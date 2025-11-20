@@ -5,14 +5,15 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Check, X } from 'lucide-react';
 import { MOCK_QUIZZES, Quiz } from '@/lib/mockData';
 import { useUserStore } from '@/store/useUserStore';
-import { calculateXp } from '@/lib/gamification';
+import { calculateRewards } from '@/lib/gamification';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/supabase';
+import { VisualQuizCard } from '@/components/gamification/VisualQuizCard';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
 const supabase = createClient<Database>(supabaseUrl, supabaseKey);
 
 export default function QuizPage() {
@@ -109,16 +110,21 @@ export default function QuizPage() {
         if (isLastQuestion) {
             // Finish Quiz
             if (isCorrect || isAnswered) {
-                const xpEarned = calculateXp(quiz.xpReward, 0);
-                addXp(xpEarned);
+                const { xp, badgeId } = calculateRewards(quiz, 0); // Simplified streak
+                addXp(xp);
                 incrementStreak();
                 setShowReward(true);
+
+                // If badge earned, we would show a toast/modal here
+                if (badgeId) {
+                    console.log(`Unlocked badge: ${badgeId}`);
+                }
 
                 // Save progress to DB
                 const { error } = await supabase.from('user_progress').insert({
                     user_id: (await supabase.auth.getUser()).data.user?.id!,
                     quiz_id: params.id as string,
-                    score: score * 10
+                    score: xp // Save actual XP earned
                 });
                 if (error) console.error('Error saving progress:', error);
             }
@@ -170,35 +176,45 @@ export default function QuizPage() {
             <div className="space-y-4">
                 <h2 className="text-xl font-bold leading-snug">{currentQuestion.text}</h2>
 
-                <div className="space-y-3">
-                    {currentQuestion.options.map((option, index) => {
-                        let stateStyles = "border-zinc-200 dark:border-zinc-800 hover:border-blue-400 dark:hover:border-blue-700";
+                {currentQuestion.type === 'image_verification' ? (
+                    <VisualQuizCard
+                        imageUrl={currentQuestion.imageUrl || ''}
+                        correctAnswer={currentQuestion.correctAnswer}
+                        hotspots={currentQuestion.hotspots}
+                        onAnswer={handleAnswer}
+                        disabled={isAnswered}
+                    />
+                ) : (
+                    <div className="space-y-3">
+                        {currentQuestion.options.map((option, index) => {
+                            let stateStyles = "border-zinc-200 dark:border-zinc-800 hover:border-blue-400 dark:hover:border-blue-700";
 
-                        if (isAnswered) {
-                            if (index === currentQuestion.correctAnswer) {
-                                stateStyles = "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400";
-                            } else if (index === selectedOption) {
-                                stateStyles = "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400";
-                            } else {
-                                stateStyles = "opacity-50";
+                            if (isAnswered) {
+                                if (index === currentQuestion.correctAnswer) {
+                                    stateStyles = "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400";
+                                } else if (index === selectedOption) {
+                                    stateStyles = "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400";
+                                } else {
+                                    stateStyles = "opacity-50";
+                                }
                             }
-                        }
 
-                        return (
-                            <button
-                                key={index}
-                                onClick={() => handleAnswer(index)}
-                                disabled={isAnswered}
-                                className={cn(
-                                    "w-full p-4 text-left rounded-xl border-2 font-medium transition-all",
-                                    stateStyles
-                                )}
-                            >
-                                {option}
-                            </button>
-                        );
-                    })}
-                </div>
+                            return (
+                                <button
+                                    key={index}
+                                    onClick={() => handleAnswer(index)}
+                                    disabled={isAnswered}
+                                    className={cn(
+                                        "w-full p-4 text-left rounded-xl border-2 font-medium transition-all",
+                                        stateStyles
+                                    )}
+                                >
+                                    {option}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
 
             {/* Feedback / Next Button */}

@@ -1,0 +1,516 @@
+[
+    {
+        "day_number": 1,
+        "module_title": "Locking the Door",
+        "question_text": "Your password is 'Pizza123'. How long would it take a hacker to crack it?",
+        "options": [
+            "10 years",
+            "1 month",
+            "Instantly"
+        ],
+        "correct_option_index": 2,
+        "explanation_feedback": "Simple words + numbers are cracked instantly by AI tools. Use a phrase like 'Blue-Pizza-Sky-99' instead!",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 1,
+        "module_title": "Locking the Door",
+        "question_text": "Is it safe to use the same password for your Email and your Bank?",
+        "options": [
+            "Yes, it's easier to remember",
+            "No, never"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Never reuse passwords! If one site gets hacked, thieves will try that password everywhere else.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 1,
+        "module_title": "Locking the Door",
+        "question_text": "Which of these is the strongest password?",
+        "options": [
+            "Password123",
+            "MyNameIsJohn",
+            "Tr0ub4dor&3"
+        ],
+        "correct_option_index": 2,
+        "explanation_feedback": "Length and complexity matter. 'Tr0ub4dor&3' mixes letters, numbers, and symbols and isn't a common phrase.",
+        "difficulty": "medium",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 1,
+        "module_title": "Locking the Door",
+        "question_text": "What is a Password Manager?",
+        "options": [
+            "A person you hire",
+            "An app that saves your passwords securely",
+            "A notebook on your desk"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "A Password Manager is an app that generates and stores complex passwords for you, so you only need to remember one master password.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 1,
+        "module_title": "Locking the Door",
+        "question_text": "True or False: You should share your password with your best friend in case of emergency.",
+        "options": [
+            "True",
+            "False"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "False. Never share passwords. If they get hacked or you have a falling out, your account is at risk.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 2,
+        "module_title": "Double Locking",
+        "question_text": "What does '2FA' stand for?",
+        "options": [
+            "2 Fast Answers",
+            "Two-Factor Authentication",
+            "Too Far Away"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Two-Factor Authentication adds a second lock (like a code on your phone) to your account.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 2,
+        "module_title": "Double Locking",
+        "question_text": "You log into Facebook on a library computer. What must you do before leaving?",
+        "options": [
+            "Turn off the screen",
+            "Log Out",
+            "Delete the browser icon"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Always click 'Log Out'. Closing the window isn't enough; the next person could open it and be in your account.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 2,
+        "module_title": "Double Locking",
+        "question_text": "A site asks for a 'Security Question'. Which is the safest answer for 'Mother's Maiden Name'?",
+        "options": [
+            "Her actual maiden name",
+            "A fake word like 'PurpleDinosaur'",
+            "Your own last name"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Treat security questions like passwords. Real answers (like maiden names) can often be found on public records or social media.",
+        "difficulty": "medium",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 2,
+        "module_title": "Double Locking",
+        "question_text": "You get an alert: 'New login from Russia'. You live in Ohio. What do you do?",
+        "options": [
+            "Ignore it",
+            "Change your password immediately",
+            "Reply to the email"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "This means someone else might be in your account. Change your password right away to kick them out.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 2,
+        "module_title": "Double Locking",
+        "question_text": "Which is safer for receiving 2FA codes?",
+        "options": [
+            "SMS (Text Message)",
+            "An Authenticator App"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Authenticator Apps are safer. SMS messages can sometimes be intercepted by hackers swapping your SIM card.",
+        "difficulty": "hard",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 3,
+        "module_title": "The Phishing Hook (Email)",
+        "question_text": "You get an email from 'Amaz0n-Support' saying your order is delayed. What's the red flag?",
+        "options": [
+            "The order is delayed",
+            "The sender name 'Amaz0n'",
+            "It was sent at night"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Look closely at the spelling. Scammers replace 'o' with '0' or make other small typos to trick you.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 3,
+        "module_title": "The Phishing Hook (Email)",
+        "question_text": "An email says 'URGENT: Account Suspended! Click here now!'. What emotion are they using?",
+        "options": [
+            "Happiness",
+            "Fear and Urgency",
+            "Boredom"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Scammers use fear to make you act without thinking. Stop, breathe, and verify before clicking.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 3,
+        "module_title": "The Phishing Hook (Email)",
+        "question_text": "You hover your mouse over a link that says 'PayPal'. The popup box shows 'http://pay-pal-secure-login.xyz'. Is it safe?",
+        "options": [
+            "Yes",
+            "No"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "No! The actual URL (where the link goes) does not match the official 'paypal.com'. This is a trap.",
+        "difficulty": "medium",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 3,
+        "module_title": "The Phishing Hook (Email)",
+        "question_text": "An email starts with 'Dear Customer'. Why is this suspicious?",
+        "options": [
+            "It's polite",
+            "Real companies usually use your name",
+            "It's too short"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Generic greetings like 'Dear Customer' often mean the email was sent to millions of people at once by a scammer.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 3,
+        "module_title": "The Phishing Hook (Email)",
+        "question_text": "You receive an unexpected invoice attachment named 'Invoice_302.pdf.exe'. Should you open it?",
+        "options": [
+            "Yes, to see what it is",
+            "No, it's a virus"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Never open it! The '.exe' at the end means it's a program (likely a virus), not a real PDF document.",
+        "difficulty": "hard",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 4,
+        "module_title": "Smishing (SMS Scams)",
+        "question_text": "You get a text: 'USPS: We cannot deliver your package. Click here to update address.' You aren't expecting a package.",
+        "options": [
+            "Click just in case",
+            "Ignore and delete it",
+            "Reply 'STOP'"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "It's a scam. If you aren't expecting a package, don't click. Even if you are, go to the official USPS site directly.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 4,
+        "module_title": "Smishing (SMS Scams)",
+        "question_text": "A text says 'You won a $1000 Walmart Gift Card! Claim at bit.ly/winner'. What is 'bit.ly'?",
+        "options": [
+            "A government site",
+            "A link shortener hiding the real destination",
+            "A secure bank"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Link shorteners hide the true website address. Scammers use them to mask dangerous links.",
+        "difficulty": "medium",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 4,
+        "module_title": "Smishing (SMS Scams)",
+        "question_text": "You get a text from a random number: 'Hey John, are we still on for lunch?'. Your name is not John.",
+        "options": [
+            "Reply 'Wrong number'",
+            "Ignore it",
+            "Ask who it is"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Ignore it. Replying confirms your number is active, leading to more spam. This is often the start of a 'Pig Butchering' scam.",
+        "difficulty": "medium",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 4,
+        "module_title": "Smishing (SMS Scams)",
+        "question_text": "Your bank texts you a code you didn't ask for, then calls asking for that code. Do you give it?",
+        "options": [
+            "Yes, they are the bank",
+            "No, never"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "NEVER give a code to someone who calls you. Banks will never ask for it. The caller is a scammer trying to log into your account.",
+        "difficulty": "hard",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 4,
+        "module_title": "Smishing (SMS Scams)",
+        "question_text": "Why are SMS scams dangerous?",
+        "options": [
+            "They use data",
+            "People trust texts more than emails",
+            "They are loud"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "We are trained to trust texts and react quickly. Scammers exploit this 'personal' channel to lower your guard.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 5,
+        "module_title": "Hello, AI",
+        "question_text": "What does 'AI' stand for?",
+        "options": [
+            "Alien Intelligence",
+            "Artificial Intelligence",
+            "Automated Internet"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "'Artificial Intelligence' refers to computer systems designed to perform tasks that usually require human intelligence.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 5,
+        "module_title": "Hello, AI",
+        "question_text": "How does AI 'learn'?",
+        "options": [
+            "It reads books like a human",
+            "It looks for patterns in huge amounts of data",
+            "It has a magic brain"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "AI analyzes vast datasets (like millions of photos) to find patterns (like 'what a cat looks like'). It doesn't 'read' or 'understand' like we do.",
+        "difficulty": "medium",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 5,
+        "module_title": "Hello, AI",
+        "question_text": "Which of these uses AI?",
+        "options": [
+            "A standard hammer",
+            "Netflix movie recommendations",
+            "A bicycle"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Netflix uses AI to analyze what you watch and predict what you might like next.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 5,
+        "module_title": "Hello, AI",
+        "question_text": "True or False: AI is always right.",
+        "options": [
+            "True",
+            "False"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "False! AI can make mistakes, hallucinate facts, or be biased based on the data it was trained on.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 5,
+        "module_title": "Hello, AI",
+        "question_text": "What is a 'Chatbot'?",
+        "options": [
+            "A robot butler",
+            "A computer program you can talk to via text",
+            "A video game"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Chatbots (like ChatGPT or customer service bots) use AI to understand and generate human-like text responses.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 6,
+        "module_title": "AI Superpowers",
+        "question_text": "Can AI create images that look like real photos?",
+        "options": [
+            "Yes",
+            "No"
+        ],
+        "correct_option_index": 0,
+        "explanation_feedback": "Yes. AI tools can generate hyper-realistic images. This is why we must be careful about what we see online.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 6,
+        "module_title": "AI Superpowers",
+        "question_text": "What is 'Voice Cloning'?",
+        "options": [
+            "Recording your voice",
+            "AI mimicking a person's voice from a short audio clip",
+            "Singing autotune"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "AI can analyze a few seconds of someone's voice and then say ANYTHING in that voice. Scammers use this to impersonate loved ones.",
+        "difficulty": "medium",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 6,
+        "module_title": "AI Superpowers",
+        "question_text": "What is a 'Deepfake'?",
+        "options": [
+            "A deep hole",
+            "A fake video where a person's face is swapped with someone else's",
+            "A lie"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Deepfakes are AI-manipulated videos. They can make it look like a celebrity or politician said something they never actually said.",
+        "difficulty": "medium",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 6,
+        "module_title": "AI Superpowers",
+        "question_text": "Can AI write a school essay?",
+        "options": [
+            "No, it can't write",
+            "Yes, but it might be factually wrong",
+            "Yes, perfectly every time"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "AI can write essays, but it often makes up facts (hallucinations). It's a tool for assistance, not a replacement for your own work.",
+        "difficulty": "medium",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 6,
+        "module_title": "AI Superpowers",
+        "question_text": "Why should you be careful with AI?",
+        "options": [
+            "It will bite you",
+            "It can be used to create convincing scams and fake news",
+            "It uses too much electricity"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "The main risk for us is how bad actors use AI to trick us with fake emails, voices, and videos.",
+        "difficulty": "easy",
+        "xp_reward": 10,
+        "type": "text"
+    },
+    {
+        "day_number": 7,
+        "module_title": "Boss Challenge: The Gauntlet",
+        "question_text": "BOSS LEVEL: You get a call from 'Grandma' saying she's in jail and needs $500 in Gift Cards. The voice sounds exactly like her.",
+        "options": [
+            "Buy the cards immediately",
+            "Hang up and call her real number",
+            "Ask her what she did"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "CRITICAL HIT! Even if the voice is perfect, it could be AI. The request for 'Gift Cards' is the smoking gun. Always verify offline.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    },
+    {
+        "day_number": 7,
+        "module_title": "Boss Challenge: The Gauntlet",
+        "question_text": "BOSS LEVEL: You receive an email with a link to 'Reset Password'. The sender is 'support@g0ogle.com'.",
+        "options": [
+            "Click it",
+            "Report as Phishing"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "CRITICAL HIT! 'g0ogle.com' is a fake domain. You spotted the zero! Never click links from misspelled domains.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    },
+    {
+        "day_number": 7,
+        "module_title": "Boss Challenge: The Gauntlet",
+        "question_text": "BOSS LEVEL: Which password is safest?",
+        "options": [
+            "P@ssword1",
+            "Correct-Horse-Battery-Staple",
+            "J0hnny1990"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "CRITICAL HIT! A long passphrase like 'Correct-Horse-Battery-Staple' is much harder for AI to crack than short complex ones.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    },
+    {
+        "day_number": 7,
+        "module_title": "Boss Challenge: The Gauntlet",
+        "question_text": "BOSS LEVEL: You see a video of the President declaring war, but it's not on any major news channel.",
+        "options": [
+            "Share it immediately",
+            "Assume it's a Deepfake and check other sources"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "CRITICAL HIT! If a major event isn't on major news, it's likely a Deepfake designed to cause panic. Verify before you share.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    },
+    {
+        "day_number": 7,
+        "module_title": "Boss Challenge: The Gauntlet",
+        "question_text": "BOSS LEVEL: A website asks for your 2FA code to 'verify your identity' after you already logged in.",
+        "options": [
+            "Enter it",
+            "Close the tab"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "CRITICAL HIT! This is a 'Man-in-the-Middle' attack. If you are already logged in, you shouldn't need to re-enter codes on a random page.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    }
+]

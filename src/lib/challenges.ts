@@ -2,8 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/supabase';
 
 // Initialize client (this would normally use env vars)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
 const supabase = createClient<Database>(supabaseUrl, supabaseKey);
 
 export async function challengeFriend(challengerId: string, friendId: string, quizId: string) {

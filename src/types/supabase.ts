@@ -11,42 +11,43 @@ export interface Database {
         Tables: {
             profiles: {
                 Row: {
-                    id: string
-                    updated_at: string | null
-                    username: string | null
                     avatar_url: string | null
-                    xp: number | null
                     current_hearts: number | null
                     highest_streak: number | null
+                    id: string
                     is_premium: boolean | null
                     referral_code: string | null
+                    updated_at: string | null
+                    username: string | null
+                    xp: number | null
                 }
                 Insert: {
-                    id: string
-                    updated_at?: string | null
-                    username?: string | null
                     avatar_url?: string | null
-                    xp?: number | null
                     current_hearts?: number | null
                     highest_streak?: number | null
+                    id: string
                     is_premium?: boolean | null
                     referral_code?: string | null
+                    updated_at?: string | null
+                    username?: string | null
+                    xp?: number | null
                 }
                 Update: {
-                    id?: string
-                    updated_at?: string | null
-                    username?: string | null
                     avatar_url?: string | null
-                    xp?: number | null
                     current_hearts?: number | null
                     highest_streak?: number | null
+                    id?: string
                     is_premium?: boolean | null
                     referral_code?: string | null
+                    updated_at?: string | null
+                    username?: string | null
+                    xp?: number | null
                 }
                 Relationships: [
                     {
                         foreignKeyName: "profiles_id_fkey"
                         columns: ["id"]
+                        isOneToOne: true
                         referencedRelation: "users"
                         referencedColumns: ["id"]
                     }
@@ -54,36 +55,38 @@ export interface Database {
             }
             friendships: {
                 Row: {
-                    id: string
-                    user_id: string
-                    friend_id: string
-                    status: 'pending' | 'accepted' | 'blocked'
                     created_at: string
+                    friend_id: string
+                    id: string
+                    status: "pending" | "accepted" | "blocked"
+                    user_id: string
                 }
                 Insert: {
-                    id?: string
-                    user_id: string
-                    friend_id: string
-                    status?: 'pending' | 'accepted' | 'blocked'
                     created_at?: string
+                    friend_id: string
+                    id?: string
+                    status?: "pending" | "accepted" | "blocked"
+                    user_id: string
                 }
                 Update: {
-                    id?: string
-                    user_id?: string
-                    friend_id?: string
-                    status?: 'pending' | 'accepted' | 'blocked'
                     created_at?: string
+                    friend_id?: string
+                    id?: string
+                    status?: "pending" | "accepted" | "blocked"
+                    user_id?: string
                 }
                 Relationships: [
                     {
                         foreignKeyName: "friendships_friend_id_fkey"
                         columns: ["friend_id"]
+                        isOneToOne: false
                         referencedRelation: "profiles"
                         referencedColumns: ["id"]
                     },
                     {
                         foreignKeyName: "friendships_user_id_fkey"
                         columns: ["user_id"]
+                        isOneToOne: false
                         referencedRelation: "profiles"
                         referencedColumns: ["id"]
                     }
@@ -91,88 +94,204 @@ export interface Database {
             }
             challenges: {
                 Row: {
-                    id: string
                     challenger_id: string
+                    challenger_score: number | null
+                    created_at: string
+                    id: string
                     opponent_id: string
+                    opponent_score: number | null
                     quiz_id: string
                     quiz_seed: number | null
-                    challenger_score: number | null
-                    opponent_score: number | null
+                    status: "pending" | "completed" | "declined"
                     winner_id: string | null
-                    status: 'pending' | 'completed' | 'declined'
-                    created_at: string
                 }
                 Insert: {
-                    id?: string
                     challenger_id: string
+                    challenger_score?: number | null
+                    created_at?: string
+                    id?: string
                     opponent_id: string
+                    opponent_score?: number | null
                     quiz_id: string
                     quiz_seed?: number | null
-                    challenger_score?: number | null
-                    opponent_score?: number | null
+                    status?: "pending" | "completed" | "declined"
                     winner_id?: string | null
-                    status?: 'pending' | 'completed' | 'declined'
-                    created_at?: string
                 }
                 Update: {
-                    id?: string
                     challenger_id?: string
+                    challenger_score?: number | null
+                    created_at?: string
+                    id?: string
                     opponent_id?: string
+                    opponent_score?: number | null
                     quiz_id?: string
                     quiz_seed?: number | null
-                    challenger_score?: number | null
-                    opponent_score?: number | null
+                    status?: "pending" | "completed" | "declined"
                     winner_id?: string | null
-                    status?: 'pending' | 'completed' | 'declined'
-                    created_at?: string
                 }
                 Relationships: [
                     {
                         foreignKeyName: "challenges_challenger_id_fkey"
                         columns: ["challenger_id"]
+                        isOneToOne: false
                         referencedRelation: "profiles"
                         referencedColumns: ["id"]
                     },
                     {
                         foreignKeyName: "challenges_opponent_id_fkey"
                         columns: ["opponent_id"]
+                        isOneToOne: false
                         referencedRelation: "profiles"
                         referencedColumns: ["id"]
                     },
                     {
                         foreignKeyName: "challenges_winner_id_fkey"
                         columns: ["winner_id"]
+                        isOneToOne: false
                         referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
+            modules: {
+                Row: {
+                    created_at: string
+                    description: string | null
+                    id: string
+                    order_index: number
+                    theme_color: string | null
+                    title: string
+                }
+                Insert: {
+                    created_at?: string
+                    description?: string | null
+                    id?: string
+                    order_index: number
+                    theme_color?: string | null
+                    title: string
+                }
+                Update: {
+                    created_at?: string
+                    description?: string | null
+                    id?: string
+                    order_index?: number
+                    theme_color?: string | null
+                    title?: string
+                }
+                Relationships: []
+            }
+            levels: {
+                Row: {
+                    created_at: string
+                    day_number: number
+                    id: string
+                    is_boss_level: boolean
+                    module_id: string
+                    title: string
+                    xp_reward: number
+                }
+                Insert: {
+                    created_at?: string
+                    day_number: number
+                    id?: string
+                    is_boss_level?: boolean
+                    module_id: string
+                    title: string
+                    xp_reward?: number
+                }
+                Update: {
+                    created_at?: string
+                    day_number?: number
+                    id?: string
+                    is_boss_level?: boolean
+                    module_id?: string
+                    title?: string
+                    xp_reward?: number
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "levels_module_id_fkey"
+                        columns: ["module_id"]
+                        isOneToOne: false
+                        referencedRelation: "modules"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
+            questions: {
+                Row: {
+                    correct_index: number
+                    created_at: string
+                    explanation: string | null
+                    hotspots: Json | null
+                    id: string
+                    image_url: string | null
+                    level_id: string
+                    options: string[]
+                    text: string
+                    type: "text" | "image"
+                }
+                Insert: {
+                    correct_index: number
+                    created_at?: string
+                    explanation?: string | null
+                    hotspots?: Json | null
+                    id?: string
+                    image_url?: string | null
+                    level_id: string
+                    options: string[]
+                    text: string
+                    type?: "text" | "image"
+                }
+                Update: {
+                    correct_index?: number
+                    created_at?: string
+                    explanation?: string | null
+                    hotspots?: Json | null
+                    id?: string
+                    image_url?: string | null
+                    level_id?: string
+                    options?: string[]
+                    text?: string
+                    type?: "text" | "image"
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "questions_level_id_fkey"
+                        columns: ["level_id"]
+                        isOneToOne: false
+                        referencedRelation: "levels"
                         referencedColumns: ["id"]
                     }
                 ]
             }
             user_progress: {
                 Row: {
+                    completed_at: string | null
                     id: string
-                    user_id: string
                     quiz_id: string
                     score: number
-                    completed_at: string
+                    user_id: string
                 }
                 Insert: {
+                    completed_at?: string | null
                     id?: string
-                    user_id: string
                     quiz_id: string
                     score: number
-                    completed_at?: string
+                    user_id: string
                 }
                 Update: {
+                    completed_at?: string | null
                     id?: string
-                    user_id?: string
                     quiz_id?: string
                     score?: number
-                    completed_at?: string
+                    user_id?: string
                 }
                 Relationships: [
                     {
                         foreignKeyName: "user_progress_user_id_fkey"
                         columns: ["user_id"]
+                        isOneToOne: false
                         referencedRelation: "profiles"
                         referencedColumns: ["id"]
                     }
@@ -183,15 +302,19 @@ export interface Database {
             [_ in never]: never
         }
         Functions: {
+            decrement_hearts: {
+                Args: Record<PropertyKey, never>
+                Returns: undefined
+            }
             redeem_code: {
                 Args: {
                     code: string
                 }
                 Returns: Json
             }
-            decrement_hearts: {
-                Args: Record<string, never>
-                Returns: void
+            get_user_saga_state: {
+                Args: Record<PropertyKey, never>
+                Returns: Json
             }
         }
         Enums: {

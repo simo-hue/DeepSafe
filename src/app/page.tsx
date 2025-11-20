@@ -1,15 +1,84 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle, Lock, PlayCircle } from 'lucide-react';
-import { MOCK_QUIZZES } from '@/lib/mockData';
+import { SagaPath, SagaLevel } from '@/components/gamification/SagaPath';
 import { cn } from '@/lib/utils';
+import { createClient } from '@supabase/supabase-js';
+import { Database } from '@/types/supabase';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
+const supabase = createClient<Database>(supabaseUrl, supabaseKey);
 
 export default function Dashboard() {
+  const [levels, setLevels] = useState<SagaLevel[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSagaState() {
+      try {
+        const { data, error } = await supabase.rpc('get_user_saga_state');
+
+        if (error) {
+          console.error('Error fetching saga state:', error);
+          return;
+        }
+
+        // Parse RPC response
+        // The RPC returns { completed_level_ids: [...], levels: [...] }
+        const result = data as any;
+        const completedIds = new Set((result.completed_level_ids || []).map((i: any) => i.quiz_id));
+        const rawLevels = result.levels || [];
+
+        // Process levels to determine status
+        // Logic: Level is unlocked if previous level is completed OR it's the first level
+        let isNextUnlocked = true;
+
+        const processedLevels: SagaLevel[] = rawLevels.map((l: any, index: number) => {
+          const isCompleted = completedIds.has(l.id);
+          let status: 'locked' | 'active' | 'completed' = 'locked';
+
+          if (isCompleted) {
+            status = 'completed';
+          } else if (isNextUnlocked) {
+            status = 'active';
+            isNextUnlocked = false; // Only one active level at a time (the furthest reached)
+          }
+
+          return {
+            id: l.id,
+            day_number: l.day_number,
+            title: l.title,
+            is_boss_level: l.is_boss_level,
+            xp_reward: l.xp_reward,
+            module_title: l.module_title,
+            theme_color: l.theme_color,
+            order_index: l.order_index,
+            status
+          };
+        });
+
+        setLevels(processedLevels);
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSagaState();
+  }, []);
+
+  if (loading) {
+    return <div className="p-8 text-center">Loading your journey...</div>;
+  }
+
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold">Learning Path</h1>
+        <h1 className="text-2xl font-bold">Your Journey</h1>
         <p className="text-zinc-500 dark:text-zinc-400">Master AI Safety one step at a time.</p>
       </div>
 
@@ -32,47 +101,14 @@ export default function Dashboard() {
         </Link>
       </div>
 
+      {/* Learning Path */}
       <div className="space-y-4">
-        {MOCK_QUIZZES.map((quiz, index) => (
-          <div
-            key={quiz.id}
-            className={cn(
-              "relative p-4 rounded-xl border-2 transition-all",
-              quiz.locked
-                ? "border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 opacity-75"
-                : "border-blue-200 bg-white dark:border-blue-900 dark:bg-zinc-950 shadow-sm hover:border-blue-400 dark:hover:border-blue-700"
-            )}
-          >
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <h3 className="font-semibold text-lg">{quiz.title}</h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">{quiz.description}</p>
-                <div className="flex items-center space-x-2 text-xs font-medium text-blue-600 dark:text-blue-400 pt-2">
-                  <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full">
-                    +{quiz.xpReward} XP
-                  </span>
-                </div>
-              </div>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold">Saga Map</h2>
+          <span className="text-sm text-zinc-500">Week 1-4</span>
+        </div>
 
-              <div className="flex-shrink-0 ml-4">
-                {quiz.locked ? (
-                  <Lock className="w-8 h-8 text-zinc-300 dark:text-zinc-700" />
-                ) : quiz.completed ? (
-                  <CheckCircle className="w-8 h-8 text-green-500" />
-                ) : (
-                  <Link href={`/quiz/${quiz.id}`}>
-                    <PlayCircle className="w-10 h-10 text-blue-500 hover:scale-110 transition-transform cursor-pointer" />
-                  </Link>
-                )}
-              </div>
-            </div>
-
-            {/* Connector Line (Visual only) */}
-            {index < MOCK_QUIZZES.length - 1 && (
-              <div className="absolute left-1/2 -bottom-6 w-0.5 h-4 bg-zinc-200 dark:bg-zinc-800 -translate-x-1/2 z-[-1]" />
-            )}
-          </div>
-        ))}
+        <SagaPath levels={levels} />
       </div>
     </div>
   );

@@ -1,0 +1,527 @@
+[
+    {
+        "day_number": 8,
+        "module_title": "Protecting Your Wallet",
+        "question_text": "You receive a WhatsApp from your 'daughter' from an unknown number: 'Mom, phone broke, this is my temp number. Can you wire me 500€ for a new one?'. What is the FIRST thing you do?",
+        "options": [
+            "Send the money immediately",
+            "Call your daughter's OLD number to verify",
+            "Ask for a photo of the new phone"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "This is a classic AI social engineering scam. Scammers often spoof profiles. ALWAYS verify voice-to-voice on the original trusted channel before sending money.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 8,
+        "module_title": "Protecting Your Wallet",
+        "question_text": "You get an email from 'PayPal Service': 'Unauthorized transaction of $200 detected. Click here to cancel'. The sender is 'service@paypal-support-team.com'.",
+        "options": [
+            "Click to cancel the charge",
+            "Log in to PayPal directly via your browser",
+            "Reply asking for details"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Phishing emails create urgency to make you click fake links. 'paypal-support-team.com' is a fake domain. Always go directly to the official app or website.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 8,
+        "module_title": "Protecting Your Wallet",
+        "question_text": "Your bank calls you: 'Fraud alert. We need to verify your identity. Please read back the 6-digit code we just texted you.'",
+        "options": [
+            "Read the code to them",
+            "Hang up and call the number on the back of your card",
+            "Ask for their employee ID"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Banks NEVER ask for 2FA codes over the phone. The caller is a scammer trying to log into your account. Hang up and call the official number.",
+        "difficulty": "hard",
+        "xp_reward": 25,
+        "type": "text"
+    },
+    {
+        "day_number": 8,
+        "module_title": "Protecting Your Wallet",
+        "question_text": "You're selling a couch online. A buyer sends a check for $500 more than the price and asks you to 'wire back the difference'.",
+        "options": [
+            "Wire the difference",
+            "Wait for the check to fully clear (can take weeks)",
+            "Refuse the check"
+        ],
+        "correct_option_index": 2,
+        "explanation_feedback": "This is a 'Overpayment Scam'. The check is fake, but it will initially look valid in your account. When it bounces weeks later, you'll owe the bank the money you wired.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 8,
+        "module_title": "Protecting Your Wallet",
+        "question_text": "Which payment method offers the LEAST protection against fraud for online marketplace purchases?",
+        "options": [
+            "Credit Card",
+            "PayPal Goods & Services",
+            "Zelle / CashApp / Wire Transfer"
+        ],
+        "correct_option_index": 2,
+        "explanation_feedback": "Zelle, CashApp, and Wire Transfers are like cash. Once sent, the money is gone. Only use them for friends and family, never for strangers.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 9,
+        "module_title": "Tax & Government Scams",
+        "question_text": "You get a voicemail: 'This is the IRS. A lawsuit is being filed against you. Call back immediately or you will be arrested.'",
+        "options": [
+            "Call back immediately",
+            "Ignore it",
+            "Pay the fine online"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "The IRS/Tax Office does NOT initiate contact via phone threats or demand immediate payment. This is a scare tactic. Ignore it.",
+        "difficulty": "easy",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 9,
+        "module_title": "Tax & Government Scams",
+        "question_text": "An email claims you have a 'Pending Tax Refund' of $450. You just need to click a link and enter your SSN to claim it.",
+        "options": [
+            "Enter SSN to claim",
+            "Check the official government tax portal",
+            "Forward to your accountant"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Government agencies don't email links for refunds asking for SSNs. Giving your SSN leads to identity theft.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 9,
+        "module_title": "Tax & Government Scams",
+        "question_text": "A 'Government Agent' calls saying your Social Security number was found in a crime scene. They need you to move your money to a 'Safe Account'.",
+        "options": [
+            "Move the money",
+            "Hang up",
+            "Ask for their badge number"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "There is no such thing as a 'Safe Account' for this purpose. Government agents will never ask you to transfer money to protect it.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 9,
+        "module_title": "Tax & Government Scams",
+        "question_text": "You receive a text: 'Driver License Suspended. Update your info here: dmv-secure-portal.com/login'.",
+        "options": [
+            "Click and update",
+            "Ignore",
+            "Go to the DMV in person"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Smishing attacks often target licenses. 'dmv-secure-portal.com' is a fake domain. Official sites end in .gov.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 9,
+        "module_title": "Tax & Government Scams",
+        "question_text": "Why do scammers ask for payment in Gift Cards?",
+        "options": [
+            "It's convenient",
+            "They are untraceable and non-refundable",
+            "They like shopping"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Gift cards are the currency of scammers because once you give the code, the money is gone and cannot be recovered by banks.",
+        "difficulty": "easy",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 10,
+        "module_title": "Voice Cloning & Impersonation",
+        "question_text": "You get a call from your CEO's voice: 'I need you to wire $50k to this vendor ASAP for a secret project.' It sounds exactly like him.",
+        "options": [
+            "Wire the money",
+            "Verify through a secondary channel (Slack/Email)",
+            "Ask why it's secret"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "AI can clone voices perfectly. Always verify unusual financial requests through a different communication channel, even if the voice sounds real.",
+        "difficulty": "hard",
+        "xp_reward": 25,
+        "type": "text"
+    },
+    {
+        "day_number": 10,
+        "module_title": "Voice Cloning & Impersonation",
+        "question_text": "How much audio does an AI need to clone a voice?",
+        "options": [
+            "1 hour",
+            "3 seconds",
+            "1 day"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Modern AI needs only 3-5 seconds of audio (often taken from social media videos) to create a convincing clone.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 10,
+        "module_title": "Voice Cloning & Impersonation",
+        "question_text": "What is a 'Safe Word' in the context of family security?",
+        "options": [
+            "A password for the alarm",
+            "A secret word family members use to verify identity over the phone",
+            "A word to stop an argument"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Establishing a family 'Safe Word' is the best defense against AI voice scams. If the caller doesn't know the word, it's not them.",
+        "difficulty": "easy",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 10,
+        "module_title": "Voice Cloning & Impersonation",
+        "question_text": "You answer a call from an unknown number. The caller asks 'Can you hear me?'. What should you say?",
+        "options": [
+            "Yes",
+            "Who is this?",
+            "Hang up"
+        ],
+        "correct_option_index": 2,
+        "explanation_feedback": "Scammers record you saying 'Yes' to authorize fraudulent charges later. It's best to hang up on suspicious unknown callers.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 10,
+        "module_title": "Voice Cloning & Impersonation",
+        "question_text": "A video call from a friend looks glitchy and the audio is slightly out of sync. They ask for money.",
+        "options": [
+            "It's just bad connection",
+            "It might be a Deepfake",
+            "Send the money"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Live Deepfakes exist but often have glitches (blurring around face edges, syncing issues). Be skeptical of video calls asking for money.",
+        "difficulty": "hard",
+        "xp_reward": 25,
+        "type": "text"
+    },
+    {
+        "day_number": 11,
+        "module_title": "Crypto & Investment Scams",
+        "question_text": "An online 'friend' you've never met recommends a crypto trading platform where they made huge profits.",
+        "options": [
+            "Invest a small amount to test",
+            "Ignore it",
+            "Ask for their strategy"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "This is 'Pig Butchering'. They build trust over months, let you 'win' small amounts on a fake app, then steal your life savings when you invest more.",
+        "difficulty": "hard",
+        "xp_reward": 25,
+        "type": "text"
+    },
+    {
+        "day_number": 11,
+        "module_title": "Crypto & Investment Scams",
+        "question_text": "You see an ad with Elon Musk promoting a new 'Quantum AI' trading bot that guarantees 50% returns.",
+        "options": [
+            "Sign up",
+            "Report as scam",
+            "Research the bot"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Deepfake videos of celebrities are used to promote scams. No investment guarantees high returns with zero risk. If it sounds too good to be true, it is.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 11,
+        "module_title": "Crypto & Investment Scams",
+        "question_text": "Someone on Telegram offers to 'double your Bitcoin' if you send it to their wallet for 'verification'.",
+        "options": [
+            "Send it",
+            "Block them",
+            "Ask for proof"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Giveaway scams are common. You will never get your crypto back. Legitimate entities never ask you to send funds to verify a wallet.",
+        "difficulty": "easy",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 11,
+        "module_title": "Crypto & Investment Scams",
+        "question_text": "What is a 'Rug Pull'?",
+        "options": [
+            "A carpet cleaning scam",
+            "Developers abandoning a crypto project and taking all the money",
+            "A wrestling move"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "In a Rug Pull, scammers hype a new coin, wait for people to invest, then drain the liquidity pool and disappear.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 11,
+        "module_title": "Crypto & Investment Scams",
+        "question_text": "A 'Financial Advisor' contacts you on Instagram. Their profile has photos of luxury cars and cash.",
+        "options": [
+            "Trust them, they are rich",
+            "Be skeptical",
+            "Ask for a loan"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Real financial advisors don't solicit clients via Instagram DMs with photos of cash. These are lifestyle scams designed to lure victims.",
+        "difficulty": "easy",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 12,
+        "module_title": "Shopping & Delivery Fraud",
+        "question_text": "You find a website selling brand new iPhones for $200. The site is 'apple-discount-store.net'.",
+        "options": [
+            "Buy two!",
+            "Check domain age and reviews",
+            "Share with friends"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "If a price is impossibly low, it's a scam. Fake stores steal your credit card info. Check the domain age (scam sites are often days old).",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 12,
+        "module_title": "Shopping & Delivery Fraud",
+        "question_text": "You receive a package you didn't order. A few days later, someone comes to collect it saying it was a mistake.",
+        "options": [
+            "Give it to them",
+            "Refuse and contact the carrier",
+            "Keep it"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "This is a 'Brushing' or 'Address Fraud' scam. Giving the package to a stranger might make you an accomplice to receiving stolen goods. Return it via the official carrier.",
+        "difficulty": "hard",
+        "xp_reward": 25,
+        "type": "text"
+    },
+    {
+        "day_number": 12,
+        "module_title": "Shopping & Delivery Fraud",
+        "question_text": "A Facebook Marketplace seller asks you to pay via 'Friends and Family' on PayPal to save fees.",
+        "options": [
+            "Okay, it saves money",
+            "No, use Goods and Services",
+            "Pay cash by mail"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "'Friends and Family' payments have NO buyer protection. If they don't ship the item, you cannot get your money back.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 12,
+        "module_title": "Shopping & Delivery Fraud",
+        "question_text": "You get an email receipt for a $1000 TV you didn't buy. There is a number to call if you want to 'dispute' it.",
+        "options": [
+            "Call the number immediately",
+            "Check your actual bank statement first",
+            "Reply to the email"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "This is a 'Refund Scam'. The receipt is fake. If you call, they will try to trick you into giving them remote access to your computer 'to process the refund'.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 12,
+        "module_title": "Shopping & Delivery Fraud",
+        "question_text": "A website has a 'Norton Secured' seal, but it's just a static image, not clickable.",
+        "options": [
+            "It's safe",
+            "It's likely fake",
+            "It doesn't matter"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Real security seals are clickable and verify the site's certificate. Scammers just copy-paste the image to look legit.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 13,
+        "module_title": "Identity Theft Basics",
+        "question_text": "What is 'Credit Freezing'?",
+        "options": [
+            "Putting your card in ice",
+            "Locking your credit report so no one can open accounts in your name",
+            "Not spending money"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Freezing your credit at the 3 major bureaus (Equifax, Experian, TransUnion) is the best proactive defense against identity theft.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 13,
+        "module_title": "Identity Theft Basics",
+        "question_text": "You find a USB drive in your office parking lot. What do you do?",
+        "options": [
+            "Plug it in to find the owner",
+            "Throw it away / Give to IT security",
+            "Format it"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Never plug in found USBs. They can contain malware that installs instantly. Give it to IT or destroy it.",
+        "difficulty": "easy",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 13,
+        "module_title": "Identity Theft Basics",
+        "question_text": "A job application asks for your SSN and Bank Info before the interview.",
+        "options": [
+            "Provide it",
+            "Refuse, it's a scam",
+            "Ask why"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Legitimate employers only need this info AFTER offering you the job. Asking beforehand is a huge red flag for identity theft.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 13,
+        "module_title": "Identity Theft Basics",
+        "question_text": "You receive a letter about unemployment benefits you didn't apply for.",
+        "options": [
+            "Throw it away",
+            "Report it to the state agency immediately",
+            "Keep the money"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "This means someone has used your identity to file for benefits. You must report it immediately to avoid tax liability and legal issues.",
+        "difficulty": "hard",
+        "xp_reward": 25,
+        "type": "text"
+    },
+    {
+        "day_number": 13,
+        "module_title": "Identity Theft Basics",
+        "question_text": "How often should you check your bank statements?",
+        "options": [
+            "Once a year",
+            "Once a month or week",
+            "Never"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Regular monitoring helps you spot small 'test charges' from scammers before they drain your account.",
+        "difficulty": "easy",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 14,
+        "module_title": "Boss Challenge: Financial Fortress",
+        "question_text": "BOSS LEVEL: You get a call from 'Your Bank's Fraud Dept'. They know your name, address, and last 4 digits of your card. They ask for your PIN to 'freeze' the card.",
+        "options": [
+            "Give the PIN",
+            "Hang up",
+            "Ask to speak to a manager"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "CRITICAL HIT! Scammers can buy your personal data (Name, Address, Card info) on the dark web. Knowing this info doesn't prove they are the bank. NEVER give your PIN.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    },
+    {
+        "day_number": 14,
+        "module_title": "Boss Challenge: Financial Fortress",
+        "question_text": "BOSS LEVEL: You are investing in a new DeFi project. The developers are anonymous, but the website looks very professional.",
+        "options": [
+            "Invest",
+            "Avoid anonymous teams",
+            "Ask Reddit"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "CRITICAL HIT! Anonymous teams in crypto are a massive risk factor for Rug Pulls. Professional websites are cheap to make. Due diligence requires knowing WHO you are trusting.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    },
+    {
+        "day_number": 14,
+        "module_title": "Boss Challenge: Financial Fortress",
+        "question_text": "BOSS LEVEL: Your boss emails you from a personal Gmail account: 'Urgent, I'm in a meeting. Buy $500 Apple Gift Cards for clients. I will reimburse you.'",
+        "options": [
+            "Buy them",
+            "Call the boss to verify",
+            "Reply 'Sure'"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "CRITICAL HIT! CEO Fraud (Business Email Compromise) often uses personal emails or spoofing. No legitimate boss asks for Gift Cards for clients via urgent email.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    },
+    {
+        "day_number": 14,
+        "module_title": "Boss Challenge: Financial Fortress",
+        "question_text": "BOSS LEVEL: You download a popular crypto wallet app from the App Store. It asks for your 'Seed Phrase' to set up.",
+        "options": [
+            "Enter it",
+            "Check if it's a fake app",
+            "Share it with support"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "CRITICAL HIT! Fake apps often slip into App Stores. If you enter your seed phrase into a fake app, your wallet is drained instantly. Verify the developer and reviews carefully.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    },
+    {
+        "day_number": 14,
+        "module_title": "Boss Challenge: Financial Fortress",
+        "question_text": "BOSS LEVEL: A pop-up on your computer says 'VIRUS DETECTED! Call Microsoft Support immediately'.",
+        "options": [
+            "Call the number",
+            "Force close the browser / Restart computer",
+            "Download the suggested tool"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "CRITICAL HIT! This is 'Tech Support Fraud'. Microsoft/Apple do not send pop-ups with phone numbers. It's just a browser window stuck in full screen. Restarting usually fixes it.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    }
+]

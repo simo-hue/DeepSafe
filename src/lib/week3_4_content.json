@@ -1,0 +1,452 @@
+[
+    {
+        "day_number": 15,
+        "module_title": "AI at the Office",
+        "question_text": "You need to summarize a PDF containing the company's financial strategy for next year. To save time, you upload it to a public AI chatbot. Is this safe?",
+        "options": [
+            "Yes, if I delete the file afterwards",
+            "No, public AI models may train on your data",
+            "Yes, if the AI promises privacy"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Never upload internal documents to public AI tools. Anything you type can become part of the AI's public database and leak to competitors. Use only enterprise-approved tools.",
+        "difficulty": "hard",
+        "xp_reward": 25,
+        "type": "text"
+    },
+    {
+        "day_number": 15,
+        "module_title": "AI at the Office",
+        "question_text": "You are writing a client contract and use AI to generate a clause. It looks perfect. What is your next step?",
+        "options": [
+            "Send it to the client immediately",
+            "Review it yourself",
+            "Have Legal Counsel review it"
+        ],
+        "correct_option_index": 2,
+        "explanation_feedback": "AI is not a lawyer. It can hallucinate laws or create unenforceable clauses. Always have a qualified human expert review legal output.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 15,
+        "module_title": "AI at the Office",
+        "question_text": "A colleague suggests using a free online AI tool to 'optimize' the source code of your proprietary software. They say it's fine because they removed the comments.",
+        "options": [
+            "Go ahead, code logic isn't confidential",
+            "Refuse, the code structure itself is IP",
+            "Do it, but change variable names first"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Your code logic is Intellectual Property. Uploading it to a third-party AI gives them a license to view and potentially use your IP. This is a major data leak.",
+        "difficulty": "hard",
+        "xp_reward": 25,
+        "type": "text"
+    },
+    {
+        "day_number": 16,
+        "module_title": "Shadow IT & Security",
+        "question_text": "You find a new AI meeting assistant that records and transcribes Zoom calls automatically. It requires 'Read/Write' access to your Calendar.",
+        "options": [
+            "Install it to boost productivity",
+            "Ask IT for approval first",
+            "Use it only for internal meetings"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "This is 'Shadow IT'. Granting third-party apps access to corporate calendars can expose confidential meeting details and attendee lists. Always vet tools through IT.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 16,
+        "module_title": "Shadow IT & Security",
+        "question_text": "An AI tool generates a report citing a specific regulation 'EU-2024-Alpha'. You've never heard of it.",
+        "options": [
+            "Trust the AI, it has access to more data",
+            "Google the regulation to verify it exists",
+            "Ask the AI for the source link"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "AI frequently 'hallucinates' facts, including fake court cases and regulations. Always verify specific citations independently.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 16,
+        "module_title": "Shadow IT & Security",
+        "question_text": "You want to use ChatGPT to draft a sensitive email to a client. How should you prompt it?",
+        "options": [
+            "Paste the client's email chain for context",
+            "Describe the situation generically without names or data",
+            "Use the client's first name only"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Sanitize your inputs. Remove all PII (Personally Identifiable Information) and specific data points before asking public AI for assistance.",
+        "difficulty": "hard",
+        "xp_reward": 25,
+        "type": "text"
+    },
+    {
+        "day_number": 17,
+        "module_title": "Social Engineering at Work",
+        "question_text": "You receive a LinkedIn connection request from a recruiter at a competitor. They ask for your work email to send a 'confidential job description'.",
+        "options": [
+            "Give your work email",
+            "Give your personal email",
+            "Ignore/Report"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "While it could be real, fake recruiters are a common way to map corporate directories. If you are interested, use a personal email, never your work address.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 17,
+        "module_title": "Social Engineering at Work",
+        "question_text": "A 'Vendor' emails an updated invoice with new bank details. The email comes from 'vendor-billing@gmail.com'.",
+        "options": [
+            "Update the payment details",
+            "Reply asking for a signed letter",
+            "Call the vendor's known contact number"
+        ],
+        "correct_option_index": 2,
+        "explanation_feedback": "Business Email Compromise (BEC) is huge. Legitimate businesses rarely use @gmail.com for billing. Always verify payment changes via a second channel (phone).",
+        "difficulty": "hard",
+        "xp_reward": 25,
+        "type": "text"
+    },
+    {
+        "day_number": 17,
+        "module_title": "Social Engineering at Work",
+        "question_text": "Your boss sends a voice note on WhatsApp: 'I'm locked out, please text me the 2FA code sent to your phone.'",
+        "options": [
+            "Send the code",
+            "Call the boss to verify",
+            "Email the boss"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Voice cloning is used to bypass security. A boss should never need YOUR 2FA code. Call them immediately to confirm the hack.",
+        "difficulty": "hard",
+        "xp_reward": 25,
+        "type": "text"
+    },
+    {
+        "day_number": 18,
+        "module_title": "Data Privacy & Ethics",
+        "question_text": "You are training an internal AI model for HR. Is it okay to use historical hiring data that includes age and gender?",
+        "options": [
+            "Yes, more data is better",
+            "No, it introduces bias",
+            "Yes, if names are removed"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Using protected characteristics (age, gender, race) can lead to algorithmic bias and discrimination lawsuits. Data must be carefully curated for fairness.",
+        "difficulty": "hard",
+        "xp_reward": 25,
+        "type": "text"
+    },
+    {
+        "day_number": 18,
+        "module_title": "Data Privacy & Ethics",
+        "question_text": "A client asks if your company uses AI to process their data. You use a little bit for spell-checking.",
+        "options": [
+            "Say 'No' to keep it simple",
+            "Disclose the specific use cases",
+            "Say 'We use advanced technology'"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Transparency is a legal requirement under regulations like GDPR. You must disclose if and how AI interacts with client data.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 18,
+        "module_title": "Data Privacy & Ethics",
+        "question_text": "You take a photo of your desk to show off your setup on LinkedIn. Your monitor is visible.",
+        "options": [
+            "Post it, the text is too small to read",
+            "Blur the screen completely",
+            "Crop the monitor out"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "High-res cameras and AI upscaling can make even tiny text readable. 'Desk selfies' are a common source of data leaks. Blur screens or turn them off.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 19,
+        "module_title": "Boss Challenge: Corporate Defense",
+        "question_text": "BOSS LEVEL: IT sends an email: 'Mandatory Security Update. Click here to install.' The link goes to 'company-it-support.net'.",
+        "options": [
+            "Click to install",
+            "Verify the URL with IT",
+            "Wait for automatic update"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "CRITICAL HIT! 'company-it-support.net' is likely a phishing site. Corporate updates are usually pushed automatically or hosted on internal domains. Verify before clicking.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    },
+    {
+        "day_number": 19,
+        "module_title": "Boss Challenge: Corporate Defense",
+        "question_text": "BOSS LEVEL: You discover a colleague is using a personal ChatGPT account to analyze customer support logs.",
+        "options": [
+            "Ignore it",
+            "Warn them privately",
+            "Report to Data Privacy Officer"
+        ],
+        "correct_option_index": 2,
+        "explanation_feedback": "CRITICAL HIT! This is a GDPR violation. Customer data is being sent to a third party without consent. It puts the company at massive legal risk and must be reported.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    },
+    {
+        "day_number": 19,
+        "module_title": "Boss Challenge: Corporate Defense",
+        "question_text": "BOSS LEVEL: A 'Journalist' calls asking for a comment on a rumor about your company's finances. They sound friendly.",
+        "options": [
+            "Give a 'off the record' comment",
+            "Hang up",
+            "Direct them to PR/Media Relations"
+        ],
+        "correct_option_index": 2,
+        "explanation_feedback": "CRITICAL HIT! Social engineers pose as journalists to extract info. Only authorized spokespeople should speak to the press. 'Off the record' is not a guarantee.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    },
+    {
+        "day_number": 22,
+        "module_title": "Truth in the AI Era",
+        "question_text": "You see a video of a CEO announcing a massive stock sell-off. The stock price drops. Later, it's proven fake.",
+        "options": [
+            "Sell your shares immediately",
+            "Check the company's official Investor Relations page",
+            "Share the video"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Deepfakes are used for market manipulation. Never trade on a single video source. Verify with official regulatory filings or company press releases.",
+        "difficulty": "hard",
+        "xp_reward": 25,
+        "type": "text"
+    },
+    {
+        "day_number": 22,
+        "module_title": "Truth in the AI Era",
+        "question_text": "An image shows a politician being arrested. The hands of the police officers look blurry and have 6 fingers.",
+        "options": [
+            "It's real, cameras blur motion",
+            "It's likely AI-generated",
+            "It's a photoshop"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "AI struggles with hands and text. Extra fingers or 'melted' hands are a hallmark of AI generation. Always look at the details.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 22,
+        "module_title": "Truth in the AI Era",
+        "question_text": "A news article has a sensational headline but no author name and the website is 'Daily-News-247.xyz'.",
+        "options": [
+            "Share it, it's important",
+            "Read the About Us page",
+            "Ignore it"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Fake news sites often have anonymous authors and generic domains. Check the 'About Us' section; if it's missing or vague, the site is likely a content farm.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 23,
+        "module_title": "Social Media Manipulation",
+        "question_text": "You see a post that makes you incredibly angry immediately. What is the likely goal of the post?",
+        "options": [
+            "To inform you",
+            "To bypass your critical thinking via emotion",
+            "To make you laugh"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Rage-bait is designed to trigger an emotional response so you share without thinking. If a post makes you furious, pause and verify.",
+        "difficulty": "easy",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 23,
+        "module_title": "Social Media Manipulation",
+        "question_text": "A 'Doctor' on TikTok recommends a miracle cure that 'Big Pharma' is hiding. They have 1M followers.",
+        "options": [
+            "Trust the follower count",
+            "Verify their medical license",
+            "Buy the cure"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Followers can be bought. A white coat is a costume. Always verify medical advice against consensus from reputable health organizations.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 23,
+        "module_title": "Social Media Manipulation",
+        "question_text": "What is a 'Bot Farm'?",
+        "options": [
+            "A place where robots grow food",
+            "A network of fake accounts used to amplify specific narratives",
+            "A server room"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Bot farms use thousands of automated accounts to like/share posts, making fringe opinions look like popular majority views (Astroturfing).",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 24,
+        "module_title": "Verifying Sources",
+        "question_text": "You want to verify an image. What tool can you use?",
+        "options": [
+            "Zoom in really close",
+            "Reverse Image Search (Google Lens/TinEye)",
+            "Ask a friend"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Reverse Image Search helps you find the original source of an image. You might find the 'war zone' photo is actually from a movie set 5 years ago.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 24,
+        "module_title": "Verifying Sources",
+        "question_text": "A quote attributed to a famous historical figure supports a modern political view perfectly.",
+        "options": [
+            "Share it",
+            "Search for the quote on a fact-checking site",
+            "Like it"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Fake quotes are rampant. If a historical figure sounds like a modern pundit, it's likely fake. Sites like Snopes or Quote Investigator can verify.",
+        "difficulty": "easy",
+        "xp_reward": 15,
+        "type": "text"
+    },
+    {
+        "day_number": 24,
+        "module_title": "Verifying Sources",
+        "question_text": "A video shows a politician slurring their words. It could be:",
+        "options": [
+            "They are drunk",
+            "A 'Cheapfake' (slowed down video)",
+            "Both are possible"
+        ],
+        "correct_option_index": 2,
+        "explanation_feedback": "Before assuming, check for 'Cheapfakes'—videos that are simply slowed down to make someone sound impaired. Compare with other footage from the event.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 25,
+        "module_title": "Digital Citizenship",
+        "question_text": "You realize a story you shared yesterday is false. What should you do?",
+        "options": [
+            "Delete it and pretend it never happened",
+            "Delete it and post a correction",
+            "Leave it up, it got likes"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Integrity matters. Deleting prevents further spread, but posting a correction informs those who already saw it. Be part of the solution.",
+        "difficulty": "medium",
+        "xp_reward": 20,
+        "type": "text"
+    },
+    {
+        "day_number": 25,
+        "module_title": "Digital Citizenship",
+        "question_text": "Why is 'Lateral Reading' better than reading vertically (staying on the page)?",
+        "options": [
+            "It exercises your eyes",
+            "It involves opening new tabs to verify the site's reputation elsewhere",
+            "It's faster"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Don't trust the 'About' page of a suspicious site. Open new tabs and search for what OTHER reputable sources say about that site.",
+        "difficulty": "hard",
+        "xp_reward": 25,
+        "type": "text"
+    },
+    {
+        "day_number": 25,
+        "module_title": "Digital Citizenship",
+        "question_text": "A friend posts a conspiracy theory. How do you engage?",
+        "options": [
+            "Mock them publicly",
+            "Send a private message with a fact-check link",
+            "Block them"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "Public shaming often digs people deeper into their beliefs. A private, empathetic message with a reliable source is more effective.",
+        "difficulty": "hard",
+        "xp_reward": 25,
+        "type": "text"
+    },
+    {
+        "day_number": 28,
+        "module_title": "Boss Challenge: The Info War",
+        "question_text": "BOSS LEVEL: A viral audio clip leaks of a candidate admitting to a crime. The audio quality is perfect, no background noise.",
+        "options": [
+            "It's proof!",
+            "Be suspicious of 'perfect' audio",
+            "Share it"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "CRITICAL HIT! Real secret recordings are rarely studio-quality. Perfect audio with no background noise is a strong indicator of AI generation.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    },
+    {
+        "day_number": 28,
+        "module_title": "Boss Challenge: The Info War",
+        "question_text": "BOSS LEVEL: You are asked to donate to a 'Disaster Relief Fund' immediately after a tragedy. The site accepts only Crypto.",
+        "options": [
+            "Donate to help",
+            "Verify the charity on CharityNavigator.org",
+            "Share the link"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "CRITICAL HIT! Scammers exploit tragedies. Legitimate charities accept credit cards/checks. Crypto-only donations for relief funds are almost always scams.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    },
+    {
+        "day_number": 28,
+        "module_title": "Boss Challenge: The Info War",
+        "question_text": "BOSS LEVEL: A website looks exactly like 'BBC News' but the URL is 'bbc-news-live.com'.",
+        "options": [
+            "It's a mirror site",
+            "It's a 'Typosquatting' fake site",
+            "It's the real BBC"
+        ],
+        "correct_option_index": 1,
+        "explanation_feedback": "CRITICAL HIT! This is Typosquatting/Spoofing. Scammers clone legitimate news sites to push fake narratives. Always check the URL carefully.",
+        "difficulty": "hard",
+        "xp_reward": 50,
+        "type": "text"
+    }
+]
