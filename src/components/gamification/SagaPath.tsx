@@ -1,7 +1,10 @@
+'use client';
+
 import React from 'react';
+import { Check, Lock, Skull, Star, Shield, AlertTriangle, Hexagon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Check, Lock, Star, AlertTriangle, Shield, Skull } from 'lucide-react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 
 export interface SagaLevel {
     id: string;
@@ -10,7 +13,7 @@ export interface SagaLevel {
     is_boss_level: boolean;
     xp_reward: number;
     module_title: string;
-    theme_color: string;
+    theme_color: string | null;
     order_index: number;
     status: 'locked' | 'active' | 'completed';
 }
@@ -20,87 +23,137 @@ interface SagaPathProps {
 }
 
 export function SagaPath({ levels }: SagaPathProps) {
+    // Group levels by module
+    const modules = levels.reduce((acc, level) => {
+        const modTitle = level.module_title || 'Unknown Module';
+        if (!acc[modTitle]) acc[modTitle] = [];
+        acc[modTitle].push(level);
+        return acc;
+    }, {} as Record<string, SagaLevel[]>);
+
     return (
-        <div className="relative flex flex-col items-center py-8 space-y-8">
-            {/* Central Line */}
-            <div className="absolute top-0 bottom-0 w-1 bg-zinc-200 dark:bg-zinc-800 -z-10" />
+        <div className="relative space-y-12 py-8">
+            {/* Circuit Line Background */}
+            <div className="absolute left-8 top-0 bottom-0 w-1 bg-cyber-gray/30 z-0">
+                <motion.div
+                    className="absolute top-0 left-0 w-full bg-gradient-to-b from-cyber-blue via-cyber-purple to-cyber-blue"
+                    initial={{ height: '0%' }}
+                    animate={{ height: '100%' }}
+                    transition={{ duration: 2, ease: "easeInOut" }}
+                />
+            </div>
 
-            {levels.map((level, index) => {
-                const isLeft = index % 2 === 0;
-
-                // Determine Icon and Color based on type
-                let Icon = Check;
-                let colorClass = "bg-blue-500";
-                let sizeClass = "w-12 h-12";
-                let borderClass = "border-blue-200 dark:border-blue-900";
-                let animationClass = "";
-
-                if (level.is_boss_level) {
-                    Icon = Skull;
-                    colorClass = "bg-red-600";
-                    sizeClass = "w-16 h-16";
-                    borderClass = "border-red-200 dark:border-red-900";
-                    if (level.status === 'active') animationClass = "animate-pulse";
-                } else if (level.status === 'locked') {
-                    Icon = Lock;
-                    colorClass = "bg-zinc-400";
-                    borderClass = "border-zinc-200 dark:border-zinc-800";
-                } else if (level.status === 'completed') {
-                    colorClass = "bg-green-500";
-                    borderClass = "border-green-200 dark:border-green-900";
-                } else if (level.status === 'active') {
-                    colorClass = "bg-blue-600";
-                    borderClass = "border-blue-300 dark:border-blue-800";
-                    animationClass = "ring-4 ring-blue-200 dark:ring-blue-900";
-                }
-
-                return (
-                    <div key={level.id} className={cn(
-                        "relative w-full max-w-md flex items-center",
-                        isLeft ? "justify-start" : "justify-end"
-                    )}>
-                        {/* Connecting Line (Horizontal) */}
-                        <div className={cn(
-                            "absolute top-1/2 w-1/2 h-1 bg-zinc-200 dark:bg-zinc-800 -z-10",
-                            isLeft ? "right-1/2" : "left-1/2"
-                        )} />
-
-                        <Link
-                            href={level.status === 'locked' ? '#' : `/quiz/${level.id}`}
-                            className={cn(
-                                "relative group flex flex-col items-center transition-transform hover:scale-105",
-                                level.status === 'locked' && "opacity-70 cursor-not-allowed hover:scale-100"
-                            )}
-                        >
-                            {/* Node Circle */}
-                            <div className={cn(
-                                "rounded-full flex items-center justify-center text-white shadow-lg border-4 z-10 transition-all",
-                                colorClass,
-                                sizeClass,
-                                borderClass,
-                                animationClass
-                            )}>
-                                <Icon className="w-6 h-6" />
-                            </div>
-
-                            {/* Label Card */}
-                            <div className={cn(
-                                "absolute top-full mt-2 p-3 bg-white dark:bg-zinc-900 rounded-xl shadow-md border border-zinc-100 dark:border-zinc-800 w-48 text-center z-20",
-                                isLeft ? "left-0 text-left" : "right-0 text-right"
-                            )}>
-                                <div className="text-xs uppercase tracking-wider font-bold text-zinc-400 mb-1">Day {level.day_number}</div>
-                                <h3 className="font-bold text-sm leading-tight">{level.title}</h3>
-                                {level.is_boss_level && (
-                                    <span className="text-xs font-bold text-red-500 uppercase tracking-wider block mt-1">Boss Level</span>
-                                )}
-                                <div className="text-xs text-zinc-500 mt-1">
-                                    {level.xp_reward} XP
-                                </div>
-                            </div>
-                        </Link>
+            {Object.entries(modules).map(([moduleTitle, moduleLevels], modIndex) => (
+                <div key={moduleTitle} className="relative z-10">
+                    <div className="sticky top-4 z-20 mb-6 ml-12">
+                        <h3 className="text-sm font-orbitron tracking-widest text-cyber-blue uppercase drop-shadow-[0_0_5px_rgba(69,162,158,0.5)]">
+                            {moduleTitle}
+                        </h3>
                     </div>
-                );
-            })}
+
+                    <div className="space-y-8">
+                        {moduleLevels.map((level, index) => {
+                            const isLocked = level.status === 'locked';
+                            const isCompleted = level.status === 'completed';
+                            const isActive = level.status === 'active';
+                            const isBoss = level.is_boss_level;
+
+                            return (
+                                <Link
+                                    key={level.id}
+                                    href={isLocked ? '#' : `/quiz/${level.id}`}
+                                    className={cn(
+                                        "flex items-center gap-6 group relative",
+                                        isLocked && "pointer-events-none opacity-50"
+                                    )}
+                                >
+                                    {/* Node Connector Line (Horizontal) */}
+                                    <div className={cn(
+                                        "absolute left-8 w-8 h-0.5 bg-cyber-gray/50",
+                                        (isCompleted || isActive) && "bg-cyber-blue shadow-[0_0_8px_#45A29E]"
+                                    )} />
+
+                                    {/* Hexagon Node */}
+                                    <div className="relative flex-shrink-0 ml-4">
+                                        <div className={cn(
+                                            "w-16 h-16 flex items-center justify-center transition-all duration-500",
+                                            isActive && "scale-110"
+                                        )}>
+                                            {/* Hexagon Shape SVG */}
+                                            <svg viewBox="0 0 100 100" className="w-full h-full absolute inset-0 drop-shadow-lg">
+                                                <path
+                                                    d="M50 0 L93.3 25 L93.3 75 L50 100 L6.7 75 L6.7 25 Z"
+                                                    className={cn(
+                                                        "fill-cyber-dark stroke-2 transition-all duration-300",
+                                                        isLocked ? "stroke-cyber-gray" :
+                                                            isBoss ? "stroke-cyber-red fill-cyber-red/10" :
+                                                                isActive ? "stroke-cyber-blue fill-cyber-blue/20" : "stroke-cyber-green fill-cyber-green/10"
+                                                    )}
+                                                />
+                                            </svg>
+
+                                            {/* Icon */}
+                                            <div className="relative z-10">
+                                                {isLocked ? (
+                                                    <Lock className="w-6 h-6 text-cyber-gray" />
+                                                ) : isCompleted ? (
+                                                    <Check className="w-8 h-8 text-cyber-green drop-shadow-[0_0_5px_#66FCF1]" />
+                                                ) : isBoss ? (
+                                                    <Skull className="w-8 h-8 text-cyber-red animate-pulse-slow" />
+                                                ) : (
+                                                    <div className="w-4 h-4 bg-cyber-blue rounded-full animate-ping" />
+                                                )}
+                                            </div>
+
+                                            {/* Active Ring Animation */}
+                                            {isActive && (
+                                                <motion.div
+                                                    className="absolute inset-0"
+                                                    initial={{ opacity: 0, scale: 1 }}
+                                                    animate={{ opacity: [0, 0.5, 0], scale: [1, 1.2, 1.4] }}
+                                                    transition={{ duration: 2, repeat: Infinity }}
+                                                >
+                                                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                                                        <path d="M50 0 L93.3 25 L93.3 75 L50 100 L6.7 75 L6.7 25 Z" className="fill-none stroke-cyber-blue stroke-1" />
+                                                    </svg>
+                                                </motion.div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Level Info Card */}
+                                    <div className={cn(
+                                        "flex-1 p-4 rounded-r-xl border-l-4 transition-all duration-300",
+                                        "glass-card",
+                                        isLocked ? "border-cyber-gray text-cyber-gray" :
+                                            isActive ? "border-cyber-blue bg-cyber-blue/5 translate-x-2" :
+                                                isCompleted ? "border-cyber-green" : "border-cyber-gray",
+                                        isBoss && !isLocked && "border-cyber-red bg-cyber-red/5"
+                                    )}>
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h4 className={cn(
+                                                    "font-bold text-sm mb-1 font-orbitron tracking-wide",
+                                                    isActive && "text-cyber-blue text-glow",
+                                                    isBoss && !isLocked && "text-cyber-red text-glow-danger"
+                                                )}>
+                                                    {isBoss ? 'BOSS LEVEL' : `Day ${level.day_number}`}
+                                                </h4>
+                                                <p className="text-xs text-gray-400 line-clamp-1">{level.title}</p>
+                                            </div>
+                                            {level.xp_reward > 0 && (
+                                                <span className="text-xs font-mono text-cyber-purple font-bold">
+                                                    +{level.xp_reward} XP
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </div>
+            ))}
         </div>
     );
 }

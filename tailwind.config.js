@@ -41,6 +41,14 @@ module.exports = {
                     '0%': { top: '0%' },
                     '50%': { top: '100%' },
                     '100%': { top: '0%' },
+                },
+                shine: {
+                    '0%': { transform: 'translateX(-100%)' },
+                    '100%': { transform: 'translateX(100%)' },
+                },
+                float: {
+                    '0%, 100%': { transform: 'translateY(0)' },
+                    '50%': { transform: 'translateY(-10px)' },
                 }
             }
         },

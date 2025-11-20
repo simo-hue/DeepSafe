@@ -2,42 +2,57 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Map, Trophy, ShoppingBag, User } from 'lucide-react';
+import { Home, Trophy, ShoppingBag, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-    { href: '/learn', icon: Map, label: 'Learn' },
-    { href: '/leaderboard', icon: Trophy, label: 'Rank' },
-    { href: '/', icon: Home, label: 'Home' }, // Dashboard
-    { href: '/shop', icon: ShoppingBag, label: 'Shop' },
-    { href: '/profile', icon: User, label: 'Profile' },
-];
+import { motion } from 'framer-motion';
 
 export function BottomNav() {
     const pathname = usePathname();
 
+    const navItems = [
+        { icon: Home, label: 'Home', href: '/' },
+        { icon: Trophy, label: 'Leaderboard', href: '/leaderboard' },
+        { icon: ShoppingBag, label: 'Shop', href: '/shop' },
+        { icon: User, label: 'Profile', href: '/profile' }, // Redirect to login for now as profile
+    ];
+
     return (
-        <nav className="fixed bottom-0 left-0 right-0 border-t bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 pb-safe">
-            <div className="flex justify-around items-center h-16 max-w-md mx-auto">
-                {navItems.map(({ href, icon: Icon, label }) => {
-                    const isActive = pathname === href;
+        <div className="fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
+            <div className="glass-panel rounded-full px-6 py-3 flex items-center gap-8 pointer-events-auto">
+                {navItems.map((item) => {
+                    const isActive = pathname === item.href;
                     return (
                         <Link
-                            key={href}
-                            href={href}
-                            className={cn(
-                                "flex flex-col items-center justify-center w-full h-full space-y-1",
-                                isActive
-                                    ? "text-blue-600 dark:text-blue-400"
-                                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-                            )}
+                            key={item.href}
+                            href={item.href}
+                            className="relative flex flex-col items-center justify-center w-10 h-10"
                         >
-                            <Icon className={cn("w-6 h-6", isActive && "fill-current")} />
-                            <span className="text-[10px] font-medium uppercase tracking-wide">{label}</span>
+                            {isActive && (
+                                <motion.div
+                                    layoutId="nav-glow"
+                                    className="absolute inset-0 bg-cyber-blue/20 blur-md rounded-full"
+                                    initial={false}
+                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                />
+                            )}
+                            <item.icon
+                                className={cn(
+                                    "w-6 h-6 transition-all duration-300 relative z-10",
+                                    isActive
+                                        ? "text-cyber-blue drop-shadow-[0_0_8px_rgba(69,162,158,0.8)]"
+                                        : "text-cyber-gray hover:text-cyber-blue/70"
+                                )}
+                            />
+                            {isActive && (
+                                <motion.div
+                                    layoutId="nav-dot"
+                                    className="absolute -bottom-1 w-1 h-1 bg-cyber-blue rounded-full shadow-[0_0_5px_#45A29E]"
+                                />
+                            )}
                         </Link>
                     );
                 })}
             </div>
-        </nav>
+        </div>
     );
 }

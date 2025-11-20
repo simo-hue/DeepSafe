@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle, Lock, PlayCircle } from 'lucide-react';
-import { SagaPath, SagaLevel } from '@/components/gamification/SagaPath';
+import { SagaMap, SagaLevel } from '@/components/gamification/SagaMap';
 import { cn } from '@/lib/utils';
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/supabase';
@@ -108,7 +108,7 @@ export default function Dashboard() {
           <span className="text-sm text-zinc-500">Week 1-4</span>
         </div>
 
-        <SagaPath levels={levels} />
+        <SagaMap levels={levels} />
       </div>
     </div>
   );

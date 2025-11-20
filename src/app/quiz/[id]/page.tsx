@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Check, X } from 'lucide-react';
+import { ArrowLeft, Check, X, AlertTriangle } from 'lucide-react';
 import { MOCK_QUIZZES, Quiz } from '@/lib/mockData';
 import { useUserStore } from '@/store/useUserStore';
 import { calculateRewards } from '@/lib/gamification';
@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/supabase';
 import { VisualQuizCard } from '@/components/gamification/VisualQuizCard';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
@@ -37,27 +38,27 @@ export default function QuizPage() {
         }
     }, [params.id]);
 
-    if (!quiz) return <div className="p-4">Loading...</div>;
+    if (!quiz) return <div className="p-4 text-cyber-blue animate-pulse">Initializing System...</div>;
 
     // Shop Modal
     if (showShopModal) {
         return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl max-w-sm w-full text-center space-y-4 animate-in zoom-in duration-200">
-                    <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto text-2xl">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                <div className="glass-panel p-6 rounded-2xl max-w-sm w-full text-center space-y-4 animate-in zoom-in duration-200 border-cyber-red/50">
+                    <div className="w-16 h-16 bg-cyber-red/20 rounded-full flex items-center justify-center mx-auto text-2xl animate-pulse">
                         💔
                     </div>
-                    <h2 className="text-xl font-bold">Out of Hearts!</h2>
-                    <p className="text-zinc-500">You need hearts to keep learning. Refill them in the shop.</p>
+                    <h2 className="text-xl font-bold font-orbitron text-cyber-red text-glow-danger">System Failure</h2>
+                    <p className="text-zinc-400">Critical resource depletion. Recharge required.</p>
                     <div className="flex flex-col gap-2">
-                        <Link href="/shop" className="w-full py-3 bg-blue-600 text-white rounded-xl font-bold">
-                            Go to Shop
+                        <Link href="/shop" className="w-full py-3 bg-cyber-blue text-cyber-dark rounded-xl font-bold hover:bg-cyber-green transition-colors">
+                            Access Supply Depot
                         </Link>
                         <button
                             onClick={() => router.push('/')}
-                            className="w-full py-3 text-zinc-500 font-bold"
+                            className="w-full py-3 text-zinc-500 font-bold hover:text-white"
                         >
-                            Quit Quiz
+                            Abort Mission
                         </button>
                     </div>
                 </div>
@@ -67,12 +68,12 @@ export default function QuizPage() {
 
     if (lives <= 0 && !showShopModal) return (
         <div className="flex flex-col items-center justify-center h-[60vh] space-y-4 text-center">
-            <h2 className="text-2xl font-bold text-red-500">Out of Lives!</h2>
-            <p>Wait for them to refill or visit the shop.</p>
-            <Link href="/shop" className="px-6 py-2 bg-blue-600 text-white rounded-full font-bold">
-                Go to Shop
+            <h2 className="text-2xl font-bold text-cyber-red font-orbitron text-glow-danger">SIGNAL LOST</h2>
+            <p className="text-zinc-400">Connection terminated. Lives depleted.</p>
+            <Link href="/shop" className="px-6 py-2 bg-cyber-blue text-cyber-dark rounded-full font-bold hover:bg-cyber-green transition-colors">
+                Recharge Signal
             </Link>
-            <Link href="/" className="text-zinc-500">Back to Home</Link>
+            <Link href="/" className="text-zinc-500 hover:text-white">Return to Base</Link>
         </div>
     );
 
@@ -91,12 +92,8 @@ export default function QuizPage() {
 
         if (isCorrectAnswer) {
             setScore(score + 1);
-            // Play success sound (not implemented)
         } else {
-            // Wrong answer
             decrementLives();
-
-            // Call RPC to decrement hearts in DB
             const { error } = await supabase.rpc('decrement_hearts');
             if (error) console.error('Error decrementing hearts:', error);
 
@@ -108,23 +105,16 @@ export default function QuizPage() {
 
     const handleNext = async () => {
         if (isLastQuestion) {
-            // Finish Quiz
             if (isCorrect || isAnswered) {
-                const { xp, badgeId } = calculateRewards(quiz, 0); // Simplified streak
+                const { xp, badgeId } = calculateRewards(quiz, 0);
                 addXp(xp);
                 incrementStreak();
                 setShowReward(true);
 
-                // If badge earned, we would show a toast/modal here
-                if (badgeId) {
-                    console.log(`Unlocked badge: ${badgeId}`);
-                }
-
-                // Save progress to DB
                 const { error } = await supabase.from('user_progress').insert({
                     user_id: (await supabase.auth.getUser()).data.user?.id!,
                     quiz_id: params.id as string,
-                    score: xp // Save actual XP earned
+                    score: xp
                 });
                 if (error) console.error('Error saving progress:', error);
             }
@@ -139,16 +129,16 @@ export default function QuizPage() {
     if (showReward) {
         return (
             <div className="flex flex-col items-center justify-center h-[60vh] space-y-6 text-center animate-in fade-in zoom-in duration-300">
-                <div className="w-24 h-24 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
-                    <span className="text-4xl">🏆</span>
+                <div className="w-24 h-24 bg-cyber-purple/20 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(176,38,255,0.5)] border border-cyber-purple">
+                    <span className="text-4xl animate-bounce">🏆</span>
                 </div>
                 <div className="space-y-2">
-                    <h2 className="text-3xl font-bold text-yellow-500">Quiz Complete!</h2>
-                    <p className="text-xl font-medium">You earned +{quiz.xpReward} XP</p>
+                    <h2 className="text-3xl font-bold text-cyber-purple font-orbitron text-glow">Mission Accomplished</h2>
+                    <p className="text-xl font-medium text-cyber-blue">Data Secured: +{quiz.xpReward} XP</p>
                 </div>
                 <button
                     onClick={() => router.push('/')}
-                    className="px-8 py-3 bg-blue-600 text-white rounded-full font-bold text-lg shadow-lg hover:bg-blue-700 transition-colors"
+                    className="px-8 py-3 bg-cyber-blue text-cyber-dark rounded-full font-bold text-lg shadow-[0_0_15px_rgba(69,162,158,0.5)] hover:bg-cyber-green transition-all hover:scale-105"
                 >
                     Continue
                 </button>
@@ -157,107 +147,137 @@ export default function QuizPage() {
     }
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <Link href="/" className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full">
-                    <ArrowLeft className="w-6 h-6" />
+        <div className="space-y-6 relative min-h-[80vh]">
+            {/* HUD Header */}
+            <div className="flex items-center justify-between glass-panel p-3 rounded-full">
+                <Link href="/" className="p-2 hover:bg-cyber-gray/50 rounded-full transition-colors">
+                    <ArrowLeft className="w-5 h-5 text-cyber-blue" />
                 </Link>
-                <div className="w-full max-w-[200px] h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden mx-4">
-                    <div
-                        className="h-full bg-blue-500 transition-all duration-300"
-                        style={{ width: `${((currentQuestionIndex + 1) / quiz.questions.length) * 100}%` }}
+
+                {/* Progress Bar - Laser Style */}
+                <div className="flex-1 mx-4 h-1 bg-cyber-dark/50 rounded-full overflow-hidden relative">
+                    <motion.div
+                        className="absolute top-0 left-0 h-full bg-cyber-blue shadow-[0_0_10px_#45A29E]"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${((currentQuestionIndex + 1) / quiz.questions.length) * 100}%` }}
+                        transition={{ duration: 0.5 }}
                     />
                 </div>
-                <div className="w-10" /> {/* Spacer */}
+
+                <div className="text-xs font-mono text-cyber-blue">
+                    {currentQuestionIndex + 1}/{quiz.questions.length}
+                </div>
             </div>
 
-            {/* Question */}
-            <div className="space-y-4">
-                <h2 className="text-xl font-bold leading-snug">{currentQuestion.text}</h2>
+            {/* Question Card */}
+            <AnimatePresence mode='wait'>
+                <motion.div
+                    key={currentQuestionIndex}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-6"
+                >
+                    <h2 className="text-xl font-bold leading-snug font-orbitron text-white drop-shadow-md">
+                        {currentQuestion.text}
+                    </h2>
 
-                {currentQuestion.type === 'image_verification' ? (
-                    <VisualQuizCard
-                        imageUrl={currentQuestion.imageUrl || ''}
-                        correctAnswer={currentQuestion.correctAnswer}
-                        hotspots={currentQuestion.hotspots}
-                        onAnswer={handleAnswer}
-                        disabled={isAnswered}
-                    />
-                ) : (
-                    <div className="space-y-3">
-                        {currentQuestion.options.map((option, index) => {
-                            let stateStyles = "border-zinc-200 dark:border-zinc-800 hover:border-blue-400 dark:hover:border-blue-700";
+                    {currentQuestion.type === 'image_verification' ? (
+                        <div className="relative overflow-hidden rounded-xl border border-cyber-blue/30 group">
+                            {/* Scanning Animation Overlay */}
+                            <div className="absolute inset-0 pointer-events-none z-20 animate-scan bg-gradient-to-b from-transparent via-cyber-blue/20 to-transparent h-[20%]" />
 
-                            if (isAnswered) {
-                                if (index === currentQuestion.correctAnswer) {
-                                    stateStyles = "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400";
-                                } else if (index === selectedOption) {
-                                    stateStyles = "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400";
-                                } else {
-                                    stateStyles = "opacity-50";
+                            <VisualQuizCard
+                                imageUrl={currentQuestion.imageUrl || ''}
+                                correctAnswer={currentQuestion.correctAnswer}
+                                hotspots={currentQuestion.hotspots}
+                                onAnswer={handleAnswer}
+                                disabled={isAnswered}
+                            />
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {currentQuestion.options.map((option, index) => {
+                                let stateStyles = "border-cyber-gray/50 bg-cyber-dark/40 hover:border-cyber-blue/50 hover:bg-cyber-blue/10";
+                                let icon = null;
+
+                                if (isAnswered) {
+                                    if (index === currentQuestion.correctAnswer) {
+                                        stateStyles = "border-cyber-green bg-cyber-green/10 text-cyber-green shadow-[0_0_15px_rgba(102,252,241,0.2)]";
+                                        icon = <Check className="w-5 h-5" />;
+                                    } else if (index === selectedOption) {
+                                        stateStyles = "border-cyber-red bg-cyber-red/10 text-cyber-red animate-glitch";
+                                        icon = <AlertTriangle className="w-5 h-5" />;
+                                    } else {
+                                        stateStyles = "opacity-30 grayscale";
+                                    }
                                 }
-                            }
 
-                            return (
-                                <button
-                                    key={index}
-                                    onClick={() => handleAnswer(index)}
-                                    disabled={isAnswered}
-                                    className={cn(
-                                        "w-full p-4 text-left rounded-xl border-2 font-medium transition-all",
-                                        stateStyles
-                                    )}
-                                >
-                                    {option}
-                                </button>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
+                                return (
+                                    <button
+                                        key={index}
+                                        onClick={() => handleAnswer(index)}
+                                        disabled={isAnswered}
+                                        className={cn(
+                                            "w-full p-4 text-left rounded-xl border transition-all duration-200 flex items-center justify-between group glass-card",
+                                            stateStyles
+                                        )}
+                                    >
+                                        <span className="font-medium">{option}</span>
+                                        {icon}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+                </motion.div>
+            </AnimatePresence>
 
             {/* Feedback / Next Button */}
-            {isAnswered && (
-                <div className={cn(
-                    "fixed bottom-0 left-0 right-0 p-4 pb-8 border-t animate-in slide-in-from-bottom duration-300",
-                    isCorrect
-                        ? "bg-green-50 border-green-200 dark:bg-green-950/50 dark:border-green-900"
-                        : "bg-red-50 border-red-200 dark:bg-red-950/50 dark:border-red-900"
-                )}>
-                    <div className="max-w-md mx-auto flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                            <div className={cn(
-                                "w-10 h-10 rounded-full flex items-center justify-center",
-                                isCorrect ? "bg-green-500" : "bg-red-500"
-                            )}>
-                                {isCorrect ? <Check className="text-white" /> : <X className="text-white" />}
-                            </div>
-                            <div>
-                                <p className={cn("font-bold text-lg", isCorrect ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400")}>
-                                    {isCorrect ? "Correct!" : "Incorrect"}
+            <AnimatePresence>
+                {isAnswered && (
+                    <motion.div
+                        initial={{ y: 100, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 100, opacity: 0 }}
+                        className={cn(
+                            "fixed bottom-24 left-4 right-4 p-4 rounded-2xl border backdrop-blur-xl shadow-2xl z-40",
+                            isCorrect
+                                ? "bg-cyber-green/10 border-cyber-green/50 shadow-[0_0_30px_rgba(102,252,241,0.15)]"
+                                : "bg-cyber-red/10 border-cyber-red/50 shadow-[0_0_30px_rgba(255,0,85,0.15)]"
+                        )}
+                    >
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="flex-1">
+                                <p className={cn(
+                                    "font-bold text-lg font-orbitron",
+                                    isCorrect ? "text-cyber-green text-glow" : "text-cyber-red text-glow-danger"
+                                )}>
+                                    {isCorrect ? "SYSTEM SECURE" : "SECURITY BREACH"}
                                 </p>
                                 {!isCorrect && (
-                                    <div className="mt-1 text-sm text-red-600 dark:text-red-300">
-                                        <p className="font-semibold">Correct Answer: {currentQuestion.options[currentQuestion.correctAnswer]}</p>
-                                        <p className="mt-1 italic opacity-90">{currentQuestion.explanation}</p>
+                                    <div className="mt-2 text-sm text-zinc-300">
+                                        <p className="font-bold text-cyber-red mb-1">Correct Protocol: {currentQuestion.options[currentQuestion.correctAnswer]}</p>
+                                        <p className="italic opacity-80 text-xs">{currentQuestion.explanation}</p>
                                     </div>
                                 )}
                             </div>
-                        </div>
 
-                        <button
-                            onClick={handleNext}
-                            className={cn(
-                                "px-6 py-3 rounded-xl font-bold text-white shadow-lg transition-transform active:scale-95",
-                                isCorrect ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
-                            )}
-                        >
-                            {isLastQuestion ? "Finish" : "Next"}
-                        </button>
-                    </div>
-                </div>
-            )}
+                            <button
+                                onClick={handleNext}
+                                className={cn(
+                                    "px-6 py-3 rounded-xl font-bold text-cyber-dark shadow-lg transition-transform active:scale-95 whitespace-nowrap",
+                                    isCorrect
+                                        ? "bg-cyber-green hover:bg-white hover:shadow-[0_0_20px_#66FCF1]"
+                                        : "bg-cyber-red hover:bg-white hover:shadow-[0_0_20px_#FF0055]"
+                                )}
+                            >
+                                {isLastQuestion ? "Complete" : "Next >"}
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
