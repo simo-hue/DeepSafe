@@ -81,17 +81,42 @@ export default function AchievementsPage() {
                     </div>
 
                     {/* Hex Grid Layout */}
-                    <div className="flex flex-wrap justify-center gap-4 pb-8">
-                        {badges.map((badge, index) => (
-                            <div key={badge.id} className={cn(
-                                "relative",
-                                // Offset every other row for honeycomb effect
-                                index % 2 === 1 ? "mt-14" : ""
-                            )}>
+                    {/* Hex Grid Layout - Honeycomb */}
+                    <div className="flex flex-wrap justify-center max-w-3xl mx-auto pb-12 px-4">
+                        {badges.map((badge) => (
+                            <div key={badge.id} className="honeycomb-cell">
                                 <BadgeCard badge={badge} onClick={setSelectedBadge} />
                             </div>
                         ))}
                     </div>
+
+                    <style jsx global>{`
+                        .honeycomb-cell {
+                            margin: 0 4px -22px 4px; /* Negative bottom margin nestles rows */
+                        }
+
+                        /* Mobile: 2 Columns */
+                        @media (max-width: 639px) {
+                            /* Shift every odd row (items 3,4; 7,8; etc.) */
+                            /* Pattern: 2 items per row. Row 2 starts at item 3. */
+                            /* We want to shift the FIRST item of every EVEN row. */
+                            /* Rows: 1(1,2), 2(3,4), 3(5,6), 4(7,8) */
+                            /* Items needing shift: 3, 7, 11... -> 4n + 3 */
+                            .honeycomb-cell:nth-child(4n + 3) {
+                                margin-left: 54px; /* Half width (50px) + gap (4px) */
+                            }
+                        }
+
+                        /* Desktop: 3 Columns */
+                        @media (min-width: 640px) {
+                            /* Pattern: 3 items per row. Row 2 starts at item 4. */
+                            /* Rows: 1(1,2,3), 2(4,5,6), 3(7,8,9) */
+                            /* Items needing shift: 4, 10, 16... -> 6n + 4 */
+                            .honeycomb-cell:nth-child(6n + 4) {
+                                margin-left: 54px;
+                            }
+                        }
+                    `}</style>
                 </section>
             </div>
 

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Heart, Flame } from 'lucide-react';
 import { useUserStore } from '@/store/useUserStore';
 
@@ -10,8 +11,16 @@ export function Header() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800">
             <div className="max-w-md mx-auto h-14 flex items-center justify-between px-4">
                 <div className="flex items-center space-x-4">
-                    {/* Flag or Language Selector could go here */}
-                    <span className="font-bold text-lg tracking-tight text-blue-600 dark:text-blue-400">Deepsafe</span>
+                    <Link href="/" className="flex items-center gap-2 group">
+                        <div className="relative w-8 h-8">
+                            <img
+                                src="/icon.svg"
+                                alt="Deepsafe Logo"
+                                className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(102,252,241,0.5)] transition-transform group-hover:scale-110"
+                            />
+                        </div>
+                        <span className="font-bold text-lg tracking-tight text-blue-600 dark:text-blue-400 group-hover:text-blue-500 transition-colors">Deepsafe</span>
+                    </Link>
                 </div>
 
                 <div className="flex items-center space-x-4">

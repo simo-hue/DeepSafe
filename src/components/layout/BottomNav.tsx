@@ -41,7 +41,6 @@ export function BottomNav() {
             {/* Floating Glass Capsule */}
             <div className="glass-panel rounded-full px-2 py-2 flex items-center gap-2 pointer-events-auto bg-cyber-dark/90 backdrop-blur-xl border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
                 {navItems.map((item) => {
-                    // Check if active (handle root path redirect case for dashboard)
                     const isActive = pathname === item.href || (item.href === '/dashboard' && pathname === '/');
 
                     return (

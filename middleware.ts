@@ -55,22 +55,25 @@ export async function middleware(request: NextRequest) {
     )
 
     const { data: { user } } = await supabase.auth.getUser()
+    const path = request.nextUrl.pathname
 
-    // Protected routes
+    // 1. Redirect unauthenticated users to login
+    // Protects: /dashboard, /leaderboard, /profile, /shop, /quiz, /learn
     if (!user && (
-        request.nextUrl.pathname.startsWith('/dashboard') ||
-        request.nextUrl.pathname === '/' ||
-        request.nextUrl.pathname.startsWith('/leaderboard') ||
-        request.nextUrl.pathname.startsWith('/shop') ||
-        request.nextUrl.pathname.startsWith('/quiz') ||
-        request.nextUrl.pathname.startsWith('/learn')
+        path.startsWith('/dashboard') ||
+        path.startsWith('/leaderboard') ||
+        path.startsWith('/profile') ||
+        path.startsWith('/shop') ||
+        path.startsWith('/quiz') ||
+        path.startsWith('/learn')
     )) {
         return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    // Redirect authenticated users away from login
-    if (user && request.nextUrl.pathname === '/login') {
-        return NextResponse.redirect(new URL('/', request.url))
+    // 2. Redirect authenticated users to dashboard
+    // Redirects from: /login, / (root)
+    if (user && (path === '/login' || path === '/')) {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
     }
 
     return response
@@ -83,8 +86,9 @@ export const config = {
          * - _next/static (static files)
          * - _next/image (image optimization files)
          * - favicon.ico (favicon file)
-         * Feel free to modify this pattern to include more paths.
+         * - icon.svg (PWA icon)
+         * - manifest.json (PWA manifest)
          */
-        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!_next/static|_next/image|favicon.ico|icon.svg|manifest.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 }
