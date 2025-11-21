@@ -147,7 +147,7 @@ export default function QuizPage() {
     }
 
     return (
-        <div className="space-y-6 relative min-h-[80vh]">
+        <div className="space-y-6 relative min-h-screen">
             {/* HUD Header */}
             <div className="flex items-center justify-between glass-panel p-3 rounded-full">
                 <Link href="/" className="p-2 hover:bg-cyber-gray/50 rounded-full transition-colors">

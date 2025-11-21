@@ -187,7 +187,7 @@ export function SagaMap({ levels }: SagaMapProps) {
                                                         isActive ? "border-cyber-blue bg-cyber-blue/5" :
                                                             isCompleted ? "border-cyber-green" :
                                                                 "border-cyber-gray",
-                                                    isBoss && !isLocked && "border-cyber-red bg-cyber-red/5"
+                                                    isBoss && "fire-border bg-cyber-red/5"
                                                 )}
                                             >
                                                 <div className="flex justify-between items-start">

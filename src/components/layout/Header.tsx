@@ -19,7 +19,7 @@ export function Header() {
                                 className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(102,252,241,0.5)] transition-transform group-hover:scale-110"
                             />
                         </div>
-                        <span className="font-bold text-lg tracking-tight text-blue-600 dark:text-blue-400 group-hover:text-blue-500 transition-colors">Deepsafe</span>
+                        <span className="font-bold text-lg tracking-tight text-[#66FCF1] group-hover:text-[#45A29E] transition-colors">Deepsafe</span>
                     </Link>
                 </div>
 

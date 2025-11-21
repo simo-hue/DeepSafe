@@ -34,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${inter.variable} ${orbitron.variable} antialiased pb-24`}
+        className={`${inter.variable} ${orbitron.variable} antialiased pt-24 pb-24 bg-cyber-dark`}
       >
         <div className="max-w-md mx-auto min-h-screen flex flex-col relative overflow-hidden">
           <Header />

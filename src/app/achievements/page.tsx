@@ -82,7 +82,7 @@ export default function AchievementsPage() {
 
                     {/* Hex Grid Layout */}
                     {/* Hex Grid Layout - Honeycomb */}
-                    <div className="flex flex-wrap justify-center max-w-3xl mx-auto pb-12 px-4">
+                    <div className="flex flex-wrap justify-center mx-auto pb-12 px-4 w-fit max-w-full">
                         {badges.map((badge) => (
                             <div key={badge.id} className="honeycomb-cell">
                                 <BadgeCard badge={badge} onClick={setSelectedBadge} />
@@ -92,28 +92,25 @@ export default function AchievementsPage() {
 
                     <style jsx global>{`
                         .honeycomb-cell {
-                            margin: 0 4px -22px 4px; /* Negative bottom margin nestles rows */
+                            margin: 0 4px -25px 4px; /* Reduced negative margin to fix overlap */
                         }
 
-                        /* Mobile: 2 Columns */
+                        /* Mobile: 2 Columns - Enforce width to force wrap */
                         @media (max-width: 639px) {
-                            /* Shift every odd row (items 3,4; 7,8; etc.) */
-                            /* Pattern: 2 items per row. Row 2 starts at item 3. */
-                            /* We want to shift the FIRST item of every EVEN row. */
-                            /* Rows: 1(1,2), 2(3,4), 3(5,6), 4(7,8) */
-                            /* Items needing shift: 3, 7, 11... -> 4n + 3 */
                             .honeycomb-cell:nth-child(4n + 3) {
-                                margin-left: 54px; /* Half width (50px) + gap (4px) */
+                                margin-left: 54px; /* Shift 3rd item (start of row 2) */
                             }
+                            
+                            /* Force container to only fit 2 items (108px * 2 = 216px) */
+                            /* We can't target container here easily with scoped styles, 
+                               but the w-fit on container helps. 
+                               We rely on the screen width being small. */
                         }
 
                         /* Desktop: 3 Columns */
                         @media (min-width: 640px) {
-                            /* Pattern: 3 items per row. Row 2 starts at item 4. */
-                            /* Rows: 1(1,2,3), 2(4,5,6), 3(7,8,9) */
-                            /* Items needing shift: 4, 10, 16... -> 6n + 4 */
                             .honeycomb-cell:nth-child(6n + 4) {
-                                margin-left: 54px;
+                                margin-left: 54px; /* Shift 4th item (start of row 2) */
                             }
                         }
                     `}</style>

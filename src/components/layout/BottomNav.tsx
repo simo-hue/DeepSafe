@@ -14,7 +14,7 @@ export function BottomNav() {
             icon: Map,
             label: 'Home',
             href: '/dashboard',
-            activeColor: 'text-cyber-blue'
+            activeColor: 'text-yellow-500'
         },
         {
             icon: Trophy,
@@ -26,7 +26,7 @@ export function BottomNav() {
             icon: LayoutGrid,
             label: 'Vault',
             href: '/achievements',
-            activeColor: 'text-cyber-purple'
+            activeColor: 'text-yellow-500'
         },
         {
             icon: User,
