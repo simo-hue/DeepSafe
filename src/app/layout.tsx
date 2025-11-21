@@ -26,6 +26,10 @@ export const metadata: Metadata = {
   },
 };
 
+import { SystemUIProvider } from "@/context/SystemUIContext";
+import { CyberToast } from "@/components/ui/CyberToast";
+import { CyberModal } from "@/components/ui/CyberModal";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,13 +40,17 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${orbitron.variable} antialiased pt-24 pb-24 bg-cyber-dark`}
       >
-        <div className="max-w-md mx-auto min-h-screen flex flex-col relative overflow-hidden">
-          <Header />
-          <main className="flex-1 p-4 z-10">
-            {children}
-          </main>
-          <BottomNav />
-        </div>
+        <SystemUIProvider>
+          <div className="max-w-md mx-auto min-h-screen flex flex-col relative overflow-hidden">
+            <Header />
+            <main className="flex-1 p-4 z-10">
+              {children}
+            </main>
+            <BottomNav />
+            <CyberToast />
+            <CyberModal />
+          </div>
+        </SystemUIProvider>
       </body>
     </html>
   );

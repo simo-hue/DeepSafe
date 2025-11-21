@@ -1,0 +1,24 @@
+✅ Monetization Engine Online!
+
+I've wired up the "Cyber Supply Depot" to the real world.
+
+1. Stripe Payments (Real Cash)
+
+Checkout API: Clicking "Upgrade" or "Buy" now calls a real backend route that creates a Stripe Checkout session.
+Webhooks: When a payment succeeds, Stripe tells our server, and we securely update the database (e.g., turn on Premium, refill hearts).
+Products Support:
+Elite: Subscriptions.
+Reboot/Freeze: One-time payments.
+2. Ad Rewards (Simulation)
+
+"Watch Ad": Opens a modal with a 15-second countdown (simulating a video ad).
+Reward: After the timer, it calls a secure API to give you +1 Heart.
+3. Setup Required (Important!) To make the payments actually work, you need to:
+
+Get your API Keys from the Stripe Dashboard.
+Create the Products in Stripe (Elite, Reboot, Freeze).
+Add the keys to your .env.local file (see src/app/api/checkout/route.ts for the list).
+To Test (Mock Mode):
+
+The "Watch Ad" button works immediately (try it!).
+The Payment buttons will try to open Stripe. If you haven't set the keys, they will log an error, but the code is ready.
