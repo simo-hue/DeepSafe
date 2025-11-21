@@ -42,7 +42,7 @@ export default function ShopPage() {
                     {/* Background Effects */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
 
-                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
+                    <div className="relative z-10 flex flex-col lg:flex-row items-center gap-6">
                         {/* Icon */}
                         <div className="flex-shrink-0">
                             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
@@ -51,12 +51,12 @@ export default function ShopPage() {
                         </div>
 
                         {/* Content */}
-                        <div className="flex-1 text-center md:text-left space-y-2">
-                            <h2 className="text-2xl font-bold font-orbitron text-white tracking-wide flex items-center justify-center md:justify-start gap-2">
+                        <div className="flex-1 text-center lg:text-left space-y-2">
+                            <h2 className="text-2xl font-bold font-orbitron text-white tracking-wide flex items-center justify-center lg:justify-start gap-2">
                                 DEEPSAFE ELITE
                                 <span className="px-2 py-0.5 rounded text-[10px] bg-yellow-500 text-black font-bold">PLUS</span>
                             </h2>
-                            <div className="flex flex-wrap justify-center md:justify-start gap-3 text-sm text-blue-100">
+                            <div className="flex flex-wrap justify-center lg:justify-start gap-3 text-sm text-blue-100">
                                 <span className="flex items-center gap-1"><Check className="w-4 h-4 text-yellow-400" /> Infinite Lives</span>
                                 <span className="flex items-center gap-1"><Check className="w-4 h-4 text-yellow-400" /> No Ads</span>
                                 <span className="flex items-center gap-1"><Check className="w-4 h-4 text-yellow-400" /> Double XP</span>
@@ -64,11 +64,11 @@ export default function ShopPage() {
                         </div>
 
                         {/* CTA */}
-                        <div className="flex-shrink-0 w-full md:w-auto">
+                        <div className="flex-shrink-0 w-full lg:w-auto">
                             <button
                                 onClick={handlePremium}
                                 disabled={hasInfiniteLives}
-                                className="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-bold rounded-xl shadow-[0_0_20px_rgba(234,179,8,0.3)] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed font-orbitron tracking-wide"
+                                className="w-full lg:w-auto px-8 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-bold rounded-xl shadow-[0_0_20px_rgba(234,179,8,0.3)] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed font-orbitron tracking-wide"
                             >
                                 {hasInfiniteLives ? 'PLAN ACTIVE' : 'UPGRADE - €4.99/mo'}
                             </button>
@@ -125,7 +125,7 @@ export default function ShopPage() {
                         <button
                             onClick={handleRefill}
                             disabled={lives >= maxLives || hasInfiniteLives}
-                            className="w-full py-2 rounded-lg bg-cyber-green text-black hover:bg-cyber-green/90 transition-all font-mono text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_10px_rgba(102,252,241,0.3)]"
+                            className="flex-shrink-0 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white font-mono text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_10px_rgba(102,252,241,0.3)]"
                         >
                             €0.99
                         </button>
