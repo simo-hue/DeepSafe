@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Check, Skull, Shield, Play, X, AlertCircle } from 'lucide-react';
+import { Lock, Check, Skull, Shield, Play, X, AlertCircle, Bot, Smartphone, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
@@ -78,10 +78,20 @@ export function SagaMap({ levels }: SagaMapProps) {
                                 const isActive = level.status === 'active';
                                 const isBoss = level.is_boss_level;
 
+                                // Find if this is the "Next Up" level (first locked level)
+                                const isNextUp = isLocked && levels.find(l => l.status === 'locked')?.id === level.id;
+
                                 const LevelWrapper = isLocked ? 'div' : Link;
                                 const wrapperProps = isLocked
                                     ? { onClick: () => handleLockedClick(level) }
                                     : { href: `/quiz/${level.id}` };
+
+                                // Determine Icon
+                                let LevelIcon = Shield;
+                                if (level.module_title.includes('AI')) LevelIcon = Bot;
+                                if (level.module_title.includes('Scam')) LevelIcon = Smartphone;
+                                if (level.module_title.includes('Deepfake')) LevelIcon = Eye;
+                                if (isBoss) LevelIcon = Skull;
 
                                 return (
                                     <div
@@ -92,13 +102,17 @@ export function SagaMap({ levels }: SagaMapProps) {
                                         <LevelWrapper
                                             {...wrapperProps as any}
                                             className={cn(
-                                                "flex items-center gap-4 group cursor-pointer",
-                                                isLocked && "opacity-60"
+                                                "flex items-center gap-4 group cursor-pointer transition-all duration-300",
+                                                isLocked && !isNextUp && "opacity-80 hover:opacity-100",
+                                                isNextUp && "scale-[1.02]"
                                             )}
                                         >
                                             {/* Connection Line */}
                                             {levelIdx > 0 && (
-                                                <div className="absolute left-8 -top-6 w-0.5 h-6 bg-gradient-to-b from-cyber-blue to-transparent" />
+                                                <div className={cn(
+                                                    "absolute left-8 -top-6 w-0.5 h-6",
+                                                    isLocked ? "bg-cyber-gray/30" : "bg-gradient-to-b from-cyber-blue to-transparent"
+                                                )} />
                                             )}
 
                                             {/* Hexagon Node */}
@@ -117,7 +131,7 @@ export function SagaMap({ levels }: SagaMapProps) {
                                                     <div
                                                         className={cn(
                                                             "absolute inset-0 transition-all duration-300",
-                                                            isLocked ? "bg-cyber-gray/50" :
+                                                            isLocked ? "bg-cyber-gray/20" :
                                                                 isCompleted ? "bg-cyber-green/20" :
                                                                     isActive ? "bg-cyber-blue/20" :
                                                                         "bg-cyber-dark"
@@ -136,19 +150,35 @@ export function SagaMap({ levels }: SagaMapProps) {
                                                             d="M50 0 L93.3 25 L93.3 75 L50 100 L6.7 75 L6.7 25 Z"
                                                             className={cn(
                                                                 "fill-none stroke-2 transition-all duration-300",
-                                                                isLocked ? "stroke-cyber-gray" :
-                                                                    isBoss ? "stroke-cyber-red" :
-                                                                        isActive ? "stroke-cyber-blue" :
-                                                                            isCompleted ? "stroke-cyber-green" :
-                                                                                "stroke-cyber-gray"
+                                                                isLocked && isBoss ? "stroke-cyber-red stroke-dashed" :
+                                                                    isLocked ? "stroke-cyber-gray/50" :
+                                                                        isBoss ? "stroke-cyber-red" :
+                                                                            isActive ? "stroke-cyber-blue" :
+                                                                                isCompleted ? "stroke-cyber-green" :
+                                                                                    "stroke-cyber-gray"
                                                             )}
+                                                            strokeDasharray={isLocked && isBoss ? "4 2" : "none"}
                                                         />
                                                     </svg>
 
                                                     {/* Icon */}
-                                                    <div className="relative z-10">
+                                                    <div className={cn(
+                                                        "relative z-10 transition-all duration-300",
+                                                        isLocked && "grayscale opacity-50 group-hover:opacity-80",
+                                                        isLocked && isBoss && "opacity-100 grayscale-0 text-black drop-shadow-[0_0_10px_rgba(255,0,0,0.5)]"
+                                                    )}>
                                                         {isLocked ? (
-                                                            <Lock className="w-5 h-5 text-cyber-gray" />
+                                                            <div className="relative">
+                                                                {/* Teaser Icon */}
+                                                                <LevelIcon className={cn(
+                                                                    isBoss ? "w-10 h-10 text-cyber-red" : "w-6 h-6 text-cyber-blue",
+                                                                    isBoss && "fill-current"
+                                                                )} />
+                                                                {/* Lock Overlay */}
+                                                                <div className="absolute -bottom-2 -right-2 bg-cyber-dark rounded-full p-1 border border-cyber-gray">
+                                                                    <Lock className="w-3 h-3 text-cyber-gray" />
+                                                                </div>
+                                                            </div>
                                                         ) : isCompleted ? (
                                                             <Check className="w-6 h-6 text-cyber-green drop-shadow-[0_0_5px_#66FCF1]" />
                                                         ) : isBoss ? (
@@ -182,35 +212,59 @@ export function SagaMap({ levels }: SagaMapProps) {
                                             {/* Level Info Card */}
                                             <div
                                                 className={cn(
-                                                    "flex-1 p-4 rounded-xl border-l-4 transition-all duration-300 glass-card",
-                                                    isLocked ? "border-cyber-gray text-cyber-gray" :
+                                                    "flex-1 p-4 rounded-xl border-l-4 transition-all duration-300 glass-card relative overflow-hidden",
+                                                    isLocked ? "border-cyber-gray/30 bg-black/20" :
                                                         isActive ? "border-cyber-blue bg-cyber-blue/5" :
                                                             isCompleted ? "border-cyber-green" :
                                                                 "border-cyber-gray",
-                                                    isBoss && "fire-border bg-cyber-red/5"
+                                                    isBoss && "fire-border bg-cyber-red/5",
+                                                    isBoss && isLocked && "border-cyber-red/30 border-dashed"
                                                 )}
                                             >
-                                                <div className="flex justify-between items-start">
-                                                    <div>
+                                                {/* Next Up Badge */}
+                                                {isNextUp && (
+                                                    <div className="absolute top-0 right-0 bg-cyber-blue text-black text-[10px] font-bold px-2 py-0.5 rounded-bl-lg font-orbitron">
+                                                        NEXT UNLOCK
+                                                    </div>
+                                                )}
+
+                                                {/* Boss Threat Badge */}
+                                                {isBoss && isLocked && (
+                                                    <div className="absolute top-0 right-0 bg-cyber-red/20 text-cyber-red text-[10px] font-bold px-2 py-0.5 rounded-bl-lg font-orbitron animate-pulse border-l border-b border-cyber-red/50">
+                                                        ⚠ THREAT DETECTED
+                                                    </div>
+                                                )}
+
+                                                <div className="flex justify-between items-start relative z-10">
+                                                    <div className="flex-1 min-w-0">
                                                         <h4
                                                             className={cn(
                                                                 "font-bold text-sm mb-1 font-orbitron tracking-wide",
                                                                 isActive && "text-cyber-blue text-glow",
-                                                                isBoss && !isLocked && "text-cyber-red text-glow-danger"
+                                                                isBoss && !isLocked && "text-cyber-red text-glow-danger",
+                                                                isLocked && "text-zinc-500"
                                                             )}
                                                         >
                                                             {isBoss ? 'BOSS LEVEL' : `Day ${level.day_number}`}
                                                         </h4>
-                                                        <p className="text-xs text-gray-400 line-clamp-1">
+                                                        <p className={cn(
+                                                            "text-xs line-clamp-1",
+                                                            isLocked ? "text-zinc-600 blur-[2px] select-none" : "text-gray-400"
+                                                        )}>
                                                             {level.title}
                                                         </p>
                                                     </div>
-                                                    {level.xp_reward > 0 && (
-                                                        <span className="text-xs font-mono text-cyber-purple font-bold">
+                                                    {level.xp_reward > 0 && !isLocked && (
+                                                        <span className="text-xs font-mono text-cyber-purple font-bold ml-2">
                                                             +{level.xp_reward} XP
                                                         </span>
                                                     )}
                                                 </div>
+
+                                                {/* Locked Overlay Pattern */}
+                                                {isLocked && (
+                                                    <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5 pointer-events-none" />
+                                                )}
                                             </div>
                                         </LevelWrapper>
                                     </div>

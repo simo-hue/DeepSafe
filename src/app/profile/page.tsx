@@ -121,6 +121,10 @@ export default function ProfilePage() {
 
     const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         try {
+            if (!user) {
+                console.error('No user found');
+                return;
+            }
             setUploading(true);
 
             if (!event.target.files || event.target.files.length === 0) {
@@ -160,6 +164,8 @@ export default function ProfilePage() {
 
     const handleSaveProfile = async () => {
         try {
+            if (!user) return;
+
             const { error } = await supabase
                 .from('profiles')
                 .update({
@@ -238,7 +244,7 @@ export default function ProfilePage() {
                             </div>
 
                             {/* Level Badge */}
-                            <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-cyber-dark border border-cyber-blue px-4 py-1.5 rounded-full shadow-lg flex items-center gap-2 z-20">
+                            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-cyber-dark border border-cyber-blue px-4 py-1.5 rounded-full shadow-lg flex items-center gap-2 z-20">
                                 <span className="text-[10px] text-cyber-gray font-mono uppercase">LVL</span>
                                 <span className="text-lg font-bold font-orbitron text-white leading-none">{currentLevel}</span>
                             </div>

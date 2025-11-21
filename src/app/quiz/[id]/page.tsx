@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/supabase';
 import { VisualQuizCard } from '@/components/gamification/VisualQuizCard';
+import { QuizFeedback } from '@/components/gamification/QuizFeedback';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
@@ -147,7 +148,7 @@ export default function QuizPage() {
     }
 
     return (
-        <div className="space-y-6 relative min-h-screen">
+        <div className="space-y-6 relative min-h-screen pb-40"> {/* Added pb-40 for bottom sheet clearance */}
             {/* HUD Header */}
             <div className="flex items-center justify-between glass-panel p-3 rounded-full">
                 <Link href="/" className="p-2 hover:bg-cyber-gray/50 rounded-full transition-colors">
@@ -203,13 +204,13 @@ export default function QuizPage() {
 
                                 if (isAnswered) {
                                     if (index === currentQuestion.correctAnswer) {
-                                        stateStyles = "border-cyber-green bg-cyber-green/10 text-cyber-green shadow-[0_0_15px_rgba(102,252,241,0.2)]";
+                                        stateStyles = "border-cyber-green bg-cyber-green/20 text-cyber-green shadow-[0_0_15px_rgba(102,252,241,0.2)]";
                                         icon = <Check className="w-5 h-5" />;
                                     } else if (index === selectedOption) {
-                                        stateStyles = "border-cyber-red bg-cyber-red/10 text-cyber-red animate-glitch";
-                                        icon = <AlertTriangle className="w-5 h-5" />;
+                                        stateStyles = "border-cyber-red bg-cyber-red/20 text-cyber-red animate-glitch";
+                                        icon = <X className="w-5 h-5" />;
                                     } else {
-                                        stateStyles = "opacity-30 grayscale";
+                                        stateStyles = "opacity-30 grayscale border-transparent";
                                     }
                                 }
 
@@ -219,12 +220,16 @@ export default function QuizPage() {
                                         onClick={() => handleAnswer(index)}
                                         disabled={isAnswered}
                                         className={cn(
-                                            "w-full p-4 text-left rounded-xl border transition-all duration-200 flex items-center justify-between group glass-card",
+                                            "w-full p-4 text-left rounded-xl border-2 transition-all duration-200 flex items-center justify-between group glass-card relative overflow-hidden",
                                             stateStyles
                                         )}
                                     >
-                                        <span className="font-medium">{option}</span>
+                                        <span className="font-medium relative z-10">{option}</span>
                                         {icon}
+                                        {/* Hover Effect for Unanswered */}
+                                        {!isAnswered && (
+                                            <div className="absolute inset-0 bg-cyber-blue/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        )}
                                     </button>
                                 );
                             })}
@@ -233,49 +238,16 @@ export default function QuizPage() {
                 </motion.div>
             </AnimatePresence>
 
-            {/* Feedback / Next Button */}
+            {/* Feedback Modal */}
             <AnimatePresence>
                 {isAnswered && (
-                    <motion.div
-                        initial={{ y: 100, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: 100, opacity: 0 }}
-                        className={cn(
-                            "fixed bottom-24 left-4 right-4 p-4 rounded-2xl border backdrop-blur-xl shadow-2xl z-40",
-                            isCorrect
-                                ? "bg-cyber-green/10 border-cyber-green/50 shadow-[0_0_30px_rgba(102,252,241,0.15)]"
-                                : "bg-cyber-red/10 border-cyber-red/50 shadow-[0_0_30px_rgba(255,0,85,0.15)]"
-                        )}
-                    >
-                        <div className="flex items-center justify-between gap-4">
-                            <div className="flex-1">
-                                <p className={cn(
-                                    "font-bold text-lg font-orbitron",
-                                    isCorrect ? "text-cyber-green text-glow" : "text-cyber-red text-glow-danger"
-                                )}>
-                                    {isCorrect ? "SYSTEM SECURE" : "SECURITY BREACH"}
-                                </p>
-                                {!isCorrect && (
-                                    <div className="mt-2 text-sm text-zinc-300">
-                                        <p className="font-bold text-cyber-red mb-1">Correct Protocol: {currentQuestion.options[currentQuestion.correctAnswer]}</p>
-                                        <p className="italic opacity-80 text-xs">{currentQuestion.explanation}</p>
-                                    </div>
-                                )}
-                            </div>
-
-                            <button
-                                onClick={handleNext}
-                                className={cn(
-                                    "px-6 py-3 rounded-xl font-bold text-cyber-dark shadow-lg transition-transform active:scale-95 whitespace-nowrap",
-                                    isCorrect
-                                        ? "bg-cyber-green hover:bg-white hover:shadow-[0_0_20px_#66FCF1]"
-                                        : "bg-cyber-red hover:bg-white hover:shadow-[0_0_20px_#FF0055]"
-                                )}
-                            >
-                                {isLastQuestion ? "Complete" : "Next >"}
-                            </button>
-                        </div>
-                    </motion.div>
+                    <QuizFeedback
+                        isCorrect={isCorrect}
+                        correctAnswerText={currentQuestion.options[currentQuestion.correctAnswer]}
+                        explanation={currentQuestion.explanation}
+                        onNext={handleNext}
+                        isLastQuestion={isLastQuestion}
+                    />
                 )}
             </AnimatePresence>
         </div>
