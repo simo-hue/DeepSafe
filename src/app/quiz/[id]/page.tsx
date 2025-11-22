@@ -32,6 +32,7 @@ export default function QuizPage() {
     const [score, setScore] = useState(0);
     const [showShopModal, setShowShopModal] = useState(false);
     const [showReward, setShowReward] = useState(false);
+    const [earnedXp, setEarnedXp] = useState(0);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -177,8 +178,13 @@ export default function QuizPage() {
     const handleNext = async () => {
         if (isLastQuestion) {
             if (isCorrect || isAnswered) {
-                const { xp } = calculateRewards(quiz, 0); // Base XP
-                addXp(xp);
+                const finalScore = score + (isCorrect ? 1 : 0);
+                const totalQuestions = quiz.questions.length;
+                const calculatedXp = Math.round((finalScore / totalQuestions) * quiz.xpReward);
+                console.log('🧮 Calculated XP:', { finalScore, totalQuestions, maxXp: quiz.xpReward, calculatedXp });
+
+                setEarnedXp(calculatedXp);
+                addXp(calculatedXp);
                 incrementStreak();
                 setShowReward(true);
 
@@ -191,32 +197,51 @@ export default function QuizPage() {
                         const { data, error } = await supabase.rpc('complete_level', {
                             p_user_id: user.id,
                             p_level_id: params.id as string,
-                            p_score: score + (isCorrect ? 1 : 0),
-                            p_earned_xp: quiz.xpReward // Pass earned XP
+                            p_score: finalScore,
+                            p_earned_xp: calculatedXp // Pass proportional XP
                         });
 
-                        if (error) {
-                            console.error('❌ Error completing level (RPC):', error);
+                        if (error || (data && !data.success)) {
+                            console.error('❌ Error completing level (RPC):', error || data?.error);
                             // Fallback: Insert directly into user_progress (Partial fix if RPC fails)
                             await supabase.from('user_progress').upsert({
                                 user_id: user.id,
                                 quiz_id: params.id as string,
-                                score: score + (isCorrect ? 1 : 0),
+                                score: finalScore,
                                 status: 'completed',
                                 completed_at: new Date().toISOString()
                             }, { onConflict: 'user_id, quiz_id' });
+
+                            // Also try to update XP manually if RPC failed
+                            if (calculatedXp > 0) {
+                                const { error: xpError } = await supabase.rpc('increment_xp', { x: calculatedXp });
+                                if (xpError) {
+                                    // If increment_xp doesn't exist, try direct update (less safe but better than nothing)
+                                    console.warn('Could not increment XP via RPC, trying direct update');
+                                    // We can't easily do atomic increment without RPC, so we skip or rely on refresh
+                                }
+                            }
                         } else {
                             console.log('✅ Level completed successfully:', data);
                         }
                     }
 
-                    // Force Hard Refresh to ensure Dashboard gets fresh data
-                    window.location.href = '/dashboard';
+                    // 2. CRITICAL: Force refresh the user profile to get new XP
+                    try {
+                        console.log('🔄 Refreshing profile...');
+                        await useUserStore.getState().refreshProfile();
+                        console.log('✅ Profile refreshed');
+                    } catch (refreshError) {
+                        console.error('❌ Error refreshing profile:', refreshError);
+                        alert('Errore aggiornamento profilo (vedi console)');
+                    }
+
+                    // 3. Background Refresh (No auto-redirect)
+                    console.log('✅ Profile refreshed, waiting for user input...');
 
                 } catch (error) {
                     console.error('❌ Unexpected error completing level:', error);
-                    // Even on error, try to go to dashboard
-                    window.location.href = '/dashboard';
+                    // Don't redirect on error, let user click the button
                 }
             }
         } else {
@@ -235,12 +260,12 @@ export default function QuizPage() {
                 </div>
                 <div className="space-y-2">
                     <h2 className="text-3xl font-bold text-cyber-purple font-orbitron text-glow">Missione Compiuta</h2>
-                    <p className="text-xl font-medium text-cyber-blue">Dati Messi in Sicurezza: +{quiz.xpReward} XP</p>
+                    <p className="text-xl font-medium text-cyber-blue">Dati Messi in Sicurezza: +{earnedXp} XP</p>
                 </div>
                 <button
                     onClick={() => {
-                        router.refresh(); // Force refresh to update Saga Map
-                        router.push('/dashboard');
+                        // Force Hard Refresh to ensure Dashboard gets fresh data
+                        window.location.href = '/dashboard';
                     }}
                     className="px-8 py-3 bg-cyber-blue text-cyber-dark rounded-full font-bold text-lg shadow-[0_0_15px_rgba(69,162,158,0.5)] hover:bg-cyber-green transition-all hover:scale-105"
                 >

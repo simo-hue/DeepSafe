@@ -125,6 +125,7 @@ export default function ProfilePage() {
 
             if (error) throw error;
 
+            console.log('👤 Profile Page Fetched Data:', data);
             setProfile(data as any);
             setEditName(data.username || '');
             setEditBio((data as any).bio || 'Recluta Cyber Security');
