@@ -181,7 +181,6 @@ export default function QuizPage() {
                 const finalScore = score + (isCorrect ? 1 : 0);
                 const totalQuestions = quiz.questions.length;
                 const calculatedXp = Math.round((finalScore / totalQuestions) * quiz.xpReward);
-                console.log('🧮 Calculated XP:', { finalScore, totalQuestions, maxXp: quiz.xpReward, calculatedXp });
 
                 setEarnedXp(calculatedXp);
                 addXp(calculatedXp);

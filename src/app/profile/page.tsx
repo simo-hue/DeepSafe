@@ -125,7 +125,6 @@ export default function ProfilePage() {
 
             if (error) throw error;
 
-            console.log('👤 Profile Page Fetched Data:', data);
             setProfile(data as any);
             setEditName(data.username || '');
             setEditBio((data as any).bio || 'Recluta Cyber Security');
@@ -444,56 +443,54 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                    <AnimatePresence mode='wait'>
-                        {leaderboardData.map((entry, index) => (
-                            <motion.div
-                                key={entry.id}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: index * 0.05 }}
-                                className={cn(
-                                    "flex items-center p-3 rounded-xl border transition-all relative overflow-hidden",
-                                    entry.id === user?.id
-                                        ? "border-cyber-blue bg-cyber-blue/5"
-                                        : "border-white/5 bg-black/20 hover:bg-white/5"
-                                )}
-                            >
-                                {entry.id === user?.id && (
-                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyber-blue shadow-[0_0_10px_#66FCF1]" />
-                                )}
+                    {leaderboardData.map((entry, index) => (
+                        <motion.div
+                            key={entry.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className={cn(
+                                "flex items-center p-3 rounded-xl border transition-all relative overflow-hidden",
+                                entry.id === user?.id
+                                    ? "border-cyber-blue bg-cyber-blue/5"
+                                    : "border-white/5 bg-black/20 hover:bg-white/5"
+                            )}
+                        >
+                            {entry.id === user?.id && (
+                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyber-blue shadow-[0_0_10px_#66FCF1]" />
+                            )}
 
-                                <div className={cn(
-                                    "w-8 h-8 flex items-center justify-center font-bold font-mono rounded-full mr-3 text-sm",
-                                    index === 0 ? "text-yellow-500 drop-shadow-[0_0_5px_rgba(234,179,8,0.5)]" :
-                                        index === 1 ? "text-zinc-300" :
-                                            index === 2 ? "text-amber-700" : "text-zinc-600"
+                            <div className={cn(
+                                "w-8 h-8 flex items-center justify-center font-bold font-mono rounded-full mr-3 text-sm",
+                                index === 0 ? "text-yellow-500 drop-shadow-[0_0_5px_rgba(234,179,8,0.5)]" :
+                                    index === 1 ? "text-zinc-300" :
+                                        index === 2 ? "text-amber-700" : "text-zinc-600"
+                            )}>
+                                {index < 3 ? <Medal className="w-5 h-5" /> : `#${entry.rank}`}
+                            </div>
+
+                            <div className="w-8 h-8 bg-cyber-gray/30 rounded-full flex items-center justify-center mr-3 overflow-hidden border border-white/10">
+                                {entry.avatar_url ? (
+                                    <img src={entry.avatar_url} alt={entry.username} className="w-full h-full object-cover" />
+                                ) : (
+                                    <Cpu className="w-4 h-4 text-cyber-gray" />
+                                )}
+                            </div>
+
+                            <div className="flex-1">
+                                <h3 className={cn(
+                                    "font-bold text-sm tracking-wide",
+                                    entry.id === user?.id ? "text-cyber-blue text-glow" : "text-zinc-300"
                                 )}>
-                                    {index < 3 ? <Medal className="w-5 h-5" /> : `#${entry.rank}`}
-                                </div>
+                                    {entry.username}
+                                </h3>
+                            </div>
 
-                                <div className="w-8 h-8 bg-cyber-gray/30 rounded-full flex items-center justify-center mr-3 overflow-hidden border border-white/10">
-                                    {entry.avatar_url ? (
-                                        <img src={entry.avatar_url} alt={entry.username} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <Cpu className="w-4 h-4 text-cyber-gray" />
-                                    )}
-                                </div>
-
-                                <div className="flex-1">
-                                    <h3 className={cn(
-                                        "font-bold text-sm tracking-wide",
-                                        entry.id === user?.id ? "text-cyber-blue text-glow" : "text-zinc-300"
-                                    )}>
-                                        {entry.username}
-                                    </h3>
-                                </div>
-
-                                <div className="text-right">
-                                    <span className="font-mono text-cyber-purple font-bold text-xs tracking-wider">{entry.xp} XP</span>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
+                            <div className="text-right">
+                                <span className="font-mono text-cyber-purple font-bold text-xs tracking-wider">{entry.xp} XP</span>
+                            </div>
+                        </motion.div>
+                    ))}
                 </div>
             </div>
 
@@ -581,6 +578,6 @@ export default function ProfilePage() {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </div >
     );
 }
