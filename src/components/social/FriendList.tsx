@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { UserPlus, Swords } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { challengeFriend } from '@/lib/challenges';
@@ -20,6 +21,7 @@ interface FriendListProps {
 }
 
 export function FriendList({ friends, currentUserId, referralCode }: FriendListProps) {
+    const router = useRouter();
     const [loadingId, setLoadingId] = useState<string | null>(null);
 
     const handleInvite = async () => {
@@ -41,12 +43,27 @@ export function FriendList({ friends, currentUserId, referralCode }: FriendListP
         }
     };
 
+    /**
+     * Initiates a duel with a friend.
+     * 
+     * 1. Calls the challengeFriend function in lib/challenges.ts
+     * 2. Redirects the user to the Quiz page in 'duel' mode.
+     */
     const handleChallenge = async (friendId: string) => {
-        setLoadingId(friendId);
-        // Mock quiz ID for now
-        const result = await challengeFriend(currentUserId, friendId, '1');
-        alert(result.message);
-        setLoadingId(null);
+        setLoadingId(friendId); // Set loading state for the specific friend
+        // Optimistic UI update or loading state could be added here
+        // Using currentUserId from props as 'user' is not defined in this scope.
+        // 'quiz-1' is used as a placeholder ID for the quiz.
+        const result = await challengeFriend(currentUserId, friendId, 'quiz-1');
+
+        if (result.success && result.challenge) {
+            // Redirect to the quiz page with the challenge ID
+            // The QuizPage will handle the logic for 'duel' mode
+            router.push(`/quiz/quiz-1?mode=duel&challengeId=${result.challenge.id}`);
+        } else {
+            alert(result.message || 'Errore durante la sfida'); // Provide a fallback error message
+        }
+        setLoadingId(null); // Reset loading state
     };
 
     return (

@@ -5,9 +5,11 @@ import { usePathname } from 'next/navigation';
 import { Map, Trophy, ShoppingBag, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { useHaptics } from '@/hooks/useHaptics';
 
 export function BottomNav() {
     const pathname = usePathname();
+    const { trigger } = useHaptics();
 
     // Hide BottomNav on quiz pages for immersion and to prevent overlay issues
     if (pathname?.startsWith('/quiz')) return null;
@@ -20,7 +22,7 @@ export function BottomNav() {
     ];
 
     return (
-        <div className="fixed bottom-6 left-0 right-0 flex justify-center z-[100] pointer-events-none">
+        <div className="fixed bottom-6 left-0 right-0 flex justify-center z-[100] pointer-events-none pb-[env(safe-area-inset-bottom)]">
             {/* Floating Glass Capsule */}
             <div className="glass-panel rounded-full px-2 py-2 flex items-center gap-2 pointer-events-auto bg-cyber-dark/90 backdrop-blur-xl border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
                 {navItems.map((item) => {
@@ -30,10 +32,11 @@ export function BottomNav() {
                         <Link
                             key={item.path}
                             href={item.path}
+                            onClick={() => trigger('light')}
                             className="relative group"
                         >
                             <div className={cn(
-                                "relative flex flex-col items-center justify-center w-16 h-14 rounded-full transition-all duration-300",
+                                "relative flex flex-col items-center justify-center w-16 h-14 rounded-full transition-all duration-300 active:scale-90",
                                 isActive ? "bg-white/5" : "hover:bg-white/5"
                             )}>
                                 {isActive && (

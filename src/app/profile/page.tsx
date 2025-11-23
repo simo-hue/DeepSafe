@@ -22,6 +22,7 @@ import {
     Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import posthog from 'posthog-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
@@ -48,8 +49,8 @@ import { MissionControl } from '@/components/gamification/MissionControl';
 import { ArtifactGrid } from '@/components/gamification/ArtifactGrid';
 import { Mission } from '@/components/gamification/MissionCard';
 import { Badge } from '@/components/gamification/BadgeCard';
-
-// Mock Data (Moved from AchievementsPage)
+import { InstallPWA } from '@/components/gamification/InstallPWA';
+import { PushNotificationManager } from '@/components/notifications/PushNotificationManager';
 const MOCK_MISSIONS: Mission[] = [
     { id: '1', title: 'Accesso Giornaliero', target_count: 1, current_count: 1, reward_xp: 50, is_completed: true, is_claimed: false, frequency: 'daily' },
     { id: '2', title: 'Maestro dei Quiz', target_count: 3, current_count: 2, reward_xp: 150, is_completed: false, is_claimed: false, frequency: 'daily' },
@@ -69,6 +70,7 @@ export default function ProfilePage() {
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // -- State Management --
     const [user, setUser] = useState<any>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
@@ -84,11 +86,15 @@ export default function ProfilePage() {
     const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
     const [userRank, setUserRank] = useState<number>(0);
 
-    // Vault State
+    // Gamification State
     const [missions, setMissions] = useState<Mission[]>(MOCK_MISSIONS);
     const [badges, setBadges] = useState<Badge[]>(MOCK_BADGES);
     const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
 
+    /**
+     * Handles the "Claim" action for a mission.
+     * In a real app, this would call an API to award XP and update the DB.
+     */
     const handleClaimMission = (id: string) => {
         setMissions(prev => prev.map(m =>
             m.id === id ? { ...m, is_claimed: true } : m
@@ -114,6 +120,11 @@ export default function ProfilePage() {
                 router.push('/login');
                 return;
             }
+
+            // Identify user in PostHog
+            posthog.identify(user.id, {
+                email: user.email
+            });
 
             setUser(user);
 
@@ -348,18 +359,36 @@ export default function ProfilePage() {
                                     </div>
 
                                     {/* XP Progress Bar */}
-                                    <div className="w-full max-w-xs mx-auto space-y-1">
-                                        <div className="flex justify-between text-[10px] font-mono text-cyber-blue/70">
-                                            <span>XP {currentLevelXp}</span>
-                                            <span>PROSSIMO {100}</span>
+                                    <div className="w-full max-w-xs mx-auto space-y-2 mt-4">
+                                        <div className="flex justify-between items-end px-1">
+                                            <div className="text-left">
+                                                <div className="text-[9px] font-bold tracking-widest text-cyber-gray uppercase">XP Correnti</div>
+                                                <div className="text-lg font-bold font-orbitron text-cyber-blue text-glow leading-none">{currentLevelXp}</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-[9px] font-bold tracking-widest text-cyber-gray uppercase">Prossimo Livello</div>
+                                                <div className="text-lg font-bold font-orbitron text-cyber-purple text-glow leading-none">{100}</div>
+                                            </div>
                                         </div>
-                                        <div className="h-1 bg-cyber-dark rounded-full overflow-hidden border border-white/5">
+
+                                        {/* Enhanced Progress Bar Container */}
+                                        <div className="h-3 bg-black/50 rounded-full overflow-hidden border border-white/10 relative">
+                                            {/* Background pattern */}
+                                            <div className="absolute inset-0 opacity-20 bg-[repeating-linear-gradient(45deg,transparent,transparent_5px,#000_5px,#000_10px)]" />
+
+                                            {/* Fill with gradient */}
                                             <motion.div
-                                                className="h-full bg-cyber-blue shadow-[0_0_10px_#66FCF1]"
+                                                className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyber-blue via-cyber-purple to-cyber-blue shadow-[0_0_15px_rgba(69,162,158,0.6)]"
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${progressPercent}%` }}
-                                                transition={{ duration: 1, ease: "easeOut" }}
-                                            />
+                                                transition={{ duration: 1, ease: "circOut" }}
+                                            >
+                                                {/* Leading Edge Shine */}
+                                                <div className="absolute right-0 top-0 bottom-0 w-[2px] bg-white/80 shadow-[0_0_10px_white]" />
+
+                                                {/* Animated shimmer effect */}
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+                                            </motion.div>
                                         </div>
                                     </div>
 
@@ -506,6 +535,20 @@ export default function ProfilePage() {
 
             {/* Section E: Artifact Grid */}
             <ArtifactGrid badges={badges} onSelectBadge={setSelectedBadge} />
+
+            {/* Divider: SYSTEM PROTOCOLS */}
+            <div className="relative flex items-center gap-4 py-4 mt-8">
+                <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-cyber-gray to-transparent" />
+                <div className="text-xs font-mono text-cyber-gray uppercase tracking-[0.2em]">// PROTOCOLLI SISTEMA</div>
+                <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-cyber-gray to-transparent" />
+            </div>
+
+            // ... inside component
+            {/* Section F: PWA Install */}
+            <div className="px-1 space-y-4">
+                <InstallPWA />
+                <PushNotificationManager />
+            </div>
 
             {/* Badge Inspection Modal */}
             <AnimatePresence>

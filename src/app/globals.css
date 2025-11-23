@@ -121,3 +121,17 @@ body::before {
 .animate-spin-reverse-slower {
   animation: spin-reverse-slower 12s linear infinite;
 }
+
+/* Shimmer Effect for Progress Bars */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}

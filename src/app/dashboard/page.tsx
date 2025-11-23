@@ -2,25 +2,29 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { CheckCircle, Lock, PlayCircle, Flame, Heart, Zap } from 'lucide-react';
 import { SagaMap, SagaLevel } from '@/components/gamification/SagaMap';
 import { cn } from '@/lib/utils';
 import { createBrowserClient } from '@supabase/ssr';
 import { Database } from '@/types/supabase';
 import { motion } from 'framer-motion';
+import { useHaptics } from '@/hooks/useHaptics';
+
 import { useUserStore } from '@/store/useUserStore';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
 const supabase = createBrowserClient<Database>(supabaseUrl, supabaseKey);
-
-
+import { getPendingChallenges } from '@/lib/challenges';
 
 export default function Dashboard() {
   const [levels, setLevels] = useState<SagaLevel[]>([]);
   const [loading, setLoading] = useState(true);
   const { lives, streak } = useUserStore();
-  const [activeChallenge, setActiveChallenge] = useState<{ sender_id: string } | null>(null); // Placeholder for now
+  const [challenges, setChallenges] = useState<any[]>([]);
+  const { trigger } = useHaptics();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchSagaState = async () => {
@@ -29,6 +33,35 @@ export default function Dashboard() {
 
         // 1. Fetch User Progress
         const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+          /**
+     * Fetches pending challenges where the current user is the opponent.
+     * These are challenges that need to be accepted.
+     */
+          const fetchChallenges = async () => {
+            if (!user) return;
+            const data = await getPendingChallenges(user.id);
+            setChallenges(data);
+          };
+
+          /**
+           * Accepts a challenge by redirecting to the quiz.
+           * The status update to 'in_progress' or 'completed' happens when the quiz starts/ends.
+           */
+          const handleAcceptChallenge = (challengeId: string) => {
+            router.push(`/quiz/1?mode=duel&challengeId=${challengeId}`);
+          }; const { data: progressData, error: progressError } = await supabase
+            .from('user_progress')
+            .select('quiz_id')
+            .eq('user_id', user.id)
+            .eq('status', 'completed');
+
+          if (progressData) {
+            progressData.forEach(p => completedIds.add(p.quiz_id));
+          }
+        }
+
         let completedIds = new Set<string>();
 
         if (user) {
@@ -147,23 +180,33 @@ export default function Dashboard() {
         </header>
 
         {/* Challenge Notification */}
-        {activeChallenge && (
+        {challenges.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-cyber-blue/10 border border-cyber-blue/30 p-4 rounded-xl flex items-center justify-between relative overflow-hidden group"
+            className="bg-cyber-blue/10 border border-cyber-blue/30 p-4 rounded-xl flex items-center justify-between relative overflow-hidden group mb-4"
           >
             <div className="absolute inset-0 bg-cyber-blue/5 animate-scan pointer-events-none" />
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-cyber-blue/20 flex items-center justify-center">
-                <Zap className="w-5 h-5 text-cyber-blue" />
+              <div className="w-10 h-10 rounded-full bg-cyber-blue/20 flex items-center justify-center overflow-hidden border border-cyber-blue/50">
+                {challenges[0].challenger?.avatar_url ? (
+                  <img src={challenges[0].challenger.avatar_url} alt="Challenger" className="w-full h-full object-cover" />
+                ) : (
+                  <Zap className="w-5 h-5 text-cyber-blue" />
+                )}
               </div>
               <div>
-                <h3 className="font-bold text-white text-sm">Nuova Sfida!</h3>
-                <p className="text-xs text-cyber-gray">Da: {activeChallenge.sender_id.slice(0, 8)}...</p>
+                <h3 className="font-bold text-white text-sm">Sfida da {challenges[0].challenger?.username || 'Sconosciuto'}!</h3>
+                <p className="text-xs text-cyber-gray">Ti sfida a battere il suo punteggio!</p>
               </div>
             </div>
-            <button className="px-4 py-2 bg-cyber-blue text-cyber-dark font-bold text-xs rounded-lg hover:bg-cyber-green transition-colors shadow-[0_0_10px_rgba(69,162,158,0.4)]">
+            <button
+              onClick={() => {
+                trigger('medium');
+                router.push(`/quiz/${challenges[0].quiz_id}?mode=duel&challengeId=${challenges[0].id}`);
+              }}
+              className="px-4 py-2 bg-cyber-blue text-cyber-dark font-bold text-xs rounded-lg hover:bg-cyber-green transition-all shadow-[0_0_10px_rgba(69,162,158,0.4)] active:scale-95 active:bg-white"
+            >
               ACCETTA
             </button>
           </motion.div>

@@ -14,14 +14,21 @@ import { VisualQuizCard } from '@/components/gamification/VisualQuizCard';
 import { QuizActionPanel } from '@/components/gamification/QuizActionPanel';
 import { SystemFailureModal } from '@/components/gamification/SystemFailureModal';
 import { motion, AnimatePresence } from 'framer-motion';
+import posthog from 'posthog-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
 const supabase = createBrowserClient<Database>(supabaseUrl, supabaseKey);
 
+import { submitDuelScore } from '@/lib/challenges';
+import { useSearchParams } from 'next/navigation';
+
 export default function QuizPage() {
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const mode = searchParams.get('mode');
+    const challengeId = searchParams.get('challengeId');
     const { lives, decrementLives, addXp, incrementStreak } = useUserStore();
 
     const [quiz, setQuiz] = useState<Quiz | null>(null);
@@ -157,6 +164,10 @@ export default function QuizPage() {
         setIsCorrect(isCorrectAnswer);
         setIsAnswered(true);
 
+        // ... imports
+
+        // ... inside handleAnswer
+
         if (isCorrectAnswer) {
             setScore(score + 1);
         } else {
@@ -170,6 +181,10 @@ export default function QuizPage() {
             }
 
             if (lives <= 1) {
+                posthog.capture('quiz_failed', {
+                    quiz_id: params.id,
+                    question_index: currentQuestionIndex
+                });
                 setShowShopModal(true);
             }
         }
@@ -192,6 +207,36 @@ export default function QuizPage() {
                     const { data: { user } } = await supabase.auth.getUser();
 
                     if (user) {
+                        // -- DUEL MODE LOGIC --
+                        // If this quiz was played as part of a challenge, submit the score to the challenges table.
+                        if (mode === 'duel' && challengeId) {
+                            // We don't await this to prevent blocking the UI transition,
+                            // but we log success/failure.
+                            submitDuelScore(challengeId, user.id, finalScore)
+                                .then(() => console.log('⚔️ Duel score submitted successfully.'))
+                                .catch(err => console.error('❌ Error submitting duel score:', err));
+
+                            // Track the duel completion event for analytics
+                            posthog.capture('duel_completed', {
+                                challenge_id: challengeId,
+                                score: finalScore,
+                                // A simple heuristic for 'won'. The actual winner is determined by the DB logic
+                                // comparing scores from both participants.
+                                won: finalScore > (totalQuestions / 2),
+                                quiz_id: params.id,
+                                user_id: user.id
+                            });
+                        }
+
+                        // Track Quiz Completion
+                        posthog.capture('quiz_completed', {
+                            quiz_id: params.id,
+                            score: finalScore,
+                            xp_earned: calculatedXp,
+                            perfect_score: finalScore === totalQuestions,
+                            mode: mode || 'solo'
+                        });
+
                         // Call the robust RPC
                         const { data, error } = await supabase.rpc('complete_level', {
                             p_user_id: user.id,
