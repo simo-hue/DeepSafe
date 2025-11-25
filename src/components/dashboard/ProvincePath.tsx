@@ -9,6 +9,7 @@ interface ProvincePathProps {
     onProvinceHover?: (province: Province | null) => void;
     isRegionMode: boolean;
     isRegionHovered: boolean;
+    isProvinceHighlighted: boolean;
 }
 
 const ProvincePath: React.FC<ProvincePathProps> = ({
@@ -16,7 +17,8 @@ const ProvincePath: React.FC<ProvincePathProps> = ({
     onProvinceClick,
     onProvinceHover,
     isRegionMode,
-    isRegionHovered
+    isRegionHovered,
+    isProvinceHighlighted
 }) => {
     const { status, path } = province;
 
@@ -47,6 +49,25 @@ const ProvincePath: React.FC<ProvincePathProps> = ({
         ease: "easeInOut" as const
     };
 
+    const getFillColor = () => {
+        if (isProvinceHighlighted) return 'rgba(6, 182, 212, 0.3)'; // Cyan highlight
+        if (isRegionHovered) return 'rgba(6, 182, 212, 0.2)'; // Region highlight
+        if (isRegionMode) return 'rgba(30, 41, 59, 0.8)'; // Dim others in region mode
+        return 'rgba(30, 41, 59, 0.4)'; // Default
+    };
+
+    const getStrokeColor = () => {
+        if (isProvinceHighlighted) return '#22d3ee'; // Cyan
+        if (isRegionHovered) return '#06b6d4'; // Cyan-500
+        return '#334155'; // Slate-700
+    };
+
+    const getStrokeWidth = () => {
+        if (isProvinceHighlighted) return 2;
+        if (isRegionHovered) return 1.5;
+        return 0.5;
+    };
+
     return (
         <motion.g
             initial="initial"
@@ -63,18 +84,17 @@ const ProvincePath: React.FC<ProvincePathProps> = ({
         >
             <motion.path
                 d={path}
+                fill={getFillColor()}
+                stroke={getStrokeColor()}
+                strokeWidth={getStrokeWidth()}
                 className={cn(
-                    "stroke-1 transition-all duration-300",
-                    // Base Styles
-                    isLocked && "fill-slate-900/80 stroke-slate-700",
-                    isUnlocked && "fill-cyan-900/40 stroke-cyan-400 stroke-2",
-                    isSafe && "fill-amber-700/60 stroke-amber-500",
-
-                    // Region Highlight (Level 1)
-                    !isRegionMode && isRegionHovered && "fill-cyan-500/20 stroke-cyan-300 stroke-[2px] brightness-125",
-
-                    // Region Mode Hover (Level 2) handled by whileHover/CSS
-                    isRegionMode && "hover:fill-cyan-500/30"
+                    "transition-all duration-300",
+                    // Base Styles if not overridden by inline styles
+                    // We keep these for fallback or specific status effects if needed, 
+                    // but the inline styles above take precedence for the main logic.
+                    isLocked && "fill-slate-900/80",
+                    isUnlocked && "fill-cyan-900/40",
+                    isSafe && "fill-amber-700/60",
                 )}
                 animate={isUnlocked ? {
                     fillOpacity: [0.3, 0.6, 0.3],

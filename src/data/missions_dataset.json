@@ -1,0 +1,269 @@
+[
+    {
+        "region_id": "MOL",
+        "region_name": "Molise",
+        "is_unlocked": true,
+        "provinces": [
+            {
+                "id": "CB",
+                "name": "Campobasso",
+                "status": "active",
+                "missions": [
+                    {
+                        "id": "m1_cb",
+                        "title": "Il Sovraccarico Dati",
+                        "description": "L'hub neurale di Campobasso sta emettendo frequenze dissonanti. I cittadini soffrono di emicranie digitali. Orion ha bisogno del tuo aiuto per ricalibrare i flussi.",
+                        "difficulty": "Easy",
+                        "topic": "Digital Wellbeing",
+                        "character": {
+                            "name": "Orion",
+                            "role": "IA Allocazione Risorse",
+                            "avatar_style": "Ologramma Stellare"
+                        },
+                        "xp_reward": 100
+                    },
+                    {
+                        "id": "m2_cb",
+                        "title": "Il Dilemma Deepfake",
+                        "description": "Un politico locale appare in video compromettenti, ma Echo ha rilevato artefatti visivi. Analizza i frame per smascherare la frode.",
+                        "difficulty": "Medium",
+                        "topic": "Identity Theft",
+                        "character": {
+                            "name": "Echo",
+                            "role": "Sfera Senziente",
+                            "avatar_style": "Sfera Cromata Fluttuante"
+                        },
+                        "xp_reward": 150
+                    },
+                    {
+                        "id": "m3_cb",
+                        "title": "Divario di Rete Rurale",
+                        "description": "Le comunità montane sono isolate dal Net. Tala sta costruendo ponti radio, ma i vecchi protocolli bloccano il segnale.",
+                        "difficulty": "Easy",
+                        "topic": "Connectivity",
+                        "character": {
+                            "name": "Tala",
+                            "role": "Attivista Tech Rurale",
+                            "avatar_style": "Punk-Pastore"
+                        },
+                        "xp_reward": 120
+                    }
+                ]
+            },
+            {
+                "id": "IS",
+                "name": "Isernia",
+                "status": "locked",
+                "missions": [
+                    {
+                        "id": "m1_is",
+                        "title": "Droni da Pascolo Impazziti",
+                        "description": "I droni che sorvegliano le greggi sintetiche stanno attaccando i turisti. Un malware ha corrotto il loro modulo IFF.",
+                        "difficulty": "Medium",
+                        "topic": "Malware Analysis",
+                        "character": {
+                            "name": "Nonno Bit",
+                            "role": "Pastore Cybernetico",
+                            "avatar_style": "Anziano con Visore AR"
+                        },
+                        "xp_reward": 140
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "region_id": "LOM",
+        "region_name": "Lombardia",
+        "is_unlocked": false,
+        "provinces": [
+            {
+                "id": "MI",
+                "name": "Milano",
+                "status": "locked",
+                "missions": [
+                    {
+                        "id": "m1_mi",
+                        "title": "Anomalia Energetica",
+                        "description": "Il Duomo Tech sta assorbendo troppa energia, minacciando un blackout totale. Gestisci la griglia intelligente prima del collasso.",
+                        "difficulty": "Medium",
+                        "topic": "Smart City Infrastructure",
+                        "character": {
+                            "name": "Architetto Zero",
+                            "role": "Urbanista Quantico",
+                            "avatar_style": "Minimalista Geometrico"
+                        },
+                        "xp_reward": 200
+                    },
+                    {
+                        "id": "m2_mi",
+                        "title": "Attacco alla Borsa Dati",
+                        "description": "Un gruppo hacker sta manipolando i valori delle criptovalute regionali tramite phishing mirato ai broker.",
+                        "difficulty": "Hard",
+                        "topic": "Phishing & Finance",
+                        "character": {
+                            "name": "Broker X",
+                            "role": "Analista Finanziario",
+                            "avatar_style": "Suit & Neon Tie"
+                        },
+                        "xp_reward": 250
+                    }
+                ]
+            },
+            {
+                "id": "BG",
+                "name": "Bergamo",
+                "status": "locked",
+                "missions": [
+                    {
+                        "id": "m1_bg",
+                        "title": "Ransomware in Fabbrica",
+                        "description": "Le linee di produzione automatizzate sono bloccate da un ransomware che chiede Bitcoin. Negoziare o decriptare?",
+                        "difficulty": "Medium",
+                        "topic": "Ransomware",
+                        "character": {
+                            "name": "Capo Mastro 4.0",
+                            "role": "Supervisore Industriale",
+                            "avatar_style": "Elmetto Smart"
+                        },
+                        "xp_reward": 180
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "region_id": "LAZ",
+        "region_name": "Lazio",
+        "is_unlocked": false,
+        "provinces": [
+            {
+                "id": "RM",
+                "name": "Roma",
+                "status": "locked",
+                "missions": [
+                    {
+                        "id": "m1_rm",
+                        "title": "Difesa del Database Centrale",
+                        "description": "LIVELLO CRITICO. Il database anagrafico nazionale è sotto attacco da una APT straniera. Proteggi i dati sensibili a ogni costo.",
+                        "difficulty": "Hard",
+                        "topic": "National Security",
+                        "character": {
+                            "name": "Centurione Cyber",
+                            "role": "Guardia Pretoriana Digitale",
+                            "avatar_style": "Armatura Tattica Romana"
+                        },
+                        "xp_reward": 500
+                    },
+                    {
+                        "id": "m2_rm",
+                        "title": "Spionaggio Satellitare",
+                        "description": "I satelliti meteo sopra il Colosseo sono stati dirottati. Riprendi il controllo dell'orbita.",
+                        "difficulty": "Hard",
+                        "topic": "Infrastructure Security",
+                        "character": {
+                            "name": "Astra",
+                            "role": "Ingegnere Aerospaziale",
+                            "avatar_style": "Tuta Spaziale Leggera"
+                        },
+                        "xp_reward": 450
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "region_id": "PUG",
+        "region_name": "Puglia",
+        "is_unlocked": false,
+        "provinces": [
+            {
+                "id": "BA",
+                "name": "Bari",
+                "status": "locked",
+                "missions": [
+                    {
+                        "id": "m1_ba",
+                        "title": "Disinformazione Virale",
+                        "description": "Una ondata di fake news sta destabilizzando l'opinione pubblica locale. Usa gli algoritmi di verità per filtrare il feed.",
+                        "difficulty": "Medium",
+                        "topic": "Deepfake & Social",
+                        "character": {
+                            "name": "Nonna Social",
+                            "role": "Influencer della Verità",
+                            "avatar_style": "Anziana con Tablet Olografico"
+                        },
+                        "xp_reward": 180
+                    }
+                ]
+            },
+            {
+                "id": "LE",
+                "name": "Lecce",
+                "status": "locked",
+                "missions": [
+                    {
+                        "id": "m1_le",
+                        "title": "Trappole per Turisti 2.0",
+                        "description": "Siti di prenotazione falsi stanno truffando i visitatori del Salento. Chiudi i portali fraudolenti.",
+                        "difficulty": "Easy",
+                        "topic": "Scams & Phishing",
+                        "character": {
+                            "name": "Sole",
+                            "role": "Guida Turistica AI",
+                            "avatar_style": "Barocco Digitale"
+                        },
+                        "xp_reward": 150
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "region_id": "SIC",
+        "region_name": "Sicilia",
+        "is_unlocked": false,
+        "provinces": [
+            {
+                "id": "PA",
+                "name": "Palermo",
+                "status": "locked",
+                "missions": [
+                    {
+                        "id": "m1_pa",
+                        "title": "Pizzo Elettronico",
+                        "description": "Un malware estorsivo minaccia i commercianti del mercato storico. Traccia i flussi crypto per trovare i colpevoli.",
+                        "difficulty": "Hard",
+                        "topic": "Crypto Extortion",
+                        "character": {
+                            "name": "Falcone.exe",
+                            "role": "Investigatore Forense",
+                            "avatar_style": "Detective Noir Cyber"
+                        },
+                        "xp_reward": 300
+                    }
+                ]
+            },
+            {
+                "id": "CT",
+                "name": "Catania",
+                "status": "locked",
+                "missions": [
+                    {
+                        "id": "m1_ct",
+                        "title": "Sensori Vulcanici Compromessi",
+                        "description": "I sensori dell'Etna inviano falsi allarmi di eruzione. Qualcuno vuole causare il panico. Verifica i dati sismici.",
+                        "difficulty": "Medium",
+                        "topic": "IoT Security",
+                        "character": {
+                            "name": "Vulcan",
+                            "role": "Geologo Robotico",
+                            "avatar_style": "Magma Plating"
+                        },
+                        "xp_reward": 220
+                    }
+                ]
+            }
+        ]
+    }
+]

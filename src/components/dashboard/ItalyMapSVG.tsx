@@ -8,7 +8,7 @@ interface ItalyMapSVGProps {
     onProvinceHover: (province: Province | null) => void;
     viewBox: string;
     activeRegion: string | null;
-    highlightedRegion: string | null;
+    highlightedId: string | null; // Can be Region Name (Level 1) or Province ID (Level 2)
 }
 
 const ItalyMapSVG: React.FC<ItalyMapSVGProps> = ({
@@ -16,7 +16,7 @@ const ItalyMapSVG: React.FC<ItalyMapSVGProps> = ({
     onProvinceHover,
     viewBox,
     activeRegion,
-    highlightedRegion
+    highlightedId
 }) => {
     // Filter provinces if a region is active (Level 2)
     // Actually, we can just render all and let the viewBox handle the zoom, 
@@ -56,7 +56,8 @@ const ItalyMapSVG: React.FC<ItalyMapSVGProps> = ({
                         onProvinceClick={onProvinceClick}
                         onProvinceHover={onProvinceHover}
                         isRegionMode={!!activeRegion}
-                        isRegionHovered={highlightedRegion === province.region}
+                        isRegionHovered={!activeRegion && highlightedId === province.region}
+                        isProvinceHighlighted={!!activeRegion && highlightedId === province.id}
                     />
                 ))}
             </motion.svg>

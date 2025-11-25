@@ -6,20 +6,44 @@ import { Province, provincesData } from '@/data/provincesData';
 import ItalyMapSVG from './ItalyMapSVG';
 import TopBar from './TopBar';
 import ProvinceModal from './ProvinceModal';
+import ScannerHUD from './ScannerHUD';
 import { Lock, ArrowLeft, Map } from 'lucide-react';
 import { getRegionBoundingBox } from '@/utils/svgUtils';
 
 const ITALY_VIEWBOX = "0 0 800 1000";
 
+interface MapTarget {
+    id: string; // Region Name or Province ID
+    name: string;
+    status: 'locked' | 'unlocked' | 'safe';
+    type: 'REGION' | 'PROVINCE';
+    details?: string;
+}
+
 const ItalyMapDashboard: React.FC = () => {
     const [toast, setToast] = useState<{ message: string; type: 'info' | 'error' } | null>(null);
-    const [selectedProvince, setSelectedProvince] = useState<Province | null>(null);
+
+    // Calculate initial Italy ViewBox based on all provinces
+    const initialItalyViewBox = useMemo(() => {
+        const allPaths = provincesData.map(p => p.path);
+        const bbox = getRegionBoundingBox(allPaths);
+        if (!bbox) return "0 0 800 1000"; // Fallback
+        // Add small padding (5%) to avoid touching edges exactly
+        const paddingX = bbox.width * 0.05;
+        const paddingY = bbox.height * 0.05;
+        return `${bbox.minX - paddingX / 2} ${bbox.minY - paddingY / 2} ${bbox.width + paddingX} ${bbox.height + paddingY}`;
+    }, []);
+
+    const [viewBox, setViewBox] = useState(initialItalyViewBox);
 
     // Navigation State
     const [viewMode, setViewMode] = useState<'ITALY' | 'REGION'>('ITALY');
-    const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
-    const [highlightedRegion, setHighlightedRegion] = useState<string | null>(null);
-    const [viewBox, setViewBox] = useState(ITALY_VIEWBOX);
+    const [currentRegion, setCurrentRegion] = useState<string | null>(null);
+
+    // Interaction State
+    const [hoveredTarget, setHoveredTarget] = useState<MapTarget | null>(null);
+    const [selectedTarget, setSelectedTarget] = useState<MapTarget | null>(null);
+    const [modalProvince, setModalProvince] = useState<Province | null>(null);
 
     // Calculate Region ViewBox with padding
     const calculateRegionViewBox = (regionName: string) => {
@@ -27,7 +51,7 @@ const ItalyMapDashboard: React.FC = () => {
         const paths = regionProvinces.map(p => p.path);
         const bbox = getRegionBoundingBox(paths);
 
-        if (!bbox) return ITALY_VIEWBOX;
+        if (!bbox) return initialItalyViewBox;
 
         // Add 20% padding
         const paddingX = bbox.width * 0.2;
@@ -42,41 +66,108 @@ const ItalyMapDashboard: React.FC = () => {
 
     const handleProvinceClick = (province: Province) => {
         if (viewMode === 'ITALY') {
-            // Level 1 -> Level 2: Zoom into Region
-            const region = province.region;
-            const newViewBox = calculateRegionViewBox(region);
+            // Level 1: Region Logic
+            const regionName = province.region;
+            const targetId = regionName;
 
-            setSelectedRegion(region);
-            setViewBox(newViewBox);
-            setViewMode('REGION');
+            // Step 1: Select (if not already selected)
+            if (selectedTarget?.id !== targetId) {
+                const regionProvinces = provincesData.filter(p => p.region === regionName);
+                const isUnlocked = regionProvinces.some(p => p.status === 'unlocked' || p.status === 'safe');
+                const status = isUnlocked ? 'unlocked' : 'locked';
+
+                setSelectedTarget({
+                    id: regionName,
+                    name: regionName,
+                    status: status,
+                    type: 'REGION',
+                    details: `${regionProvinces.length} SECTORS`
+                });
+            } else {
+                // Step 2: Enter (if already selected)
+                enterRegion(regionName);
+            }
         } else {
-            // Level 2: Select Province for Mission
-            setSelectedProvince(province);
+            // Level 2: Province Logic
+            const targetId = province.id;
+
+            // Step 1: Select
+            if (selectedTarget?.id !== targetId) {
+                setSelectedTarget({
+                    id: province.id,
+                    name: province.name,
+                    status: province.status,
+                    type: 'PROVINCE',
+                    details: `PROGRESS: ${province.progress}%`
+                });
+            } else {
+                // Step 2: Open Modal
+                setModalProvince(province);
+                setSelectedTarget(null);
+            }
         }
+    };
+
+    const enterRegion = (regionName: string) => {
+        const newViewBox = calculateRegionViewBox(regionName);
+        setCurrentRegion(regionName);
+        setViewBox(newViewBox);
+        setViewMode('REGION');
+        setSelectedTarget(null);
+        setHoveredTarget(null);
     };
 
     const handleBackToItaly = () => {
-        setSelectedRegion(null);
-        setViewBox(ITALY_VIEWBOX);
+        setCurrentRegion(null);
+        setViewBox(initialItalyViewBox);
         setViewMode('ITALY');
+        setSelectedTarget(null);
     };
 
     const handleProvinceHover = (province: Province | null) => {
+        if (!province) {
+            setHoveredTarget(null);
+            return;
+        }
+
         if (viewMode === 'ITALY') {
-            setHighlightedRegion(province ? province.region : null);
+            const regionName = province.region;
+            const regionProvinces = provincesData.filter(p => p.region === regionName);
+            const isUnlocked = regionProvinces.some(p => p.status === 'unlocked' || p.status === 'safe');
+
+            setHoveredTarget({
+                id: regionName,
+                name: regionName,
+                status: isUnlocked ? 'unlocked' : 'locked',
+                type: 'REGION',
+                details: `${regionProvinces.length} SECTORS`
+            });
         } else {
-            setHighlightedRegion(null);
+            setHoveredTarget({
+                id: province.id,
+                name: province.name,
+                status: province.status,
+                type: 'PROVINCE',
+                details: `PROGRESS: ${province.progress}%`
+            });
         }
     };
 
-    const handleStartMission = () => {
-        if (selectedProvince) {
-            console.log(`Starting mission for: ${selectedProvince.name}`);
-            showToast(`Missione avviata: ${selectedProvince.name}`, 'info');
-            setSelectedProvince(null);
-            // Navigate to mission page or start logic here
+    const handleHudAction = () => {
+        if (!selectedTarget) return;
+
+        if (selectedTarget.type === 'REGION') {
+            enterRegion(selectedTarget.name);
+        } else {
+            const province = provincesData.find(p => p.id === selectedTarget.id);
+            if (province) {
+                setModalProvince(province);
+                setSelectedTarget(null);
+            }
         }
     };
+
+    const activeTarget = hoveredTarget || selectedTarget;
 
     const showToast = (message: string, type: 'info' | 'error') => {
         setToast({ message, type });
@@ -120,7 +211,7 @@ const ItalyMapDashboard: React.FC = () => {
                             <Map className="w-4 h-4 text-cyan-500" />
                             <div className="flex items-center text-xs font-orbitron font-bold tracking-widest text-slate-400">
                                 <span className={viewMode === 'ITALY' ? 'text-cyan-400 text-glow' : ''}>ITALIA</span>
-                                {selectedRegion && (
+                                {currentRegion && (
                                     <>
                                         <span className="mx-2 text-slate-600">/</span>
                                         <motion.span
@@ -128,7 +219,7 @@ const ItalyMapDashboard: React.FC = () => {
                                             animate={{ opacity: 1, x: 0 }}
                                             className="text-cyan-400 text-glow uppercase"
                                         >
-                                            {selectedRegion}
+                                            {currentRegion}
                                         </motion.span>
                                     </>
                                 )}
@@ -144,17 +235,25 @@ const ItalyMapDashboard: React.FC = () => {
                     onProvinceClick={handleProvinceClick}
                     onProvinceHover={handleProvinceHover}
                     viewBox={viewBox}
-                    activeRegion={selectedRegion}
-                    highlightedRegion={highlightedRegion}
+                    activeRegion={currentRegion}
+                    highlightedId={hoveredTarget?.type === 'REGION' ? hoveredTarget.id : (selectedTarget?.type === 'REGION' ? selectedTarget.id : (hoveredTarget?.id || selectedTarget?.id || null))}
                 />
             </main>
 
+            {/* Scanner HUD */}
+            <ScannerHUD
+                target={activeTarget}
+                onAction={handleHudAction}
+                actionLabel={viewMode === 'ITALY' ? 'ENTER' : 'START'}
+                isLocked={!!selectedTarget}
+            />
+
             {/* Province Selection Modal */}
             <AnimatePresence>
-                {selectedProvince && (
+                {modalProvince && (
                     <ProvinceModal
-                        province={selectedProvince}
-                        onClose={() => setSelectedProvince(null)}
+                        province={modalProvince}
+                        onClose={() => setModalProvince(null)}
                     />
                 )}
             </AnimatePresence>
@@ -166,7 +265,7 @@ const ItalyMapDashboard: React.FC = () => {
                         initial={{ opacity: 0, y: 50, x: '-50%' }}
                         animate={{ opacity: 1, y: 0, x: '-50%' }}
                         exit={{ opacity: 0, y: 20, x: '-50%' }}
-                        className={`absolute bottom-24 left-1/2 px-6 py-3 rounded-lg backdrop-blur-md border shadow-2xl flex items-center gap-3 z-50 ${toast.type === 'error'
+                        className={`absolute bottom-32 left-1/2 px-6 py-3 rounded-lg backdrop-blur-md border shadow-2xl flex items-center gap-3 z-50 ${toast.type === 'error'
                             ? 'bg-red-950/80 border-red-500/50 text-red-200'
                             : 'bg-cyan-950/80 border-cyan-500/50 text-cyan-200'
                             }`}
