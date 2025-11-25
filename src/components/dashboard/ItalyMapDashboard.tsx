@@ -155,12 +155,13 @@ const ItalyMapDashboard: React.FC = () => {
     };
 
     const handleHudAction = () => {
-        if (!selectedTarget) return;
+        const target = selectedTarget || hoveredTarget;
+        if (!target) return;
 
-        if (selectedTarget.type === 'REGION') {
-            enterRegion(selectedTarget.name);
+        if (target.type === 'REGION') {
+            enterRegion(target.name);
         } else {
-            const province = provincesData.find(p => p.id === selectedTarget.id);
+            const province = provincesData.find(p => p.id === target.id);
             if (province) {
                 setModalProvince(province);
                 setSelectedTarget(null);

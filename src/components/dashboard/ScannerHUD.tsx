@@ -98,16 +98,17 @@ const ScannerHUD: React.FC<ScannerHUDProps> = ({ target, onAction, actionLabel, 
 
                         {/* Action Button */}
                         <AnimatePresence>
-                            {isLocked && target && (
+                            {target && (
                                 <motion.button
                                     initial={{ opacity: 0, scale: 0.8, x: 10 }}
                                     animate={{ opacity: 1, scale: 1, x: 0 }}
                                     exit={{ opacity: 0, scale: 0.8, x: 10 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={onAction}
-                                    className="flex flex-col items-center justify-center w-14 h-10 rounded bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all group"
+                                    className="flex items-center justify-center gap-1 px-3 h-10 rounded bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all group"
                                 >
-                                    <ChevronRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+                                    <span className="text-[10px] font-bold tracking-wider uppercase">{actionLabel}</span>
+                                    <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                                 </motion.button>
                             )}
                         </AnimatePresence>
