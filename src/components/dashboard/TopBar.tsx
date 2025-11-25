@@ -64,7 +64,7 @@ const TopBar: React.FC<TopBarProps> = () => {
                     {/* Label & Value */}
                     <div className="flex justify-between w-full px-2 mb-1">
                         <span className="text-[9px] text-cyber-blue/80 font-mono tracking-[0.2em] uppercase">Sincronizzazione</span>
-                        <span className="text-[10px] text-white font-orbitron font-bold text-glow">3/107 • 3%</span>
+                        <span className="text-[10px] text-white font-orbitron font-bold text-glow">0/107 • 0%</span>
                     </div>
 
                     {/* Bar Container with Brackets */}
@@ -80,7 +80,7 @@ const TopBar: React.FC<TopBarProps> = () => {
                             <motion.div
                                 className="h-full bg-gradient-to-r from-cyber-blue via-cyan-400 to-white shadow-[0_0_15px_rgba(102,252,241,0.6)] relative"
                                 initial={{ width: 0 }}
-                                animate={{ width: '3%' }}
+                                animate={{ width: '0%' }}
                                 transition={{ duration: 1.5, ease: "circOut", delay: 0.5 }}
                             >
                                 {/* Leading Edge Flare */}
