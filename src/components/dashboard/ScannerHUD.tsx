@@ -35,26 +35,29 @@ const ScannerHUD: React.FC<ScannerHUDProps> = ({ target, onAction, actionLabel, 
     };
 
     return (
-        <div className="absolute bottom-24 left-0 w-full px-4 z-30 pointer-events-none flex justify-center">
-            <div className="w-full max-w-md pointer-events-auto">
+        <div className="fixed bottom-28 left-0 right-0 z-40 pointer-events-none flex justify-center px-6">
+            <div className="w-full max-w-sm pointer-events-auto">
                 <motion.div
                     layout
-                    className="relative overflow-hidden rounded-xl border border-slate-700/50 bg-slate-900/80 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.5)]"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 20, opacity: 0 }}
+                    className="relative overflow-hidden rounded-xl border border-slate-700/50 bg-black/60 backdrop-blur-md shadow-lg"
                 >
                     {/* Scanner Line Animation */}
                     <motion.div
-                        className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500/50 shadow-[0_0_10px_#06b6d4]"
+                        className="absolute top-0 left-0 w-full h-[1px] bg-cyan-500/50 shadow-[0_0_10px_#06b6d4]"
                         animate={{ top: ['0%', '100%', '0%'] }}
                         transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                     />
 
-                    <div className="p-4 flex items-center justify-between gap-4">
+                    <div className="px-4 py-3 flex items-center justify-between gap-4">
                         {/* Info Section */}
                         <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-center gap-2 mb-0.5">
                                 <Scan className={`w-3 h-3 ${target ? 'text-cyan-400 animate-pulse' : 'text-slate-600'}`} />
                                 <span className="text-[10px] font-orbitron tracking-widest text-slate-500 uppercase">
-                                    {target ? `TARGET ACQUIRED: ${target.type}` : 'SYSTEM STANDBY'}
+                                    {target ? `TARGET: ${target.type}` : 'STANDBY'}
                                 </span>
                             </div>
 
@@ -66,16 +69,16 @@ const ScannerHUD: React.FC<ScannerHUDProps> = ({ target, onAction, actionLabel, 
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -5 }}
                                     >
-                                        <h3 className="text-xl font-orbitron font-bold text-white truncate tracking-wide text-glow-cyan">
+                                        <h3 className="text-lg font-orbitron font-bold text-white truncate tracking-wide text-glow-cyan">
                                             {target.name}
                                         </h3>
-                                        <div className="flex items-center gap-3 mt-1">
-                                            <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${getStatusColor(target.status)}`}>
+                                        <div className="flex items-center gap-3 mt-0.5">
+                                            <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase border ${getStatusColor(target.status)}`}>
                                                 {getStatusIcon(target.status)}
                                                 <span>{target.status}</span>
                                             </div>
                                             {target.details && (
-                                                <span className="text-xs text-slate-400 font-mono">{target.details}</span>
+                                                <span className="text-[10px] text-slate-400 font-mono">{target.details}</span>
                                             )}
                                         </div>
                                     </motion.div>
@@ -85,9 +88,9 @@ const ScannerHUD: React.FC<ScannerHUDProps> = ({ target, onAction, actionLabel, 
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
-                                        className="text-slate-500 text-sm font-mono"
+                                        className="text-slate-500 text-xs font-mono"
                                     >
-                                        SELECT SECTOR TO ANALYZE
+                                        SELECT SECTOR
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -97,17 +100,14 @@ const ScannerHUD: React.FC<ScannerHUDProps> = ({ target, onAction, actionLabel, 
                         <AnimatePresence>
                             {isLocked && target && (
                                 <motion.button
-                                    initial={{ opacity: 0, scale: 0.8, x: 20 }}
+                                    initial={{ opacity: 0, scale: 0.8, x: 10 }}
                                     animate={{ opacity: 1, scale: 1, x: 0 }}
-                                    exit={{ opacity: 0, scale: 0.8, x: 20 }}
+                                    exit={{ opacity: 0, scale: 0.8, x: 10 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={onAction}
-                                    className="flex flex-col items-center justify-center w-20 h-14 rounded-lg bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all group"
+                                    className="flex flex-col items-center justify-center w-14 h-10 rounded bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all group"
                                 >
-                                    <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-                                    <span className="text-[8px] font-bold tracking-wider uppercase mt-1">
-                                        {actionLabel}
-                                    </span>
+                                    <ChevronRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
                                 </motion.button>
                             )}
                         </AnimatePresence>
