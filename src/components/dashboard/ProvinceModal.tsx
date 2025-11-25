@@ -1,17 +1,21 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
-import { X, MapPin, ArrowRight, Lock } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Lock, MapPin, ShieldAlert, ChevronRight } from 'lucide-react';
 import { Province } from '@/data/provincesData';
+import { useRouter } from 'next/navigation';
 
 interface ProvinceModalProps {
-    province: Province;
+    province: Province | null;
     onClose: () => void;
-    onStartMission: () => void;
 }
 
-export default function ProvinceModal({ province, onClose, onStartMission }: ProvinceModalProps) {
+export default function ProvinceModal({ province, onClose }: ProvinceModalProps) {
+    const router = useRouter();
+
+    if (!province) return null;
+
     const isLocked = province.status === 'locked';
 
     // Theme configuration based on status
@@ -27,7 +31,8 @@ export default function ProvinceModal({ province, onClose, onStartMission }: Pro
         title: 'ACCESSO NEGATO',
         description: `Il settore ${province.name} è attualmente bloccato. Completa le missioni nei settori adiacenti per ottenere i codici di accesso.`,
         buttonText: 'CHIUDI',
-        securityLevel: 'ESTREMO'
+        securityLevel: 'ESTREMO',
+        action: onClose
     } : {
         color: 'text-cyber-blue',
         borderColor: 'border-cyber-blue',
@@ -40,70 +45,73 @@ export default function ProvinceModal({ province, onClose, onStartMission }: Pro
         title: province.name,
         description: `Rilevata attività anomala nel settore ${province.name}. Protocolli di sicurezza compromessi. Richiesto intervento immediato per ripristinare il firewall regionale.`,
         buttonText: 'VAI ALLA MISSIONE',
-        securityLevel: 'CRITICO'
+        securityLevel: 'CRITICO',
+        action: () => router.push(`/missions/${province.id}`)
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={onClose}
-                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            />
+            <AnimatePresence>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={onClose}
+                    className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm"
+                />
+            </AnimatePresence>
 
-            {/* Modal Content */}
             <motion.div
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className={`relative w-full max-w-md bg-cyber-dark border ${theme.borderColor}/30 rounded-2xl overflow-hidden ${theme.glowColor}`}
+                className={`relative w-full max-w-sm bg-slate-900 border ${theme.borderColor} rounded-2xl p-6 ${theme.glowColor} overflow-hidden`}
             >
-                {/* Decorative Header Line */}
-                <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-${isLocked ? 'cyber-red' : 'cyber-blue'} to-transparent`} />
+                {/* Background Grid Effect */}
+                <div className={`absolute inset-0 ${theme.bgColor} opacity-20`}
+                    style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '20px 20px' }}
+                />
 
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-cyber-gray hover:text-white transition-colors z-10"
+                    className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors z-10"
                 >
                     <X className="w-6 h-6" />
                 </button>
 
-                <div className="p-6 space-y-6">
-                    {/* Header */}
-                    <div className="text-center space-y-2">
-                        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${theme.bgColor} ${theme.color} mb-2 border ${theme.borderColor}/30`}>
-                            {theme.icon}
-                        </div>
-                        <h2 className="text-2xl font-bold font-orbitron text-white uppercase tracking-widest text-glow">
-                            {theme.title}
-                        </h2>
-                        <div className={`text-xs font-mono ${theme.color}/60 uppercase tracking-[0.2em]`}>
-                            Settore {province.id}
-                        </div>
+                {/* Content */}
+                <div className="relative z-10 flex flex-col items-center text-center space-y-6">
+
+                    {/* Icon Circle */}
+                    <div className={`w-20 h-20 rounded-full border-2 ${theme.borderColor} flex items-center justify-center ${theme.color} bg-slate-800/50 shadow-[0_0_30px_currentColor]`}>
+                        {theme.icon}
                     </div>
 
-                    {/* Content */}
-                    <div className="bg-black/40 rounded-xl p-4 border border-white/5 space-y-3">
-                        <div className="flex justify-between items-center text-xs font-mono text-cyber-gray uppercase">
-                            <span>Livello Sicurezza</span>
-                            <span className={`${theme.color} font-bold`}>{theme.securityLevel}</span>
+                    {/* Text Content */}
+                    <div className="space-y-2">
+                        <div className={`text-xs font-orbitron font-bold tracking-widest ${theme.color} border border-current px-2 py-1 rounded inline-block mb-2`}>
+                            LIVELLO SICUREZZA: {theme.securityLevel}
                         </div>
-                        <p className="text-sm text-zinc-300 leading-relaxed font-sans">
+                        <h2 className="text-2xl font-orbitron font-bold text-white tracking-wide">
+                            {theme.title}
+                        </h2>
+                        <p className="text-slate-400 text-sm leading-relaxed">
                             {theme.description}
                         </p>
                     </div>
 
                     {/* Action Button */}
                     <button
-                        onClick={isLocked ? onClose : onStartMission}
-                        className={`w-full py-4 bg-black border ${theme.borderColor} text-white font-bold font-orbitron uppercase tracking-widest rounded-xl ${theme.buttonBg} ${theme.buttonBorder} hover:text-white transition-all duration-300 ${theme.buttonShadow} flex items-center justify-center gap-2 group`}
+                        onClick={theme.action}
+                        className={`w-full py-4 rounded-xl bg-slate-800 border border-slate-600 text-white font-orbitron font-bold tracking-wider transition-all duration-300 group relative overflow-hidden ${theme.buttonBg} ${theme.buttonBorder} ${theme.buttonShadow}`}
                     >
-                        <span>{theme.buttonText}</span>
-                        {!isLocked && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
+                        <span className="relative z-10 flex items-center justify-center space-x-2">
+                            <span>{theme.buttonText}</span>
+                            {!isLocked && <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
+                        </span>
+                        {/* Button Glare Effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                     </button>
                 </div>
 
