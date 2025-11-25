@@ -169,7 +169,7 @@ const ItalyMapDashboard: React.FC = () => {
         }
     };
 
-    const activeTarget = hoveredTarget || selectedTarget;
+    const activeTarget = selectedTarget || hoveredTarget;
 
     // Calculate Progress
     const unlockedCount = useMemo(() => {
@@ -200,7 +200,7 @@ const ItalyMapDashboard: React.FC = () => {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
                         onClick={handleBackToItaly}
-                        className="absolute top-6 left-6 z-40 flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 text-slate-300 hover:text-cyan-400 transition-all backdrop-blur-md shadow-lg group"
+                        className="absolute top-24 left-6 z-40 flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 text-slate-300 hover:text-cyan-400 transition-all backdrop-blur-md shadow-lg group"
                     >
                         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                         <span className="text-xs font-orbitron font-bold tracking-wider">TORNA ALL'ITALIA</span>
@@ -221,6 +221,7 @@ const ItalyMapDashboard: React.FC = () => {
                     panning={{ disabled: false }}
                     limitToBounds={true}
                     alignmentAnimation={{ sizeX: 0, sizeY: 0 }}
+                    onPanningStart={() => setSelectedTarget(null)}
                 >
                     <TransformComponent
                         wrapperClass="!w-full !h-full bg-slate-950"
