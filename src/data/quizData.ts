@@ -1,21 +1,6 @@
-export interface QuizQuestion {
-    id: string;
-    text: string;
-    options: string[];
-    correctAnswer: number; // Index of the correct option
-    explanation: string;
-}
-
-export interface TrainingLesson {
-    id: string;
-    title: string;
-    content: string; // Markdown or HTML content
-    questions: QuizQuestion[];
-    xpReward: number;
-    estimatedTime: string; // e.g., "5 min"
-}
-
 import { provincesData } from './provincesData';
+import { createBrowserClient } from '@supabase/ssr';
+import { Database } from '@/types/supabase';
 
 export interface QuizQuestion {
     id: string;
@@ -157,21 +142,44 @@ const REGION_CONTENT_MAP: Record<string, string> = {
 
 const DEFAULT_CONTENT_ID = 'cyber-basics';
 
-// 3. Helper Function
-export const getLessonForProvince = (provinceId: string): TrainingLesson => {
-    // 1. Check Province Specific Content
-    if (PROVINCE_CONTENT_MAP[provinceId]) {
-        return CONTENT_LIBRARY[PROVINCE_CONTENT_MAP[provinceId]];
+// --- Helper to get lesson for a province ---
+const supabase = createBrowserClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+export const getLessonForProvince = async (provinceId: string, region: string): Promise<TrainingLesson> => {
+    // 1. Try to fetch from DB
+    const { data: mission } = await supabase
+        .from('missions')
+        .select(`
+            *,
+            mission_questions (*)
+        `)
+        .or(`province_id.eq.${provinceId},and(province_id.is.null,region.eq.${region})`)
+        .limit(1)
+        .maybeSingle();
+
+    if (mission) {
+        return {
+            id: mission.id,
+            title: mission.title,
+            content: mission.content,
+            questions: mission.mission_questions.map((q: any) => ({
+                id: q.id,
+                text: q.text,
+                options: q.options,
+                correctAnswer: q.correct_answer,
+                explanation: q.explanation
+            })),
+            xpReward: mission.xp_reward,
+            estimatedTime: mission.estimated_time
+        };
     }
 
-    // 2. Check Region Specific Content
-    const province = provincesData.find(p => p.id === provinceId);
-    if (province && REGION_CONTENT_MAP[province.region]) {
-        return CONTENT_LIBRARY[REGION_CONTENT_MAP[province.region]];
-    }
-
-    // 3. Return Default
-    return CONTENT_LIBRARY[DEFAULT_CONTENT_ID];
+    // 2. Fallback to hardcoded content
+    const contentId = PROVINCE_CONTENT_MAP[provinceId] || REGION_CONTENT_MAP[region] || DEFAULT_CONTENT_ID;
+    return CONTENT_LIBRARY[contentId];
 };
 
 // Export for backward compatibility if needed, but prefer getLessonForProvince

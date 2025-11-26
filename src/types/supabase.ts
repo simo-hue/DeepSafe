@@ -116,6 +116,76 @@ export interface Database {
                     }
                 ]
             }
+            missions: {
+                Row: {
+                    id: string
+                    title: string
+                    content: string
+                    xp_reward: number
+                    estimated_time: string
+                    region: string | null
+                    province_id: string | null
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    title: string
+                    content: string
+                    xp_reward?: number
+                    estimated_time?: string
+                    region?: string | null
+                    province_id?: string | null
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    title?: string
+                    content?: string
+                    xp_reward?: number
+                    estimated_time?: string
+                    region?: string | null
+                    province_id?: string | null
+                    created_at?: string
+                }
+                Relationships: []
+            }
+            mission_questions: {
+                Row: {
+                    id: string
+                    mission_id: string
+                    text: string
+                    options: string[] // JSONB array
+                    correct_answer: number
+                    explanation: string
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    mission_id: string
+                    text: string
+                    options: string[]
+                    correct_answer: number
+                    explanation: string
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    mission_id?: string
+                    text?: string
+                    options?: string[]
+                    correct_answer?: number
+                    explanation?: string
+                    created_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "mission_questions_mission_id_fkey"
+                        columns: ["mission_id"]
+                        referencedRelation: "missions"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
             shop_items: {
                 Row: {
                     id: string

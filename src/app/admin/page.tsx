@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { Database } from '@/types/supabase';
 import { useRouter } from 'next/navigation';
-import { Shield, Users, Coins, Search, Save, Ban, RefreshCw, Crown, Package, Medal, Zap, Trash2, Plus, X, ShoppingCart } from 'lucide-react';
+import { Shield, Users, Coins, Search, Save, Ban, RefreshCw, Crown, Package, Medal, Zap, Trash2, Plus, X, ShoppingCart, BookOpen } from 'lucide-react';
 import { BADGES_DATA } from '@/data/badgesData';
 
 // Initialize Supabase Client
@@ -246,6 +246,13 @@ export default function AdminPage() {
                     >
                         <ShoppingCart className="w-4 h-4" />
                         MANAGE SHOP
+                    </button>
+                    <button
+                        onClick={() => router.push('/admin/missions')}
+                        className="px-4 py-2 bg-cyan-900/30 border border-cyan-700/50 rounded hover:bg-cyan-900/50 text-cyan-400 font-mono text-xs transition-colors flex items-center gap-2"
+                    >
+                        <BookOpen className="w-4 h-4" />
+                        MISSION CREATOR
                     </button>
                     <button
                         onClick={handleResetDaily}

@@ -35,17 +35,25 @@ export default function TrainingPillPage() {
     const unlockedCount = unlockedProvinces.length;
 
     useEffect(() => {
-        if (provinceId) {
-            // Priority 1: Load by Province ID
-            const dynamicLesson = getLessonForProvince(provinceId);
-            setLesson(dynamicLesson);
-        } else if (problemId && quizData[problemId]) {
-            // Priority 2: Load by Content ID (Direct Link)
-            setLesson(quizData[problemId]);
-        } else {
-            // Fallback
-            setLesson(getLessonForProvince('DEFAULT'));
-        }
+        const fetchLesson = async () => {
+            if (provinceId) {
+                // Priority 1: Load by Province ID
+                // We need to find the region for the province to pass to getLessonForProvince
+                const province = provincesData.find(p => p.id === provinceId);
+                const region = province?.region || '';
+
+                const dynamicLesson = await getLessonForProvince(provinceId, region);
+                setLesson(dynamicLesson);
+            } else if (problemId && quizData[problemId]) {
+                // Priority 2: Load by Content ID (Direct Link)
+                setLesson(quizData[problemId]);
+            } else {
+                // Fallback
+                setLesson(await getLessonForProvince('DEFAULT', ''));
+            }
+        };
+
+        fetchLesson();
     }, [problemId, provinceId]);
 
     // Check for Game Over
