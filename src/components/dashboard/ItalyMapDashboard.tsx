@@ -158,7 +158,13 @@ const ItalyMapDashboard: React.FC = () => {
                 });
             } else {
                 // Step 2: Enter (if already selected)
-                enterRegion(regionName);
+                const regionProvinces = dynamicProvincesData.filter(p => p.region === regionName);
+                const isUnlocked = regionProvinces.some(p => p.status === 'unlocked' || p.status === 'safe');
+                if (isUnlocked) {
+                    enterRegion(regionName);
+                } else {
+                    showToast(`REGION LOCKED: Complete previous missions to unlock ${regionName}`, 'error');
+                }
             }
         } else {
             // Level 2: Province Logic
@@ -175,8 +181,12 @@ const ItalyMapDashboard: React.FC = () => {
                 });
             } else {
                 // Step 2: Open Modal
-                setModalProvince(province);
-                setSelectedTarget(null);
+                if (province.status !== 'locked') {
+                    setModalProvince(province);
+                    setSelectedTarget(null);
+                } else {
+                    showToast(`SECTOR LOCKED: Complete previous missions to unlock ${province.name}`, 'error');
+                }
             }
         }
     };
@@ -231,12 +241,20 @@ const ItalyMapDashboard: React.FC = () => {
         if (!target) return;
 
         if (target.type === 'REGION') {
-            enterRegion(target.name);
+            if (target.status !== 'locked') {
+                enterRegion(target.name);
+            } else {
+                showToast(`REGION LOCKED: Complete previous missions to unlock ${target.name}`, 'error');
+            }
         } else {
             const province = dynamicProvincesData.find(p => p.id === target.id);
             if (province) {
-                setModalProvince(province);
-                setSelectedTarget(null);
+                if (province.status !== 'locked') {
+                    setModalProvince(province);
+                    setSelectedTarget(null);
+                } else {
+                    showToast(`SECTOR LOCKED: Complete previous missions to unlock ${province.name}`, 'error');
+                }
             }
         }
     };
