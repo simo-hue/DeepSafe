@@ -33,7 +33,9 @@ export default function AdminMissionsPage() {
         xp_reward: 100,
         estimated_time: '5 min',
         region: '',
-        province_id: ''
+        province_id: '',
+        level: 'SEMPLICE',
+        description: ''
     });
     const [questions, setQuestions] = useState<Partial<MissionQuestion>[]>([]);
 
@@ -95,7 +97,9 @@ export default function AdminMissionsPage() {
                 xp_reward: 100,
                 estimated_time: '5 min',
                 region: REGIONS[0],
-                province_id: ''
+                province_id: '',
+                level: 'SEMPLICE',
+                description: ''
             });
             setQuestions([]);
         }
@@ -103,12 +107,18 @@ export default function AdminMissionsPage() {
         setIsModalOpen(true);
     };
 
-    const handleAddQuestion = () => {
+    const handleAddQuestion = (type: 'multiple_choice' | 'true_false' | 'image_true_false' = 'multiple_choice') => {
+        const initialOptions = type === 'multiple_choice'
+            ? ['', '', '', '']
+            : ['Vero', 'Falso'];
+
         setQuestions([...questions, {
             text: '',
-            options: ['', '', '', ''],
+            options: initialOptions,
             correct_answer: 0,
-            explanation: ''
+            explanation: '',
+            type: type,
+            image_url: ''
         }]);
     };
 
@@ -144,7 +154,9 @@ export default function AdminMissionsPage() {
                     xp_reward: formData.xp_reward,
                     estimated_time: formData.estimated_time,
                     region: formData.region,
-                    province_id: formData.province_id
+                    province_id: formData.province_id,
+                    level: formData.level,
+                    description: formData.description
                 })
                 .eq('id', missionId);
 
@@ -165,7 +177,9 @@ export default function AdminMissionsPage() {
                     xp_reward: formData.xp_reward,
                     estimated_time: formData.estimated_time,
                     region: formData.region,
-                    province_id: formData.province_id
+                    province_id: formData.province_id,
+                    level: formData.level,
+                    description: formData.description
                 } as any)
                 .select()
                 .single();
@@ -184,7 +198,9 @@ export default function AdminMissionsPage() {
                 text: q.text,
                 options: q.options,
                 correct_answer: q.correct_answer,
-                explanation: q.explanation
+                explanation: q.explanation,
+                type: q.type,
+                image_url: q.image_url
             }));
 
             const { error: questionsError } = await supabase
@@ -344,6 +360,42 @@ export default function AdminMissionsPage() {
                                         </div>
                                     </div>
 
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-mono text-slate-500 mb-1">Difficulty Level</label>
+                                            <select
+                                                value={formData.level || 'SEMPLICE'}
+                                                onChange={e => setFormData({ ...formData, level: e.target.value as any })}
+                                                className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-cyan-500 outline-none"
+                                            >
+                                                <option value="TUTORIAL">TUTORIAL</option>
+                                                <option value="SEMPLICE">SEMPLICE</option>
+                                                <option value="DIFFICILE">DIFFICILE</option>
+                                                <option value="BOSS">BOSS</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-mono text-slate-500 mb-1">Estimated Time</label>
+                                            <input
+                                                type="text"
+                                                value={formData.estimated_time}
+                                                onChange={e => setFormData({ ...formData, estimated_time: e.target.value })}
+                                                className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-cyan-500 outline-none"
+                                                placeholder="e.g. 5 min"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-mono text-slate-500 mb-1">Popup Description</label>
+                                        <textarea
+                                            value={formData.description || ''}
+                                            onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                            className="w-full bg-slate-950 border border-slate-700 rounded p-3 text-sm focus:border-cyan-500 outline-none h-20 resize-none"
+                                            placeholder="Brief description for the mission popup..."
+                                        />
+                                    </div>
+
                                     <div className="flex-1 flex flex-col">
                                         <label className="block text-xs font-mono text-slate-500 mb-1">Lecture Content (Markdown)</label>
                                         <textarea
@@ -360,9 +412,17 @@ export default function AdminMissionsPage() {
                                 <div className="space-y-6">
                                     <div className="flex justify-between items-center">
                                         <h3 className="text-lg font-bold text-white">Quiz Questions</h3>
-                                        <button onClick={handleAddQuestion} className="px-3 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs font-mono flex items-center gap-2">
-                                            <Plus className="w-3 h-3" /> ADD QUESTION
-                                        </button>
+                                        <div className="flex gap-2">
+                                            <button onClick={() => handleAddQuestion('multiple_choice')} className="px-3 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs font-mono flex items-center gap-2 border border-slate-700">
+                                                <Plus className="w-3 h-3" /> MULTI
+                                            </button>
+                                            <button onClick={() => handleAddQuestion('true_false')} className="px-3 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs font-mono flex items-center gap-2 border border-slate-700">
+                                                <Plus className="w-3 h-3" /> T/F
+                                            </button>
+                                            <button onClick={() => handleAddQuestion('image_true_false')} className="px-3 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs font-mono flex items-center gap-2 border border-slate-700">
+                                                <Plus className="w-3 h-3" /> IMG T/F
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div className="space-y-8">
@@ -380,7 +440,11 @@ export default function AdminMissionsPage() {
                                                 </button>
 
                                                 <div className="mb-4">
-                                                    <label className="block text-xs font-mono text-slate-500 mb-1">Question {qIndex + 1}</label>
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <label className="block text-xs font-mono text-slate-500">
+                                                            Question {qIndex + 1} <span className="text-cyan-500 uppercase">[{q.type?.replace(/_/g, ' ')}]</span>
+                                                        </label>
+                                                    </div>
                                                     <input
                                                         type="text"
                                                         value={q.text}
@@ -389,6 +453,19 @@ export default function AdminMissionsPage() {
                                                         placeholder="What is...?"
                                                     />
                                                 </div>
+
+                                                {q.type === 'image_true_false' && (
+                                                    <div className="mb-4">
+                                                        <label className="block text-xs font-mono text-slate-500 mb-1">Image URL</label>
+                                                        <input
+                                                            type="text"
+                                                            value={q.image_url || ''}
+                                                            onChange={e => updateQuestion(qIndex, 'image_url', e.target.value)}
+                                                            className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs focus:border-cyan-500 outline-none font-mono text-cyan-400"
+                                                            placeholder="https://..."
+                                                        />
+                                                    </div>
+                                                )}
 
                                                 <div className="grid grid-cols-2 gap-4 mb-4">
                                                     {q.options?.map((opt, oIndex) => (
@@ -406,6 +483,7 @@ export default function AdminMissionsPage() {
                                                                 onChange={e => updateOption(qIndex, oIndex, e.target.value)}
                                                                 className={`w-full bg-slate-900 border rounded px-2 py-1 text-xs outline-none ${q.correct_answer === oIndex ? 'border-cyan-500 text-cyan-400' : 'border-slate-700'}`}
                                                                 placeholder={`Option ${oIndex + 1}`}
+                                                                readOnly={q.type !== 'multiple_choice'} // Read-only for T/F types
                                                             />
                                                         </div>
                                                     ))}

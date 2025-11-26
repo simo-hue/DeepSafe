@@ -8,6 +8,8 @@ export interface QuizQuestion {
     options: string[];
     correctAnswer: number; // Index of the correct option
     explanation: string;
+    type?: 'multiple_choice' | 'true_false' | 'image_true_false';
+    image_url?: string | null;
 }
 
 export interface TrainingLesson {
@@ -17,6 +19,8 @@ export interface TrainingLesson {
     questions: QuizQuestion[];
     xpReward: number;
     estimatedTime: string; // e.g., "5 min"
+    level?: 'TUTORIAL' | 'SEMPLICE' | 'DIFFICILE' | 'BOSS';
+    description?: string;
 }
 
 // 1. Define the Content Library
@@ -148,38 +152,92 @@ const supabase = createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export const getLessonForProvince = async (provinceId: string, region: string): Promise<TrainingLesson> => {
-    // 1. Try to fetch from DB
-    const { data: mission } = await supabase
-        .from('missions')
-        .select(`
-            *,
-            mission_questions (*)
-        `)
-        .or(`province_id.eq.${provinceId},and(province_id.is.null,region.eq.${region})`)
-        .limit(1)
-        .maybeSingle();
+export const getLessonsForProvince = async (provinceId: string, region: string): Promise<TrainingLesson[]> => {
+    // 1. Try to fetch specific missions for this province from Supabase
+    try {
+        const { data: missions, error } = await supabase
+            .from('missions')
+            .select(`
+                *,
+                mission_questions (*)
+            `)
+            .eq('province_id', provinceId);
 
-    if (mission) {
-        return {
-            id: mission.id,
-            title: mission.title,
-            content: mission.content,
-            questions: mission.mission_questions.map((q: any) => ({
-                id: q.id,
-                text: q.text,
-                options: q.options,
-                correctAnswer: q.correct_answer,
-                explanation: q.explanation
-            })),
-            xpReward: mission.xp_reward,
-            estimatedTime: mission.estimated_time
-        };
+        if (error) {
+            console.error('Error fetching missions:', error);
+        }
+
+        if (missions && missions.length > 0) {
+            return missions.map(mission => ({
+                id: mission.id,
+                title: mission.title,
+                content: mission.content,
+                questions: mission.mission_questions.map((q: any) => ({
+                    id: q.id,
+                    text: q.text,
+                    options: q.options,
+                    correctAnswer: q.correct_answer,
+                    explanation: q.explanation,
+                    type: q.type,
+                    image_url: q.image_url
+                })),
+                xpReward: mission.xp_reward,
+                estimatedTime: mission.estimated_time,
+                level: mission.level,
+                description: mission.description || undefined
+            }));
+        }
+    } catch (err) {
+        console.error('Unexpected error fetching missions:', err);
     }
 
-    // 2. Fallback to hardcoded content
+    // 2. Fallback to hardcoded content if no DB mission exists
+    // We wrap the single hardcoded lesson in an array
     const contentId = PROVINCE_CONTENT_MAP[provinceId] || REGION_CONTENT_MAP[region] || DEFAULT_CONTENT_ID;
-    return CONTENT_LIBRARY[contentId];
+    const lesson = CONTENT_LIBRARY[contentId];
+    return [lesson];
+};
+
+export const getMissionById = async (missionId: string): Promise<TrainingLesson | null> => {
+    try {
+        const { data: mission, error } = await supabase
+            .from('missions')
+            .select(`
+                *,
+                mission_questions (*)
+            `)
+            .eq('id', missionId)
+            .single();
+
+        if (error) {
+            console.error('Error fetching mission by ID:', error);
+            return null;
+        }
+
+        if (mission) {
+            return {
+                id: mission.id,
+                title: mission.title,
+                content: mission.content,
+                questions: mission.mission_questions.map((q: any) => ({
+                    id: q.id,
+                    text: q.text,
+                    options: q.options,
+                    correctAnswer: q.correct_answer,
+                    explanation: q.explanation,
+                    type: q.type,
+                    image_url: q.image_url
+                })),
+                xpReward: mission.xp_reward,
+                estimatedTime: mission.estimated_time,
+                level: mission.level,
+                description: mission.description || undefined
+            };
+        }
+    } catch (err) {
+        console.error('Unexpected error fetching mission by ID:', err);
+    }
+    return null;
 };
 
 // Export for backward compatibility if needed, but prefer getLessonForProvince

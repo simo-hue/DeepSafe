@@ -126,6 +126,8 @@ export interface Database {
                     region: string | null
                     province_id: string | null
                     created_at: string
+                    level: 'TUTORIAL' | 'SEMPLICE' | 'DIFFICILE' | 'BOSS'
+                    description: string | null
                 }
                 Insert: {
                     id?: string
@@ -136,6 +138,8 @@ export interface Database {
                     region?: string | null
                     province_id?: string | null
                     created_at?: string
+                    level?: 'TUTORIAL' | 'SEMPLICE' | 'DIFFICILE' | 'BOSS'
+                    description?: string | null
                 }
                 Update: {
                     id?: string
@@ -146,6 +150,8 @@ export interface Database {
                     region?: string | null
                     province_id?: string | null
                     created_at?: string
+                    level?: 'TUTORIAL' | 'SEMPLICE' | 'DIFFICILE' | 'BOSS'
+                    description?: string | null
                 }
                 Relationships: []
             }
@@ -158,6 +164,8 @@ export interface Database {
                     correct_answer: number
                     explanation: string
                     created_at: string
+                    type: 'multiple_choice' | 'true_false' | 'image_true_false'
+                    image_url: string | null
                 }
                 Insert: {
                     id?: string
@@ -167,6 +175,8 @@ export interface Database {
                     correct_answer: number
                     explanation: string
                     created_at?: string
+                    type?: 'multiple_choice' | 'true_false' | 'image_true_false'
+                    image_url?: string | null
                 }
                 Update: {
                     id?: string
@@ -176,6 +186,8 @@ export interface Database {
                     correct_answer?: number
                     explanation?: string
                     created_at?: string
+                    type?: 'multiple_choice' | 'true_false' | 'image_true_false'
+                    image_url?: string | null
                 }
                 Relationships: [
                     {

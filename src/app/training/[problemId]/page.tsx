@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { quizData, TrainingLesson, getLessonForProvince } from '@/data/quizData';
+import { quizData, TrainingLesson, getLessonsForProvince, getMissionById } from '@/data/quizData';
 import { provincesData } from '@/data/provincesData';
 import { ArrowLeft, CheckCircle, XCircle, Brain, ChevronRight, Heart } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -17,6 +17,7 @@ export default function TrainingPillPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const provinceId = searchParams.get('provinceId');
+    const missionId = searchParams.get('missionId');
     const problemId = params?.problemId as string;
 
     const { addXp, unlockProvince, lives, decrementLives, addHeart, refillLives, unlockedProvinces, updateProvinceScore } = useUserStore();
@@ -36,25 +37,29 @@ export default function TrainingPillPage() {
 
     useEffect(() => {
         const fetchLesson = async () => {
-            if (provinceId) {
-                // Priority 1: Load by Province ID
-                // We need to find the region for the province to pass to getLessonForProvince
+            if (missionId) {
+                // Priority 1: Load specific mission by ID
+                const mission = await getMissionById(missionId);
+                setLesson(mission);
+            } else if (provinceId) {
+                // Priority 2: Load by Province ID (Default to first mission if multiple)
                 const province = provincesData.find(p => p.id === provinceId);
                 const region = province?.region || '';
 
-                const dynamicLesson = await getLessonForProvince(provinceId, region);
-                setLesson(dynamicLesson);
+                const missions = await getLessonsForProvince(provinceId, region);
+                setLesson(missions[0]); // Default to first mission
             } else if (problemId && quizData[problemId]) {
-                // Priority 2: Load by Content ID (Direct Link)
+                // Priority 3: Load by Content ID (Direct Link)
                 setLesson(quizData[problemId]);
             } else {
                 // Fallback
-                setLesson(await getLessonForProvince('DEFAULT', ''));
+                const missions = await getLessonsForProvince('DEFAULT', '');
+                setLesson(missions[0]);
             }
         };
 
         fetchLesson();
-    }, [problemId, provinceId]);
+    }, [problemId, provinceId, missionId]);
 
     // Check for Game Over
     useEffect(() => {
