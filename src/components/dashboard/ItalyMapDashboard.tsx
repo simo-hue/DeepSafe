@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Province, provincesData } from '@/data/provincesData';
+import { provincesData, Province } from '@/data/provincesData';
 import ItalyMapSVG from './ItalyMapSVG';
 import TopBar from './TopBar';
 import ProvinceModal from './ProvinceModal';
@@ -14,6 +14,7 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { useUserStore } from '@/store/useUserStore';
 import { useDailyStreak } from '@/hooks/useDailyStreak';
 import StreakRewardModal from './StreakRewardModal';
+import { BadgeUnlockModal } from '../gamification/BadgeUnlockModal';
 
 const ITALY_VIEWBOX = "0 0 800 1000";
 
@@ -30,12 +31,28 @@ const ItalyMapDashboard: React.FC = () => {
     const initialRegionParam = searchParams.get('region');
 
     const [toast, setToast] = useState<{ message: string; type: 'info' | 'error' } | null>(null);
-    const { unlockedProvinces, provinceScores, refreshProfile } = useUserStore();
+    const { unlockedProvinces, provinceScores, refreshProfile, checkBadges } = useUserStore();
     const { streak: currentStreak, showModal: showStreakModal, closeModal: closeStreakModal } = useDailyStreak();
 
-    // Refresh profile on mount to sync with DB
-    React.useEffect(() => {
-        refreshProfile();
+    const [mapScale, setMapScale] = useState(1);
+    const [mapPosition, setMapPosition] = useState({ x: 0, y: 0 });
+    const mapRef = useRef<HTMLDivElement>(null);
+
+    // Badge Unlock State
+    const [unlockedBadgeId, setUnlockedBadgeId] = useState<string | null>(null);
+    const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
+
+    // Initial Data Fetch & Badge Check
+    useEffect(() => {
+        const initProfile = async () => {
+            await refreshProfile();
+            const { newBadges } = await checkBadges();
+            if (newBadges.length > 0) {
+                setUnlockedBadgeId(newBadges[0]); // Show first new badge
+                setIsBadgeModalOpen(true);
+            }
+        };
+        initProfile();
     }, [refreshProfile]);
 
     // Merge static data with persisted unlocked status and scores
@@ -321,6 +338,13 @@ const ItalyMapDashboard: React.FC = () => {
                 isOpen={showStreakModal}
                 streak={currentStreak}
                 onClose={closeStreakModal}
+            />
+
+            {/* Badge Unlock Modal */}
+            <BadgeUnlockModal
+                isOpen={isBadgeModalOpen}
+                onClose={() => setIsBadgeModalOpen(false)}
+                badgeId={unlockedBadgeId}
             />
 
             {/* Toast Notification */}

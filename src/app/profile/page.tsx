@@ -38,7 +38,8 @@ interface Profile {
 }
 
 
-
+import { useUserStore } from '@/store/useUserStore';
+import { BADGES_DATA, BadgeDefinition } from '@/data/badgesData';
 import { MissionControl } from '@/components/gamification/MissionControl';
 import { ArtifactGrid } from '@/components/gamification/ArtifactGrid';
 import { Mission } from '@/components/gamification/MissionCard';
@@ -50,18 +51,10 @@ const MOCK_MISSIONS: Mission[] = [
     { id: '3', title: 'Serie Perfetta', target_count: 1, current_count: 1, reward_xp: 200, is_completed: true, is_claimed: true, frequency: 'weekly' },
 ];
 
-const MOCK_BADGES: Badge[] = [
-    { id: '1', name: 'Primi Passi', description: 'Hai completato il tuo primo quiz.', icon_url: '👣', category: 'General', xp_bonus: 50, is_unlocked: true, earned_at: '2024-05-20', rarity: 'common' },
-    { id: '2', name: 'Portatore dello Scudo', description: 'Account protetto con 2FA.', icon_url: '🛡️', category: 'Defense', xp_bonus: 100, is_unlocked: true, earned_at: '2024-05-21', rarity: 'rare' },
-    { id: '3', name: 'Leggenda Cyber', description: 'Completato il Buffer di 30 Giorni.', icon_url: '👑', category: 'Mastery', xp_bonus: 500, is_unlocked: true, earned_at: '2024-05-24', rarity: 'legendary' },
-    { id: '4', name: 'Terminator di Phishing', description: 'Segnalati 10 tentativi di phishing.', icon_url: '🎣', category: 'Defense', xp_bonus: 200, is_unlocked: false, rarity: 'rare' },
-    { id: '5', name: 'Demone della Velocità', description: 'Quiz finito in meno di 30s.', icon_url: '⚡', category: 'Speed', xp_bonus: 100, is_unlocked: false, rarity: 'common' },
-    { id: '6', name: 'Ingegnere Sociale', description: 'Invitati 5 amici.', icon_url: '🤝', category: 'Social', xp_bonus: 150, is_unlocked: false, rarity: 'common' },
-];
-
 export default function ProfilePage() {
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { earnedBadges, refreshProfile } = useUserStore();
 
     // -- State Management --
     const [user, setUser] = useState<any>(null);
@@ -74,12 +67,25 @@ export default function ProfilePage() {
     const [editName, setEditName] = useState('');
     const [editBio, setEditBio] = useState('');
 
-
-
     // Gamification State
     const [missions, setMissions] = useState<Mission[]>(MOCK_MISSIONS);
-    const [badges, setBadges] = useState<Badge[]>(MOCK_BADGES);
     const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
+
+    // Compute Badges with Unlock Status
+    const badges = BADGES_DATA.map(badgeDef => {
+        const earned = earnedBadges.find(b => b.id === badgeDef.id);
+        return {
+            id: badgeDef.id,
+            name: badgeDef.name,
+            description: badgeDef.description,
+            icon_url: badgeDef.icon,
+            category: badgeDef.category,
+            xp_bonus: badgeDef.xpReward,
+            is_unlocked: !!earned,
+            earned_at: earned?.earned_at,
+            rarity: badgeDef.rarity
+        };
+    });
 
     /**
      * Handles the "Claim" action for a mission.

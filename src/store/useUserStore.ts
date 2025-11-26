@@ -18,19 +18,21 @@ interface UserState {
     unlockedProvinces: string[]; // IDs of unlocked provinces
     provinceScores: Record<string, { score: number; maxScore: number; isCompleted: boolean }>;
     lastLoginDate: string | null; // ISO Date string YYYY-MM-DD
+    earnedBadges: { id: string; earned_at: string }[];
 
     // Actions
     addXp: (amount: number) => void;
-    incrementStreak: () => void;
-    resetStreak: () => void;
-    setLastLoginDate: (date: string) => void;
-    decrementLives: () => void;
-    addHeart: (amount: number) => void;
-    refillLives: () => void;
+    incrementStreak: () => Promise<void>;
+    resetStreak: () => Promise<void>;
+    setLastLoginDate: (date: string) => Promise<void>;
+    decrementLives: () => Promise<void>;
+    addHeart: (amount: number) => Promise<void>;
+    refillLives: () => Promise<void>;
     setInfiniteLives: (active: boolean) => void;
-    unlockProvince: (id: string) => void;
-    updateProvinceScore: (id: string, score: number, maxScore: number, isCompleted: boolean) => void;
+    unlockProvince: (id: string) => Promise<void>;
+    updateProvinceScore: (id: string, score: number, maxScore: number, isCompleted: boolean) => Promise<void>;
     refreshProfile: () => Promise<void>;
+    checkBadges: () => Promise<{ newBadges: string[] }>;
 }
 
 export const useUserStore = create<UserState>()(
@@ -42,13 +44,10 @@ export const useUserStore = create<UserState>()(
             maxLives: 5,
             hasInfiniteLives: false,
             lastRefillTime: null,
-            unlockedProvinces: ['CB', 'IS', 'AQ', 'CH', 'PE', 'TE', 'BA', 'BT', 'BR', 'FG', 'LE', 'TA'], // Default unlocked: Molise, Abruzzo, Puglia
-            provinceScores: {
-                'CB': { score: 10, maxScore: 10, isCompleted: true }, // Mock Perfect
-                'IS': { score: 8, maxScore: 10, isCompleted: true },  // Mock Passed
-                'AQ': { score: 5, maxScore: 10, isCompleted: false }, // Mock In Progress
-            },
+            unlockedProvinces: ['CB', 'IS', 'FG'], // Molise (CB, IS) + Foggia (FG) unlocked by default
+            provinceScores: {},
             lastLoginDate: null,
+            earnedBadges: [],
 
             addXp: (amount) => set((state) => ({ xp: state.xp + amount })),
             updateProvinceScore: async (id, score, maxScore, isCompleted) => {
@@ -178,7 +177,7 @@ export const useUserStore = create<UserState>()(
 
                     const { data: profile, error } = await supabase
                         .from('profiles')
-                        .select('xp, current_hearts, highest_streak, unlocked_provinces, province_scores, last_login')
+                        .select('xp, current_hearts, highest_streak, unlocked_provinces, province_scores, last_login, earned_badges')
                         .eq('id', user.id)
                         .single();
 
@@ -192,19 +191,92 @@ export const useUserStore = create<UserState>()(
                             xp: profile.xp ?? 0,
                             lives: profile.current_hearts ?? 5,
                             streak: profile.highest_streak ?? 0,
-                            unlockedProvinces: profile.unlocked_provinces ?? ['CB', 'IS', 'AQ', 'CH', 'PE', 'TE', 'BA', 'BT', 'BR', 'FG', 'LE', 'TA'],
-                            provinceScores: (profile.province_scores as any) ?? {
-                                'CB': { score: 10, maxScore: 10, isCompleted: true },
-                                'IS': { score: 8, maxScore: 10, isCompleted: true },
-                                'AQ': { score: 5, maxScore: 10, isCompleted: false },
-                            },
-                            lastLoginDate: profile.last_login ?? null
+                            unlockedProvinces: profile.unlocked_provinces ?? ['CB', 'IS', 'FG'],
+                            provinceScores: (profile.province_scores as any) ?? {},
+                            lastLoginDate: profile.last_login ?? null,
+                            earnedBadges: (profile.earned_badges as any) ?? [],
                         });
                         console.log('🔄 Profile refreshed from DB:', profile);
                     }
                 } catch (err) {
                     console.error('Unexpected error refreshing profile:', err);
                 }
+            },
+            checkBadges: async () => {
+                const state = get();
+                const { xp, streak, earnedBadges } = state;
+                const newBadges: string[] = [];
+
+                // Import BADGES_DATA dynamically
+                const { BADGES_DATA } = await import('@/data/badgesData');
+                const { provincesData } = await import('@/data/provincesData');
+
+                const earnedBadgeIds = new Set(earnedBadges.map(b => b.id));
+                const now = new Date().toISOString();
+
+                for (const badge of BADGES_DATA) {
+                    if (earnedBadgeIds.has(badge.id)) continue;
+
+                    let unlocked = false;
+
+                    switch (badge.condition.type) {
+                        case 'xp_milestone':
+                            if (typeof badge.condition.value === 'number' && xp >= badge.condition.value) {
+                                unlocked = true;
+                            }
+                            break;
+                        case 'streak_milestone':
+                            if (typeof badge.condition.value === 'number' && streak >= badge.condition.value) {
+                                unlocked = true;
+                            }
+                            break;
+                        case 'first_mission':
+                            const hasCompletedMission = Object.values(state.provinceScores).some(s => s.score > 0);
+                            if (hasCompletedMission) unlocked = true;
+                            break;
+                        case 'region_master':
+                            if (typeof badge.condition.value === 'string') {
+                                const regionName = badge.condition.value;
+                                const regionProvinces = provincesData.filter(p => p.region === regionName);
+                                const allCompleted = regionProvinces.every(p => {
+                                    const scoreData = state.provinceScores[p.id];
+                                    return scoreData && scoreData.isCompleted;
+                                });
+                                if (regionProvinces.length > 0 && allCompleted) {
+                                    unlocked = true;
+                                }
+                            }
+                            break;
+                    }
+
+                    if (unlocked) {
+                        newBadges.push(badge.id);
+                        earnedBadgeIds.add(badge.id);
+                    }
+                }
+
+                if (newBadges.length > 0) {
+                    const updatedBadges = [
+                        ...earnedBadges,
+                        ...newBadges.map(id => ({ id, earned_at: now }))
+                    ];
+
+                    set({ earnedBadges: updatedBadges });
+
+                    try {
+                        const { data: { user } } = await supabase.auth.getUser();
+                        if (user) {
+                            await supabase
+                                .from('profiles')
+                                .update({ earned_badges: updatedBadges })
+                                .eq('id', user.id);
+                        }
+                    } catch (err) {
+                        console.error('Error syncing badges:', err);
+                    }
+                }
+
+                return { newBadges };
             }
         }),
         {

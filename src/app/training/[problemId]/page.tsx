@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { quizData, TrainingLesson } from '@/data/quizData';
+import { quizData, TrainingLesson, getLessonForProvince } from '@/data/quizData';
 import { provincesData } from '@/data/provincesData';
 import { ArrowLeft, CheckCircle, XCircle, Brain, ChevronRight, Heart } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -35,13 +35,18 @@ export default function TrainingPillPage() {
     const unlockedCount = unlockedProvinces.length;
 
     useEffect(() => {
-        if (problemId && quizData[problemId]) {
+        if (provinceId) {
+            // Priority 1: Load by Province ID
+            const dynamicLesson = getLessonForProvince(provinceId);
+            setLesson(dynamicLesson);
+        } else if (problemId && quizData[problemId]) {
+            // Priority 2: Load by Content ID (Direct Link)
             setLesson(quizData[problemId]);
         } else {
-            // Handle invalid ID or redirect
-            // router.push('/dashboard');
+            // Fallback
+            setLesson(getLessonForProvince('DEFAULT'));
         }
-    }, [problemId]);
+    }, [problemId, provinceId]);
 
     // Check for Game Over
     useEffect(() => {

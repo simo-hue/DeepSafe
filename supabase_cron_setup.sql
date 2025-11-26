@@ -13,7 +13,7 @@ select cron.schedule(
   select
     net.http_get(
       url:='YOUR_APP_URL/api/cron/daily-reminder',
-      headers:='{"Authorization": "Bearer YOUR_CRON_SECRET"}'::jsonb
+      headers:='{"Authorization": "Bearer 70b8ccfa98b80820eda10b9213e17a941f96b69f0900f6b00ece8589f1c0a3e3"}'::jsonb
     ) as request_id;
   $$
 );

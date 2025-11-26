@@ -57,6 +57,14 @@ VAPID_PRIVATE_KEY=oixHmzYAEZ0xyEhq1k1djsN-lEEj64UPVzdH9d38N4A
 ```
 
 2.  **Database**: Vai nella dashboard di Supabase -> SQL Editor.
+### 3. Run Migration for Province Scores
+Run the SQL in `supabase_add_province_scores.sql` to add the `province_scores` column.
+
+### 4. Run Migration for Badges
+Run the SQL in `supabase_add_badges.sql` to add the `earned_badges` column.
+
+### 5. Run Migration for Friends
+Run the SQL in `supabase_add_friends.sql` to create the `friends` table.
     *   Apri il file `supabase_push_setup.sql` (che ho creato nel progetto) o copia il suo contenuto.
     *   Esegui lo script per creare la tabella `push_subscriptions`.
 
