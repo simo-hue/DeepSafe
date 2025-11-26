@@ -10,7 +10,7 @@ interface TopBarProps {
 }
 
 const TopBar: React.FC<TopBarProps> = ({ progress, total, className = "" }) => {
-    const { xp, streak, lives } = useUserStore();
+    const { xp, streak, lives, credits } = useUserStore();
     const percentage = Math.round((progress / total) * 100) || 0;
 
     return (
@@ -40,6 +40,12 @@ const TopBar: React.FC<TopBarProps> = ({ progress, total, className = "" }) => {
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50">
                         <Heart className={`w-3.5 h-3.5 ${lives > 0 ? 'text-red-500 fill-red-500' : 'text-slate-600'}`} />
                         <span className="text-xs font-bold font-orbitron text-slate-200">{lives}</span>
+                    </div>
+
+                    {/* Credits Widget */}
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50">
+                        <span className="text-xs font-bold font-orbitron text-yellow-400">NC</span>
+                        <span className="text-xs font-bold font-orbitron text-slate-200">{credits}</span>
                     </div>
 
                     {/* Divider */}

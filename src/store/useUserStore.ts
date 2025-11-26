@@ -10,6 +10,7 @@ const supabase = createBrowserClient<Database>(supabaseUrl, supabaseKey);
 
 interface UserState {
     xp: number;
+    credits: number; // NeuroCredits
     streak: number;
     lives: number;
     maxLives: number;
@@ -19,9 +20,15 @@ interface UserState {
     provinceScores: Record<string, { score: number; maxScore: number; isCompleted: boolean }>;
     lastLoginDate: string | null; // ISO Date string YYYY-MM-DD
     earnedBadges: { id: string; earned_at: string }[];
+    streakFreezes: number;
+    inventory: string[]; // List of item IDs
 
     // Actions
     addXp: (amount: number) => void;
+    addCredits: (amount: number) => Promise<void>;
+    spendCredits: (amount: number) => Promise<boolean>;
+    buyItem: (itemId: string, cost: number) => Promise<boolean>;
+    useStreakFreeze: () => Promise<boolean>;
     incrementStreak: () => Promise<void>;
     resetStreak: () => Promise<void>;
     setLastLoginDate: (date: string) => Promise<void>;
@@ -39,6 +46,7 @@ export const useUserStore = create<UserState>()(
     persist(
         (set, get) => ({
             xp: 0,
+            credits: 100, // Starting bonus
             streak: 0,
             lives: 5,
             maxLives: 5,
@@ -48,8 +56,96 @@ export const useUserStore = create<UserState>()(
             provinceScores: {},
             lastLoginDate: null,
             earnedBadges: [],
+            streakFreezes: 0,
+            inventory: [],
 
             addXp: (amount) => set((state) => ({ xp: state.xp + amount })),
+
+            addCredits: async (amount) => {
+                const state = get();
+                const newCredits = state.credits + amount;
+                set({ credits: newCredits });
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        await supabase.from('profiles').update({ credits: newCredits }).eq('id', user.id);
+                    }
+                } catch (err) { console.error('Error syncing credits:', err); }
+            },
+
+            spendCredits: async (amount) => {
+                const state = get();
+                if (state.credits < amount) return false;
+
+                const newCredits = state.credits - amount;
+                set({ credits: newCredits });
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        await supabase.from('profiles').update({ credits: newCredits }).eq('id', user.id);
+                    }
+                } catch (err) { console.error('Error syncing credits:', err); }
+                return true;
+            },
+
+            buyItem: async (itemId, cost) => {
+                const state = get();
+                if (state.credits < cost) return false;
+
+                // Deduct credits
+                const newCredits = state.credits - cost;
+
+                // Apply Item Effect
+                let newStreakFreezes = state.streakFreezes;
+                let newLives = state.lives;
+                let newInventory = [...state.inventory];
+
+                if (itemId === 'streak_freeze') {
+                    newStreakFreezes += 1;
+                } else if (itemId === 'system_reboot') {
+                    newLives = state.maxLives;
+                } else {
+                    // Generic item added to inventory
+                    newInventory.push(itemId);
+                }
+
+                set({
+                    credits: newCredits,
+                    streakFreezes: newStreakFreezes,
+                    lives: newLives,
+                    inventory: newInventory
+                });
+
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        await supabase.from('profiles').update({
+                            credits: newCredits,
+                            streak_freezes: newStreakFreezes,
+                            current_hearts: newLives,
+                            inventory: newInventory
+                        }).eq('id', user.id);
+                    }
+                } catch (err) { console.error('Error syncing purchase:', err); }
+
+                return true;
+            },
+
+            useStreakFreeze: async () => {
+                const state = get();
+                if (state.streakFreezes <= 0) return false;
+
+                const newCount = state.streakFreezes - 1;
+                set({ streakFreezes: newCount });
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        await supabase.from('profiles').update({ streak_freezes: newCount }).eq('id', user.id);
+                    }
+                } catch (err) { console.error('Error syncing streak freeze usage:', err); }
+                return true;
+            },
+
             updateProvinceScore: async (id, score, maxScore, isCompleted) => {
                 const state = get();
                 const currentData = state.provinceScores[id] || { score: 0, maxScore: 10, isCompleted: false };
@@ -177,7 +273,7 @@ export const useUserStore = create<UserState>()(
 
                     const { data: profile, error } = await supabase
                         .from('profiles')
-                        .select('xp, current_hearts, highest_streak, unlocked_provinces, province_scores, last_login, earned_badges')
+                        .select('xp, current_hearts, highest_streak, unlocked_provinces, province_scores, last_login, earned_badges, credits, streak_freezes, inventory')
                         .eq('id', user.id)
                         .single();
 
@@ -189,12 +285,15 @@ export const useUserStore = create<UserState>()(
                     if (profile) {
                         set({
                             xp: profile.xp ?? 0,
+                            credits: profile.credits ?? 100,
                             lives: profile.current_hearts ?? 5,
                             streak: profile.highest_streak ?? 0,
                             unlockedProvinces: profile.unlocked_provinces ?? ['CB', 'IS', 'FG'],
                             provinceScores: (profile.province_scores as any) ?? {},
                             lastLoginDate: profile.last_login ?? null,
                             earnedBadges: (profile.earned_badges as any) ?? [],
+                            streakFreezes: profile.streak_freezes ?? 0,
+                            inventory: (profile.inventory as any) ?? [],
                         });
                         console.log('🔄 Profile refreshed from DB:', profile);
                     }

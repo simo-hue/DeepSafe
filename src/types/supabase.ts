@@ -21,6 +21,9 @@ export interface Database {
                     username: string | null
                     xp: number | null
                     unlocked_provinces: string[] | null
+                    credits: number
+                    streak_freezes: number
+                    inventory: Json
                 }
                 Insert: {
                     avatar_url?: string | null
@@ -33,6 +36,9 @@ export interface Database {
                     username?: string | null
                     xp?: number | null
                     unlocked_provinces?: string[] | null
+                    credits?: number
+                    streak_freezes?: number
+                    inventory?: Json
                 }
                 Update: {
                     avatar_url?: string | null
@@ -45,6 +51,9 @@ export interface Database {
                     username?: string | null
                     xp?: number | null
                     unlocked_provinces?: string[] | null
+                    credits?: number
+                    streak_freezes?: number
+                    inventory?: Json
                 }
                 Relationships: [
                     {

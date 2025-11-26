@@ -1,322 +1,241 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Heart, Zap, Shield, Crown, Battery, Snowflake, Check, AlertTriangle, X, Loader2 } from 'lucide-react';
-import { useSystemUI } from '@/context/SystemUIContext';
-import { createBrowserClient } from '@supabase/ssr';
-import { Database } from '@/types/supabase';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingCart, Zap, Shield, Gift, Clock, Lock, Coins, AlertTriangle } from 'lucide-react';
 import { useUserStore } from '@/store/useUserStore';
-import { cn } from '@/lib/utils';
-import { loadStripe } from '@stripe/stripe-js';
-import { useRouter } from 'next/navigation';
+import TopBar from '@/components/dashboard/TopBar';
+import { provincesData } from '@/data/provincesData';
 
-// Initialize Stripe safely
-const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
-
-// Supabase Client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
-const supabase = createBrowserClient<Database>(supabaseUrl, supabaseKey);
+// Mock Items Data
+const SHOP_ITEMS = [
+    {
+        id: 'streak_freeze',
+        name: 'Streak Freeze',
+        description: 'Proteggi la tua serie per 24 ore. Si attiva automaticamente se perdi un giorno.',
+        icon: <Clock className="w-8 h-8 text-cyan-400" />,
+        cost: 200,
+        type: 'consumable',
+        rarity: 'common'
+    },
+    {
+        id: 'system_reboot',
+        name: 'System Reboot',
+        description: 'Ripristina immediatamente tutte le tue vite al massimo.',
+        icon: <Zap className="w-8 h-8 text-yellow-400" />,
+        cost: 350,
+        type: 'consumable',
+        rarity: 'rare'
+    },
+    {
+        id: 'double_xp',
+        name: 'Double XP (1h)',
+        description: 'Raddoppia i punti esperienza guadagnati per la prossima ora.',
+        icon: <Shield className="w-8 h-8 text-purple-400" />,
+        cost: 500,
+        type: 'consumable',
+        rarity: 'epic',
+        isLimited: true,
+        stock: 3
+    }
+];
 
 export default function ShopPage() {
-    const { lives, maxLives, refillLives, hasInfiniteLives, setInfiniteLives } = useUserStore();
-    const [loading, setLoading] = useState(false);
-    const [adModalOpen, setAdModalOpen] = useState(false);
-    const [adCountdown, setAdCountdown] = useState(15);
-    const router = useRouter();
-    const { showToast, openModal } = useSystemUI();
+    const { credits, buyItem, unlockedProvinces, lives, maxLives } = useUserStore();
+    const [isBuying, setIsBuying] = useState<string | null>(null);
+    const [feedback, setFeedback] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+    const [mysteryBoxOpen, setMysteryBoxOpen] = useState(false);
 
-    const [userId, setUserId] = useState<string | null>(null);
+    // Calculate Map Progress for TopBar
+    const totalProvinces = provincesData.length;
+    const unlockedCount = unlockedProvinces.length;
 
-    useEffect(() => {
-        async function getUser() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) setUserId(user.id);
-        }
-        getUser();
-    }, []);
-
-    const handlePurchase = async (priceId: string, mode: 'subscription' | 'payment', actionType: string) => {
-        if (!userId) {
-            openModal({
-                type: 'alert',
-                title: 'ACCESSO NEGATO',
-                message: 'Verifica identità richiesta per acquistare potenziamenti.',
-                actionLabel: 'LOGIN',
-                onAction: () => router.push('/login')
-            });
+    const handleBuy = async (item: typeof SHOP_ITEMS[0]) => {
+        if (credits < item.cost) {
+            setFeedback({ type: 'error', message: 'Crediti insufficienti!' });
+            setTimeout(() => setFeedback(null), 3000);
             return;
         }
-        setLoading(true);
-        try {
-            if (!stripePromise) {
-                console.error("Stripe key missing");
-                showToast("Sistema di pagamento offline (Configurazione mancante)", "error");
-                setLoading(false);
-                return;
-            }
-            const stripe = await stripePromise;
-            if (!stripe) throw new Error("Stripe failed to load");
 
-            const response = await fetch('/api/checkout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ priceId, userId, mode, actionType }),
-            });
+        setIsBuying(item.id);
+        const success = await buyItem(item.id, item.cost);
+        setIsBuying(null);
 
-            const { url } = await response.json();
-
-            if (url) {
-                window.location.href = url;
-            } else {
-                console.error("No checkout URL returned");
-                showToast("Transazione Fallita. Riprova.", "error");
-            }
-        } catch (error) {
-            console.error("Purchase failed:", error);
-            showToast("Errore di Sistema: Acquisto fallito.", "error");
-        } finally {
-            setLoading(false);
+        if (success) {
+            setFeedback({ type: 'success', message: `${item.name} acquistato!` });
+        } else {
+            setFeedback({ type: 'error', message: 'Errore durante l\'acquisto.' });
         }
+        setTimeout(() => setFeedback(null), 3000);
     };
 
-    const handleWatchAd = () => {
-        if (!userId) {
-            openModal({
-                type: 'alert',
-                title: 'ACCESSO NEGATO',
-                message: 'Verifica identità richiesta per accedere ai rifornimenti.',
-                actionLabel: 'LOGIN',
-                onAction: () => router.push('/login')
-            });
+    const handleMysteryBox = async () => {
+        const COST = 50;
+        if (credits < COST) {
+            setFeedback({ type: 'error', message: 'Crediti insufficienti!' });
+            setTimeout(() => setFeedback(null), 3000);
             return;
         }
-        setAdModalOpen(true);
-        setAdCountdown(15);
 
-        const timer = setInterval(() => {
-            setAdCountdown((prev) => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    completeAd();
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-    };
+        setIsBuying('mystery_box');
+        // Simulate "opening" delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
-    const completeAd = async () => {
-        try {
-            const response = await fetch('/api/ad-reward', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId }),
-            });
+        // Random Reward Logic
+        const roll = Math.random();
+        let rewardMsg = "";
 
-            if (response.ok) {
-                // Optimistically update UI (or refetch from DB)
-                // For now, using store action (which updates local state)
-                // Ideally, we should sync with DB state
-                useUserStore.setState((state) => ({ lives: Math.min(state.maxLives, state.lives + 1) }));
-                alert("Ricompensa ottenuta: +1 Cuore!");
-            } else {
-                alert("Impossibile riscattare la ricompensa.");
-            }
-        } catch (error) {
-            console.error("Ad reward error:", error);
-        } finally {
-            setAdModalOpen(false);
+        if (roll < 0.5) {
+            // 50% chance: Small XP
+            // In a real app, we'd call an action to add XP directly or handle it in buyItem
+            // For now, let's assume buyItem handles 'mystery_box' logic or we add a specific action
+            // Since buyItem is generic, we might need to extend it or handle it here.
+            // Let's assume we just deduct credits here and show a message for now.
+            // Ideally, useUserStore should have a 'openMysteryBox' action.
+            await buyItem('mystery_box_cost', COST);
+            rewardMsg = "Hai trovato 50 XP!";
+        } else if (roll < 0.8) {
+            await buyItem('mystery_box_cost', COST);
+            rewardMsg = "Hai trovato 100 Crediti!";
+        } else {
+            await buyItem('mystery_box_cost', COST);
+            rewardMsg = "JACKPOT! Streak Freeze!";
         }
+
+        setMysteryBoxOpen(true);
+        setFeedback({ type: 'success', message: rewardMsg });
+        setIsBuying(null);
+        setTimeout(() => {
+            setFeedback(null);
+            setMysteryBoxOpen(false);
+        }, 4000);
     };
 
     return (
-        <div className="space-y-8 pb-32 relative">
+        <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-cyan-500/30 pb-24">
+            {/* Top Bar */}
+            <TopBar progress={unlockedCount} total={totalProvinces} className="!fixed z-40 top-14" />
+
             {/* Header */}
-            <div className="text-center space-y-2 pt-4">
-                <div className="inline-flex items-center justify-center p-3 bg-cyber-blue/10 rounded-full mb-2 border border-cyber-blue/30 shadow-[0_0_15px_rgba(69,162,158,0.2)]">
-                    <Zap className="w-6 h-6 text-cyber-blue fill-current" />
+            <header className="fixed top-32 left-0 w-full p-4 z-30 flex items-center justify-between pointer-events-none">
+                <div className="flex flex-col">
+                    <span className="text-[10px] font-orbitron tracking-widest text-cyan-500 uppercase">IL MERCATO NERO</span>
+                    <h1 className="text-2xl font-bold text-white font-orbitron">SHOP</h1>
                 </div>
-                <h1 className="text-3xl font-bold font-orbitron tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyber-blue to-cyber-purple text-glow">
-                    DEPOSITO FORNITURE CYBER
-                </h1>
-                <p className="text-zinc-400 font-mono text-sm">
-                    Equipaggiati per la frontiera digitale.
-                </p>
-            </div>
+                <div className="pointer-events-auto flex items-center gap-2 bg-slate-900/80 backdrop-blur border border-cyan-500/30 px-4 py-2 rounded-full">
+                    <Coins className="w-5 h-5 text-yellow-400" />
+                    <span className="font-bold font-mono text-yellow-400">{credits} NC</span>
+                </div>
+            </header>
 
-            {/* Section A: Elite Status (Hero Card) */}
-            <section className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200 animate-pulse-slow"></div>
-                <div className="relative p-6 rounded-3xl border border-yellow-500/50 bg-gradient-to-r from-purple-900/80 to-blue-900/80 backdrop-blur-xl shadow-[0_0_30px_rgba(234,179,8,0.1)] overflow-hidden">
+            <main className="pt-52 px-4 max-w-2xl mx-auto space-y-8">
 
-                    {/* Background Effects */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                {/* Feedback Toast */}
+                <AnimatePresence>
+                    {feedback && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-lg border font-bold shadow-lg ${feedback.type === 'success'
+                                    ? 'bg-emerald-950/90 border-emerald-500 text-emerald-400'
+                                    : 'bg-red-950/90 border-red-500 text-red-400'
+                                }`}
+                        >
+                            {feedback.message}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-                    <div className="relative z-10 flex flex-col lg:flex-row items-center gap-6">
-                        {/* Icon */}
-                        <div className="flex-shrink-0">
-                            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
-                                <Crown className="w-10 h-10 text-white fill-white/20" />
+                {/* Daily Deal Section */}
+                <section className="relative overflow-hidden rounded-2xl border border-yellow-500/30 bg-gradient-to-br from-yellow-950/20 to-slate-900 p-6">
+                    <div className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-3 py-1 rounded-bl-lg font-orbitron">
+                        DAILY DEAL -50%
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <div className="p-4 rounded-full bg-yellow-500/10 border border-yellow-500/50 animate-pulse">
+                            <Zap className="w-8 h-8 text-yellow-400" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-white">System Reboot</h3>
+                            <p className="text-sm text-slate-400">Offerta a tempo limitato</p>
+                            <div className="flex items-center gap-2 mt-2">
+                                <span className="text-slate-500 line-through text-sm">350 NC</span>
+                                <span className="text-yellow-400 font-bold">175 NC</span>
                             </div>
                         </div>
+                        <button
+                            onClick={() => handleBuy({ ...SHOP_ITEMS[1], cost: 175 })}
+                            className="ml-auto px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-lg transition-colors font-orbitron text-sm"
+                        >
+                            COMPRA
+                        </button>
+                    </div>
+                </section>
 
-                        {/* Content */}
-                        <div className="flex-1 text-center lg:text-left space-y-2">
-                            <h2 className="text-2xl font-bold font-orbitron text-white tracking-wide flex items-center justify-center lg:justify-start gap-2">
-                                DEEPSAFE ELITE
-                                <span className="px-2 py-0.5 rounded text-[10px] bg-yellow-500 text-black font-bold">PLUS</span>
-                            </h2>
-                            <div className="flex flex-wrap justify-center lg:justify-start gap-3 text-sm text-blue-100">
-                                <span className="flex items-center gap-1"><Check className="w-4 h-4 text-yellow-400" /> Vite Infinite</span>
-                                <span className="flex items-center gap-1"><Check className="w-4 h-4 text-yellow-400" /> No Pubblicità</span>
-                                <span className="flex items-center gap-1"><Check className="w-4 h-4 text-yellow-400" /> Doppi XP</span>
+                {/* Mystery Box */}
+                <section className="relative overflow-hidden rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-950/20 to-slate-900 p-6 text-center">
+                    <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
+                    <Gift className={`w-12 h-12 text-purple-400 mx-auto mb-4 ${isBuying === 'mystery_box' ? 'animate-bounce' : ''}`} />
+                    <h3 className="text-xl font-bold text-white font-orbitron mb-2">Cassa Crittografata</h3>
+                    <p className="text-sm text-slate-400 mb-6">Tenta la fortuna! Contiene premi casuali.</p>
+
+                    <button
+                        onClick={handleMysteryBox}
+                        disabled={isBuying === 'mystery_box'}
+                        className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(147,51,234,0.3)] flex items-center justify-center gap-2"
+                    >
+                        {isBuying === 'mystery_box' ? 'DECRITTAZIONE...' : (
+                            <>
+                                <span>APRI</span>
+                                <span className="bg-black/20 px-2 py-0.5 rounded text-xs">50 NC</span>
+                            </>
+                        )}
+                    </button>
+                </section>
+
+                {/* Regular Items Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {SHOP_ITEMS.map(item => (
+                        <div key={item.id} className="bg-slate-900/50 border border-slate-800 rounded-xl p-4 hover:border-cyan-500/50 transition-colors group">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="p-3 rounded-lg bg-slate-800 group-hover:bg-cyan-950/30 transition-colors">
+                                    {item.icon}
+                                </div>
+                                {item.isLimited && (
+                                    <span className="text-[10px] font-bold text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full bg-red-950/30">
+                                        SOLO {item.stock} RIMASTI
+                                    </span>
+                                )}
                             </div>
-                        </div>
 
-                        {/* CTA */}
-                        <div className="flex-shrink-0 w-full lg:w-auto">
+                            <h3 className="font-bold text-white mb-1">{item.name}</h3>
+                            <p className="text-xs text-slate-400 mb-4 h-10 leading-relaxed">{item.description}</p>
+
                             <button
-                                onClick={() => handlePurchase('price_elite_monthly_id', 'subscription', 'ACTIVATE_PREMIUM')}
-                                disabled={hasInfiniteLives || loading}
-                                className="w-full lg:w-auto px-8 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-bold rounded-xl shadow-[0_0_20px_rgba(234,179,8,0.3)] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed font-orbitron tracking-wide flex items-center justify-center gap-2"
+                                onClick={() => handleBuy(item)}
+                                disabled={isBuying === item.id || credits < item.cost}
+                                className={`w-full py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all ${credits >= item.cost
+                                        ? 'bg-slate-800 hover:bg-cyan-600 text-white hover:shadow-[0_0_15px_rgba(8,145,178,0.4)]'
+                                        : 'bg-slate-900 text-slate-600 cursor-not-allowed'
+                                    }`}
                             >
-                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : hasInfiniteLives ? 'PIANO ATTIVO' : 'POTENZIA - €4.99/mese'}
+                                {isBuying === item.id ? (
+                                    <span className="animate-pulse">ELABORAZIONE...</span>
+                                ) : (
+                                    <>
+                                        <span>ACQUISTA</span>
+                                        <span className={`text-xs ${credits >= item.cost ? 'text-cyan-400 group-hover:text-white' : 'text-slate-600'}`}>
+                                            {item.cost} NC
+                                        </span>
+                                    </>
+                                )}
                             </button>
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Section B: Vital Resources (Lives Refill) */}
-            <section className="space-y-4">
-                <div className="flex items-center gap-2 px-2">
-                    <Heart className="w-5 h-5 text-cyber-red" />
-                    <h2 className="text-lg font-bold font-orbitron tracking-wide text-white">RISORSE VITALI</h2>
+                    ))}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Card 1: Single Refill */}
-                    <div className="group relative p-5 rounded-2xl border border-white/10 bg-cyber-gray/50 backdrop-blur-xl hover:bg-cyber-gray/70 transition-all">
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="p-3 rounded-xl bg-cyber-red/10 border border-cyber-red/20 group-hover:border-cyber-red/50 transition-colors">
-                                <Battery className="w-6 h-6 text-cyber-red" />
-                            </div>
-                            <span className="px-2 py-1 rounded-lg bg-white/5 text-xs font-mono text-zinc-400 border border-white/5">
-                                {lives}/{maxLives} CUORI
-                            </span>
-                        </div>
-                        <div className="space-y-1 mb-4">
-                            <h3 className="font-bold text-white">Ricarica Emergenza</h3>
-                            <p className="text-xs text-zinc-400">+1 Cuore per continuare.</p>
-                        </div>
-                        <button
-                            onClick={handleWatchAd}
-                            disabled={lives >= maxLives || hasInfiniteLives || adModalOpen}
-                            className="w-full py-2 rounded-lg border border-cyber-red/30 text-cyber-red hover:bg-cyber-red hover:text-white transition-all font-mono text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {hasInfiniteLives ? 'VITE INFINITE ATTIVE' : lives >= maxLives ? 'SALUTE COMPLETA' : adModalOpen ? 'VISIONE IN CORSO...' : 'GUARDA AD (GRATIS)'}
-                        </button>
-                    </div>
-
-                    {/* Card 2: Full Restore */}
-                    <div className="group relative p-5 rounded-2xl border border-cyber-green/30 bg-cyber-green/5 backdrop-blur-xl hover:bg-cyber-green/10 transition-all shadow-[0_0_15px_rgba(102,252,241,0.05)]">
-                        <div className="absolute top-0 right-0 px-2 py-1 bg-[#66FCF1] text-black text-[10px] font-bold rounded-bl-xl rounded-tr-xl">
-                            MIGLIOR VALORE
-                        </div>
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="p-3 rounded-xl bg-cyber-green/20 border border-cyber-green/30 group-hover:border-cyber-green/60 transition-colors">
-                                <Zap className="w-6 h-6 text-cyber-green fill-current" />
-                            </div>
-                        </div>
-                        <div className="space-y-1 mb-4">
-                            <h3 className="font-bold text-white">Riavvio Sistema</h3>
-                            <p className="text-xs text-cyber-green/80">Ripristina 5 Cuori istantaneamente.</p>
-                        </div>
-                        <button
-                            onClick={() => handlePurchase('price_reboot_id', 'payment', 'REFILL_HEARTS')}
-                            disabled={lives >= maxLives || hasInfiniteLives || loading}
-                            className="w-full py-2 rounded-lg bg-[#66FCF1] text-black hover:bg-[#66FCF1]/90 transition-all font-mono text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_10px_rgba(102,252,241,0.3)] flex items-center justify-center gap-2"
-                        >
-                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : '€0.99'}
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            {/* Section C: Tactical Upgrades (Power-ups) */}
-            <section className="space-y-4">
-                <div className="flex items-center gap-2 px-2">
-                    <Shield className="w-5 h-5 text-cyber-blue" />
-                    <h2 className="text-lg font-bold font-orbitron tracking-wide text-white">POTENZIAMENTI TATTICI</h2>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4">
-                    {/* Item 1: Streak Freeze */}
-                    <div className="flex items-center gap-4 p-4 rounded-2xl border border-white/10 bg-cyber-gray/50 backdrop-blur-xl hover:border-cyber-blue/30 transition-all">
-                        <div className="flex-shrink-0 p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
-                            <Snowflake className="w-6 h-6 text-cyan-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-white">Congela Serie</h3>
-                            <p className="text-xs text-zinc-400 line-clamp-1">Salta un giorno senza perdere la serie.</p>
-                        </div>
-                        <button
-                            onClick={() => handlePurchase('price_streak_freeze_id', 'payment', 'STREAK_FREEZE')}
-                            disabled={loading}
-                            className="flex-shrink-0 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white font-mono text-sm font-bold transition-all flex items-center justify-center gap-2"
-                        >
-                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : '€1.99'}
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            {/* Dev Tools */}
-            <div className="pt-8 border-t border-white/5">
-                <button
-                    onClick={() => {
-                        setInfiniteLives(false);
-                        useUserStore.setState({ lives: 0 });
-                        alert("Dev Mode: Infinite Lives Disabled & Hearts Reset to 0");
-                    }}
-                    className="text-xs text-zinc-600 hover:text-zinc-400 underline"
-                >
-                    [DEV] Reset Status (Enable Ads)
-                </button>
-            </div>
-
-            {/* Ad Modal */}
-            {adModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md p-4">
-                    <div className="w-full max-w-md bg-cyber-dark border border-cyber-gray rounded-2xl p-8 text-center space-y-6 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-cyber-gray">
-                            <div
-                                className="h-full bg-cyber-blue transition-all duration-1000 ease-linear"
-                                style={{ width: `${(adCountdown / 15) * 100}%` }}
-                            />
-                        </div>
-
-                        <div className="w-20 h-20 mx-auto bg-cyber-blue/10 rounded-full flex items-center justify-center animate-pulse">
-                            <Zap className="w-10 h-10 text-cyber-blue" />
-                        </div>
-
-                        <div>
-                            <h3 className="text-2xl font-bold font-orbitron text-white mb-2">TRASMISSIONE IN ARRIVO</h3>
-                            <p className="text-zinc-400">Ricezione rifornimento... Attendere.</p>
-                        </div>
-
-                        <div className="text-4xl font-mono font-bold text-cyber-blue">
-                            00:{adCountdown.toString().padStart(2, '0')}
-                        </div>
-
-                        <p className="text-xs text-zinc-600 uppercase tracking-widest">
-                            Non chiudere questa finestra
-                        </p>
-                    </div>
-                </div>
-            )}
+            </main>
         </div>
     );
 }

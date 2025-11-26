@@ -65,6 +65,9 @@ Run the SQL in `supabase_add_badges.sql` to add the `earned_badges` column.
 
 ### 5. Run Migration for Friends
 Run the SQL in `supabase_add_friends.sql` to create the `friends` table.
+
+### 6. Run Migration for Shop
+Run the SQL in `supabase_add_shop.sql` to add `credits`, `streak_freezes`, and `inventory` columns.
     *   Apri il file `supabase_push_setup.sql` (che ho creato nel progetto) o copia il suo contenuto.
     *   Esegui lo script per creare la tabella `push_subscriptions`.
 
