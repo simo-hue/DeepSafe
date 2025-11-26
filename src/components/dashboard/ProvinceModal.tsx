@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Lock, MapPin, ShieldAlert, ChevronRight } from 'lucide-react';
+import { X, Lock, MapPin, ShieldAlert, ChevronRight, Crosshair, Scan, Target } from 'lucide-react';
 import { Province } from '@/data/provincesData';
 import { getLessonsForProvince, TrainingLesson } from '@/data/quizData';
 import { useRouter } from 'next/navigation';
@@ -30,38 +30,8 @@ export default function ProvinceModal({ province, onClose }: ProvinceModalProps)
     const hasMultipleMissions = missions.length > 1;
     const singleMission = missions[0];
 
-    // Theme configuration based on status
-    const theme = isLocked ? {
-        color: 'text-cyber-red',
-        borderColor: 'border-cyber-red',
-        bgColor: 'bg-cyber-red/10',
-        glowColor: 'shadow-[0_0_50px_rgba(255,50,50,0.2)]',
-        buttonBg: 'hover:bg-cyber-red/20',
-        buttonBorder: 'hover:border-white',
-        buttonShadow: 'shadow-[0_0_20px_rgba(255,50,50,0.5)] hover:shadow-[0_0_50px_rgba(255,50,50,0.8)]',
-        icon: <Lock className="w-6 h-6" />,
-        title: 'ACCESSO NEGATO',
-        description: `Il settore ${province.name} è attualmente bloccato. Completa le missioni nei settori adiacenti per ottenere i codici di accesso.`,
-        buttonText: 'CHIUDI',
-        securityLevel: 'ESTREMO',
-        action: onClose
-    } : {
-        color: 'text-cyber-blue',
-        borderColor: 'border-cyber-blue',
-        bgColor: 'bg-cyber-blue/10',
-        glowColor: 'shadow-[0_0_50px_rgba(102,252,241,0.2)]',
-        buttonBg: 'hover:bg-cyber-blue/20',
-        buttonBorder: 'hover:border-white',
-        buttonShadow: 'shadow-[0_0_20px_rgba(102,252,241,0.5)] hover:shadow-[0_0_50px_rgba(102,252,241,0.8)]',
-        icon: <MapPin className="w-6 h-6" />,
-        title: hasMultipleMissions ? 'MISSIONI DISPONIBILI' : province.name,
-        description: hasMultipleMissions
-            ? `Rilevate multiple anomalie nel settore ${province.name}. Seleziona un obiettivo prioritario.`
-            : (singleMission?.description || `Rilevata attività anomala nel settore ${province.name}. Protocolli di sicurezza compromessi. Richiesto intervento immediato per ripristinare il firewall regionale.`),
-        buttonText: 'VAI ALLA MISSIONE',
-        securityLevel: hasMultipleMissions ? 'VARIO' : (singleMission?.level || 'CRITICO'),
-        action: () => router.push(`/training/mission-1?provinceId=${province.id}`)
-    };
+    // Calculate progress percentage
+    const progressPercent = province.maxScore > 0 ? Math.round((province.userScore / province.maxScore) * 100) : 0;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -71,117 +41,161 @@ export default function ProvinceModal({ province, onClose }: ProvinceModalProps)
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
-                    className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm"
+                    className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm"
                 />
             </AnimatePresence>
 
             <motion.div
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className={`relative w-full max-w-sm bg-slate-900 border ${theme.borderColor} rounded-2xl p-6 ${theme.glowColor} overflow-hidden flex flex-col max-h-[80vh]`}
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="relative w-full max-w-md bg-slate-950 border border-slate-800 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)]"
             >
-                {/* Background Grid Effect */}
-                <div className={`absolute inset-0 ${theme.bgColor} opacity-20`}
-                    style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '20px 20px' }}
+                {/* Cyber Grid Background */}
+                <div className="absolute inset-0 opacity-20 pointer-events-none"
+                    style={{
+                        backgroundImage: `linear-gradient(rgba(6,182,212,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.1) 1px, transparent 1px)`,
+                        backgroundSize: '40px 40px'
+                    }}
                 />
 
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors z-10"
+                    className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors z-20"
                 >
                     <X className="w-6 h-6" />
                 </button>
 
-                {/* Content */}
-                <div className="relative z-10 flex flex-col items-center text-center space-y-6 overflow-y-auto custom-scrollbar">
-
-                    {/* Icon Circle */}
-                    <div className={`w-20 h-20 rounded-full border-2 ${theme.borderColor} flex items-center justify-center ${theme.color} bg-slate-800/50 shadow-[0_0_30px_currentColor] shrink-0`}>
-                        {theme.icon}
+                {/* Header Section */}
+                <div className="relative p-8 pb-4 z-10">
+                    <div className="flex items-center gap-2 text-cyan-500 mb-2">
+                        <Scan className="w-4 h-4" />
+                        <span className="text-[10px] font-orbitron tracking-[0.2em] uppercase">TARGET: PROVINCE</span>
                     </div>
-
-                    {/* Text Content */}
-                    <div className="space-y-2 w-full">
-                        <div className={`text-xs font-orbitron font-bold tracking-widest ${theme.color} border border-current px-2 py-1 rounded inline-block mb-2`}>
-                            LIVELLO SICUREZZA: {theme.securityLevel}
-                        </div>
-                        <h2 className="text-2xl font-orbitron font-bold text-white tracking-wide">
-                            {theme.title}
-                        </h2>
-                        <p className="text-slate-400 text-sm leading-relaxed">
-                            {theme.description}
-                        </p>
-
-                        {/* Multiple Missions Stack */}
-                        {!isLocked && hasMultipleMissions && (
-                            <div className="flex flex-col gap-3 mt-4 w-full text-left">
-                                {missions.map((mission) => (
-                                    <button
-                                        key={mission.id}
-                                        onClick={() => router.push(`/training/mission-1?provinceId=${province.id}&missionId=${mission.id}`)}
-                                        className="group relative p-4 rounded-xl bg-slate-800/50 border border-slate-700 hover:border-cyan-500 hover:bg-slate-800 transition-all duration-300"
-                                    >
-                                        <div className="flex justify-between items-start mb-2">
-                                            <h3 className="font-bold text-white group-hover:text-cyan-400 transition-colors">{mission.title}</h3>
-                                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-700">
-                                                {mission.level || 'SEMPLICE'}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-4 text-xs text-slate-400 font-mono">
-                                            <span className="flex items-center gap-1">
-                                                <span className="text-amber-400">★</span> {mission.xpReward} XP
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <span>⏱</span> {mission.estimatedTime}
-                                            </span>
-                                        </div>
-                                        <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-600 group-hover:text-cyan-500 group-hover:translate-x-1 transition-all opacity-0 group-hover:opacity-100" />
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Score Display for Completed Provinces */}
-                        {province.isCompleted && !hasMultipleMissions && (
-                            <div className="flex items-center gap-4 bg-slate-800/50 p-3 rounded-lg border border-slate-700 justify-center mt-4">
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] text-slate-500 uppercase font-bold">Punteggio</span>
-                                    <span className="text-xl font-bold text-amber-400 font-orbitron">
-                                        {province.userScore}/{province.maxScore}
-                                    </span>
-                                </div>
-                                <div className="h-8 w-[1px] bg-slate-700" />
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] text-slate-500 uppercase font-bold">Stato</span>
-                                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                                        Completato
-                                    </span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Action Button (Only for Single Mission or Locked) */}
-                    {(!hasMultipleMissions || isLocked) && (
-                        <button
-                            onClick={theme.action}
-                            className={`w-full py-4 rounded-xl bg-slate-800 border border-slate-600 text-white font-orbitron font-bold tracking-wider transition-all duration-300 group relative overflow-hidden ${theme.buttonBg} ${theme.buttonBorder} ${theme.buttonShadow} shrink-0`}
-                        >
-                            <span className="relative z-10 flex items-center justify-center space-x-2">
-                                <span>{theme.buttonText}</span>
-                                {!isLocked && <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
+                    <h2 className="text-4xl font-bold text-white font-sans tracking-tight mb-1">
+                        {province.name}
+                    </h2>
+                    {!isLocked && (
+                        <div className="flex items-center gap-2 text-emerald-500 text-xs font-mono">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                             </span>
-                            {/* Button Glare Effect */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                        </button>
+                            ONLINE
+                        </div>
+                    )}
+                    {isLocked && (
+                        <div className="flex items-center gap-2 text-red-500 text-xs font-mono">
+                            <Lock className="w-3 h-3" />
+                            LOCKED
+                        </div>
                     )}
                 </div>
 
-                {/* Decorative Corner Accents */}
-                <div className={`absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 ${theme.borderColor}/30 rounded-bl-xl pointer-events-none`} />
-                <div className={`absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 ${theme.borderColor}/30 rounded-br-xl pointer-events-none`} />
+                {/* Divider */}
+                <div className="h-px w-full bg-gradient-to-r from-transparent via-cyan-900/50 to-transparent" />
+
+                {/* Body Section */}
+                <div className="relative p-8 pt-6 z-10 space-y-6">
+                    {/* Description */}
+                    <p className="text-slate-400 text-sm leading-relaxed font-light">
+                        {isLocked
+                            ? `Accesso al settore ${province.name} negato. Protocolli di sicurezza attivi. Completa le missioni adiacenti per sbloccare.`
+                            : (hasMultipleMissions
+                                ? `Rilevate multiple anomalie nel settore. Seleziona un obiettivo prioritario per avviare la procedura di contenimento.`
+                                : (singleMission?.description || `Rilevata attività anomala. Richiesto intervento immediato.`))
+                        }
+                    </p>
+
+                    {/* Mission Stack or Single Action */}
+                    {!isLocked && (
+                        <div className="space-y-3">
+                            {hasMultipleMissions ? (
+                                // Multiple Missions Stack
+                                <div className="flex flex-col gap-3">
+                                    {missions.map((mission) => (
+                                        <button
+                                            key={mission.id}
+                                            onClick={() => router.push(`/training/mission-1?provinceId=${province.id}&missionId=${mission.id}`)}
+                                            className="group relative flex items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-cyan-500/50 hover:bg-slate-900 transition-all duration-300"
+                                        >
+                                            <div className="flex flex-col items-start gap-1">
+                                                <span className="text-sm font-bold text-white group-hover:text-cyan-400 transition-colors">
+                                                    {mission.title}
+                                                </span>
+                                                <div className="flex items-center gap-3 text-[10px] font-mono text-slate-500">
+                                                    <span className="flex items-center gap-1">
+                                                        <span className="text-amber-500">★</span> {mission.xpReward} XP
+                                                    </span>
+                                                    <span className="flex items-center gap-1">
+                                                        <span>⏱</span> {mission.estimatedTime}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="px-3 py-1 rounded bg-slate-950 border border-slate-800 text-[10px] font-mono text-slate-400 group-hover:text-cyan-500 group-hover:border-cyan-900 transition-colors">
+                                                {mission.level || 'SEMPLICE'}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : (
+                                // Single Mission Action
+                                <button
+                                    onClick={() => router.push(`/training/mission-1?provinceId=${province.id}`)}
+                                    className="w-full group relative overflow-hidden rounded-xl bg-cyan-950/30 border border-cyan-900/50 p-6 hover:bg-cyan-900/20 hover:border-cyan-500/50 transition-all duration-300"
+                                >
+                                    <div className="flex items-center justify-between relative z-10">
+                                        <div className="flex flex-col items-start">
+                                            <span className="text-xs font-orbitron text-cyan-500 mb-1">MISSIONE PRINCIPALE</span>
+                                            <span className="text-lg font-bold text-white">AVVIA MISSIONE</span>
+                                        </div>
+                                        <div className="h-10 w-10 rounded-full bg-cyan-500/10 flex items-center justify-center group-hover:bg-cyan-500 group-hover:text-black transition-all">
+                                            <ChevronRight className="w-6 h-6" />
+                                        </div>
+                                    </div>
+                                    {/* Scanline effect */}
+                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-1000" />
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer Status Bar */}
+                <div className="relative bg-slate-900/80 border-t border-slate-800 p-4 flex items-center justify-between z-10">
+                    <div className="flex items-center gap-4">
+                        <div className={`px-3 py-1 rounded text-[10px] font-bold font-orbitron tracking-wider flex items-center gap-2 ${isLocked
+                            ? 'bg-red-950/30 text-red-500 border border-red-900/50'
+                            : 'bg-emerald-950/30 text-emerald-500 border border-emerald-900/50'
+                            }`}>
+                            {isLocked ? <Lock className="w-3 h-3" /> : <ShieldAlert className="w-3 h-3" />}
+                            {isLocked ? 'LOCKED' : 'UNLOCKED'}
+                        </div>
+                        {province.isCompleted && (
+                            <span className="text-[10px] font-mono text-emerald-500">
+                                COMPLETED
+                            </span>
+                        )}
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <span className="text-[10px] font-mono text-slate-500">PROGRESS:</span>
+                        <div className="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-cyan-500 transition-all duration-500"
+                                style={{ width: `${progressPercent}%` }}
+                            />
+                        </div>
+                        <span className="text-[10px] font-mono text-cyan-500 w-8 text-right">
+                            {progressPercent}%
+                        </span>
+                    </div>
+                </div>
+
+                {/* Decorative Corners */}
+                <div className="absolute top-0 left-0 w-16 h-16 border-l-2 border-t-2 border-cyan-500/20 rounded-tl-3xl pointer-events-none" />
+                <div className="absolute bottom-0 right-0 w-16 h-16 border-r-2 border-b-2 border-cyan-500/20 rounded-br-3xl pointer-events-none" />
             </motion.div>
         </div>
     );
