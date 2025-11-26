@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Orbitron } from "next/font/google";
 import "./globals.css";
-import { BottomNav } from "@/components/layout/BottomNav";
-import { Header } from "@/components/layout/Header";
+import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 const orbitron = Orbitron({ subsets: ["latin"], variable: '--font-orbitron' });
@@ -27,8 +26,6 @@ export const metadata: Metadata = {
 };
 
 import { SystemUIProvider } from "@/context/SystemUIContext";
-import { CyberToast } from "@/components/ui/CyberToast";
-import { CyberModal } from "@/components/ui/CyberModal";
 
 import { PostHogProvider } from "./providers";
 
@@ -40,19 +37,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${inter.variable} ${orbitron.variable} antialiased pt-24 pb-24 bg-cyber-dark`}
+        className={`${inter.variable} ${orbitron.variable} antialiased bg-cyber-dark`}
       >
         <PostHogProvider>
           <SystemUIProvider>
-            <div className="max-w-md mx-auto min-h-screen flex flex-col relative overflow-hidden">
-              <Header />
-              <main className="flex-1 p-4 z-10">
-                {children}
-              </main>
-              <BottomNav />
-              <CyberToast />
-              <CyberModal />
-            </div>
+            <LayoutWrapper>
+              {children}
+            </LayoutWrapper>
           </SystemUIProvider>
         </PostHogProvider>
       </body>

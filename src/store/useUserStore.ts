@@ -306,26 +306,35 @@ export const useUserStore = create<UserState>()(
                 const { xp, streak, earnedBadges } = state;
                 const newBadges: string[] = [];
 
-                // Import BADGES_DATA dynamically
-                const { BADGES_DATA } = await import('@/data/badgesData');
+                // Fetch badges from DB
+                const { data: dbBadges, error } = await supabase
+                    .from('badges')
+                    .select('*');
+
+                if (error || !dbBadges) {
+                    console.error('Error fetching badges definitions:', error);
+                    return { newBadges: [] };
+                }
+
+                // Import provincesData dynamically
                 const { provincesData } = await import('@/data/provincesData');
 
                 const earnedBadgeIds = new Set(earnedBadges.map(b => b.id));
                 const now = new Date().toISOString();
 
-                for (const badge of BADGES_DATA) {
+                for (const badge of dbBadges) {
                     if (earnedBadgeIds.has(badge.id)) continue;
 
                     let unlocked = false;
 
-                    switch (badge.condition.type) {
+                    switch (badge.condition_type) {
                         case 'xp_milestone':
-                            if (typeof badge.condition.value === 'number' && xp >= badge.condition.value) {
+                            if (badge.condition_value && xp >= Number(badge.condition_value)) {
                                 unlocked = true;
                             }
                             break;
                         case 'streak_milestone':
-                            if (typeof badge.condition.value === 'number' && streak >= badge.condition.value) {
+                            if (badge.condition_value && streak >= Number(badge.condition_value)) {
                                 unlocked = true;
                             }
                             break;
@@ -334,8 +343,8 @@ export const useUserStore = create<UserState>()(
                             if (hasCompletedMission) unlocked = true;
                             break;
                         case 'region_master':
-                            if (typeof badge.condition.value === 'string') {
-                                const regionName = badge.condition.value;
+                            if (badge.condition_value) {
+                                const regionName = badge.condition_value;
                                 const regionProvinces = provincesData.filter(p => p.region === regionName);
                                 const allCompleted = regionProvinces.every(p => {
                                     const scoreData = state.provinceScores[p.id];

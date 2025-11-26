@@ -68,6 +68,15 @@ Run the SQL in `supabase_add_friends.sql` to create the `friends` table.
 
 ### 6. Run Migration for Shop
 Run the SQL in `supabase_add_shop.sql` to add `credits`, `streak_freezes`, and `inventory` columns.
+
+### 7. Run Migration for Admin Panel
+Run the SQL in `supabase_add_admin.sql` to add the `is_admin` column and RLS policies.
+
+### 8. Enable God Mode (Admin)
+1.  Go to Supabase -> Table Editor -> `profiles`.
+2.  Find your user row.
+3.  Set `is_admin` to `TRUE`.
+4.  Click "Save".
     *   Apri il file `supabase_push_setup.sql` (che ho creato nel progetto) o copia il suo contenuto.
     *   Esegui lo script per creare la tabella `push_subscriptions`.
 

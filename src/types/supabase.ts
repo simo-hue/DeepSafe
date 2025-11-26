@@ -24,6 +24,10 @@ export interface Database {
                     credits: number
                     streak_freezes: number
                     inventory: Json
+                    is_admin: boolean
+                    last_login: string | null
+                    earned_badges: Json
+                    province_scores: Json
                 }
                 Insert: {
                     avatar_url?: string | null
@@ -39,6 +43,10 @@ export interface Database {
                     credits?: number
                     streak_freezes?: number
                     inventory?: Json
+                    is_admin?: boolean
+                    last_login?: string | null
+                    earned_badges?: Json
+                    province_scores?: Json
                 }
                 Update: {
                     avatar_url?: string | null
@@ -54,6 +62,10 @@ export interface Database {
                     credits?: number
                     streak_freezes?: number
                     inventory?: Json
+                    is_admin?: boolean
+                    last_login?: string | null
+                    earned_badges?: Json
+                    province_scores?: Json
                 }
                 Relationships: [
                     {
@@ -103,6 +115,45 @@ export interface Database {
                         referencedColumns: ["id"]
                     }
                 ]
+            }
+            badges: {
+                Row: {
+                    id: string
+                    name: string
+                    description: string
+                    icon: string
+                    category: string
+                    xp_reward: number
+                    rarity: string
+                    condition_type: string
+                    condition_value: string | null
+                    created_at: string
+                }
+                Insert: {
+                    id: string
+                    name: string
+                    description: string
+                    icon: string
+                    category: string
+                    xp_reward: number
+                    rarity: string
+                    condition_type: string
+                    condition_value?: string | null
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    name?: string
+                    description?: string
+                    icon?: string
+                    category?: string
+                    xp_reward?: number
+                    rarity?: string
+                    condition_type?: string
+                    condition_value?: string | null
+                    created_at?: string
+                }
+                Relationships: []
             }
             friends: {
                 Row: {
