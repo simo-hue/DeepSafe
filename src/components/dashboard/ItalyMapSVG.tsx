@@ -4,6 +4,7 @@ import { Province, provincesData } from '@/data/provincesData';
 import ProvincePath from './ProvincePath';
 
 interface ItalyMapSVGProps {
+    provinces: Province[];
     onProvinceClick: (province: Province) => void;
     onProvinceHover: (province: Province | null) => void;
     viewBox: string;
@@ -12,6 +13,7 @@ interface ItalyMapSVGProps {
 }
 
 const ItalyMapSVG: React.FC<ItalyMapSVGProps> = ({
+    provinces,
     onProvinceClick,
     onProvinceHover,
     viewBox,
@@ -21,12 +23,12 @@ const ItalyMapSVG: React.FC<ItalyMapSVGProps> = ({
     // Group provinces by region for National View
     const regions = React.useMemo(() => {
         const groups: Record<string, Province[]> = {};
-        provincesData.forEach(p => {
+        provinces.forEach(p => {
             if (!groups[p.region]) groups[p.region] = [];
             groups[p.region].push(p);
         });
         return groups;
-    }, []);
+    }, [provinces]);
 
     return (
         <>
@@ -69,7 +71,7 @@ const ItalyMapSVG: React.FC<ItalyMapSVGProps> = ({
                 ))}
 
                 {/* LEVEL 2: REGIONAL VIEW (Provinces) */}
-                {activeRegion && provincesData
+                {activeRegion && provinces
                     .filter(p => p.region === activeRegion)
                     .map((province) => (
                         <ProvincePath

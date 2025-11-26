@@ -52,7 +52,7 @@ export default function ProvinceModal({ province, onClose }: ProvinceModalProps)
         description: `Rilevata attività anomala nel settore ${province.name}. Protocolli di sicurezza compromessi. Richiesto intervento immediato per ripristinare il firewall regionale.`,
         buttonText: 'VAI ALLA MISSIONE',
         securityLevel: 'CRITICO',
-        action: () => router.push(`/missions/${province.id}`)
+        action: () => router.push(`/training/mission-1?provinceId=${province.id}`)
     };
 
     return (

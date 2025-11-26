@@ -10,6 +10,7 @@ import ScannerHUD from './ScannerHUD';
 import { Lock, ArrowLeft, Map } from 'lucide-react';
 import { getRegionBoundingBox } from '@/utils/svgUtils';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import { useUserStore } from '@/store/useUserStore';
 
 const ITALY_VIEWBOX = "0 0 800 1000";
 
@@ -23,17 +24,26 @@ interface MapTarget {
 
 const ItalyMapDashboard: React.FC = () => {
     const [toast, setToast] = useState<{ message: string; type: 'info' | 'error' } | null>(null);
+    const { unlockedProvinces } = useUserStore();
+
+    // Merge static data with persisted unlocked status
+    const dynamicProvincesData = useMemo(() => {
+        return provincesData.map(p => ({
+            ...p,
+            status: unlockedProvinces.includes(p.id) ? 'unlocked' : (p.status === 'safe' ? 'safe' : 'locked')
+        })) as Province[];
+    }, [unlockedProvinces]);
 
     // Calculate initial Italy ViewBox based on all provinces
     const initialItalyViewBox = useMemo(() => {
-        const allPaths = provincesData.map(p => p.path);
+        const allPaths = dynamicProvincesData.map(p => p.path);
         const bbox = getRegionBoundingBox(allPaths);
         if (!bbox) return "0 0 800 1000"; // Fallback
         // Add small padding (5%) to avoid touching edges exactly
         const paddingX = bbox.width * 0.05;
         const paddingY = bbox.height * 0.05;
         return `${bbox.minX - paddingX / 2} ${bbox.minY - paddingY / 2} ${bbox.width + paddingX} ${bbox.height + paddingY}`;
-    }, []);
+    }, [dynamicProvincesData]);
 
     const [viewBox, setViewBox] = useState(initialItalyViewBox);
 
@@ -48,7 +58,7 @@ const ItalyMapDashboard: React.FC = () => {
 
     // Calculate Region ViewBox with padding
     const calculateRegionViewBox = (regionName: string) => {
-        const regionProvinces = provincesData.filter(p => p.region === regionName);
+        const regionProvinces = dynamicProvincesData.filter(p => p.region === regionName);
         const paths = regionProvinces.map(p => p.path);
         const bbox = getRegionBoundingBox(paths);
 
@@ -73,7 +83,7 @@ const ItalyMapDashboard: React.FC = () => {
 
             // Step 1: Select (if not already selected)
             if (selectedTarget?.id !== targetId) {
-                const regionProvinces = provincesData.filter(p => p.region === regionName);
+                const regionProvinces = dynamicProvincesData.filter(p => p.region === regionName);
                 const isUnlocked = regionProvinces.some(p => p.status === 'unlocked' || p.status === 'safe');
                 const status = isUnlocked ? 'unlocked' : 'locked';
 
@@ -133,7 +143,7 @@ const ItalyMapDashboard: React.FC = () => {
 
         if (viewMode === 'ITALY') {
             const regionName = province.region;
-            const regionProvinces = provincesData.filter(p => p.region === regionName);
+            const regionProvinces = dynamicProvincesData.filter(p => p.region === regionName);
             const isUnlocked = regionProvinces.some(p => p.status === 'unlocked' || p.status === 'safe');
 
             setHoveredTarget({
@@ -161,7 +171,7 @@ const ItalyMapDashboard: React.FC = () => {
         if (target.type === 'REGION') {
             enterRegion(target.name);
         } else {
-            const province = provincesData.find(p => p.id === target.id);
+            const province = dynamicProvincesData.find(p => p.id === target.id);
             if (province) {
                 setModalProvince(province);
                 setSelectedTarget(null);
@@ -173,9 +183,9 @@ const ItalyMapDashboard: React.FC = () => {
 
     // Calculate Progress
     const unlockedCount = useMemo(() => {
-        return provincesData.filter(p => p.status === 'unlocked' || p.status === 'safe').length;
-    }, []);
-    const totalProvinces = provincesData.length;
+        return dynamicProvincesData.filter(p => p.status === 'unlocked' || p.status === 'safe').length;
+    }, [dynamicProvincesData]);
+    const totalProvinces = dynamicProvincesData.length;
 
     const showToast = (message: string, type: 'info' | 'error') => {
         setToast({ message, type });
@@ -231,6 +241,7 @@ const ItalyMapDashboard: React.FC = () => {
                             onClick={() => setSelectedTarget(null)}
                         >
                             <ItalyMapSVG
+                                provinces={dynamicProvincesData}
                                 onProvinceClick={handleProvinceClick}
                                 onProvinceHover={handleProvinceHover}
                                 viewBox={viewBox}

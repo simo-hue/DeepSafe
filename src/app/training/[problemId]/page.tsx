@@ -1,16 +1,25 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { quizData, TrainingLesson } from '@/data/quizData';
-import { ArrowLeft, CheckCircle, XCircle, Brain, ChevronRight } from 'lucide-react';
+import { provincesData } from '@/data/provincesData';
+import { ArrowLeft, CheckCircle, XCircle, Brain, ChevronRight, Heart } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { useUserStore } from '@/store/useUserStore';
+import GameOverModal from '@/components/training/GameOverModal';
+import MockAdModal from '@/components/training/MockAdModal';
+import TopBar from '@/components/dashboard/TopBar';
 
 export default function TrainingPillPage() {
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const provinceId = searchParams.get('provinceId');
     const problemId = params?.problemId as string;
+
+    const { addXp, unlockProvince, lives, decrementLives, addHeart, refillLives, unlockedProvinces } = useUserStore();
 
     const [lesson, setLesson] = useState<TrainingLesson | null>(null);
     const [mode, setMode] = useState<'LESSON' | 'QUIZ' | 'COMPLETE'>('LESSON');
@@ -18,6 +27,12 @@ export default function TrainingPillPage() {
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
     const [isAnswerChecked, setIsAnswerChecked] = useState(false);
     const [score, setScore] = useState(0);
+    const [showGameOver, setShowGameOver] = useState(false);
+    const [showAdModal, setShowAdModal] = useState(false);
+
+    // Calculate Map Progress for TopBar
+    const totalProvinces = provincesData.length;
+    const unlockedCount = unlockedProvinces.length;
 
     useEffect(() => {
         if (problemId && quizData[problemId]) {
@@ -27,6 +42,34 @@ export default function TrainingPillPage() {
             // router.push('/dashboard');
         }
     }, [problemId]);
+
+    // Check for Game Over
+    useEffect(() => {
+        if (lives <= 0) {
+            setShowGameOver(true);
+        }
+    }, [lives]);
+
+    const handleWatchAd = async () => {
+        setShowGameOver(false);
+        setShowAdModal(true);
+    };
+
+    const handleAdReward = () => {
+        addHeart(1);
+        setShowAdModal(false);
+    };
+
+    const handleBuyHearts = async () => {
+        // Simulate Purchase
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        refillLives();
+        setShowGameOver(false);
+    };
+
+    const handleGiveUp = () => {
+        router.push('/dashboard');
+    };
 
     if (!lesson) {
         return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-cyan-500">LOADING DATA...</div>;
@@ -44,8 +87,14 @@ export default function TrainingPillPage() {
     const handleCheckAnswer = () => {
         if (selectedOption === null) return;
         setIsAnswerChecked(true);
-        if (selectedOption === lesson.questions[currentQuestionIndex].correctAnswer) {
+
+        const isCorrect = selectedOption === lesson.questions[currentQuestionIndex].correctAnswer;
+
+        if (isCorrect) {
             setScore(prev => prev + 1);
+            addXp(100); // XP Reward per question
+        } else {
+            decrementLives(); // Penalty
         }
     };
 
@@ -55,6 +104,10 @@ export default function TrainingPillPage() {
             setSelectedOption(null);
             setIsAnswerChecked(false);
         } else {
+            // Mission Complete
+            if (provinceId) {
+                unlockProvince(provinceId);
+            }
             setMode('COMPLETE');
         }
     };
@@ -65,9 +118,25 @@ export default function TrainingPillPage() {
 
     return (
         <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-cyan-500/30 overflow-y-auto">
+            <GameOverModal
+                isOpen={showGameOver}
+                onWatchAd={handleWatchAd}
+                onBuyHearts={handleBuyHearts}
+                onGiveUp={handleGiveUp}
+            />
+
+            <MockAdModal
+                isOpen={showAdModal}
+                onClose={() => setShowAdModal(false)}
+                onReward={handleAdReward}
+            />
+
+            {/* Top Bar (Map Progress) */}
+            <TopBar progress={unlockedCount} total={totalProvinces} className="!fixed z-40 top-14" />
+
             {/* Header */}
-            <header className="fixed top-0 left-0 w-full p-4 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800 flex items-center justify-between">
-                <button onClick={handleExit} className="p-2 rounded-full hover:bg-slate-800 transition-colors">
+            <header className="fixed top-32 left-0 w-full p-4 z-30 flex items-center justify-between pointer-events-none">
+                <button onClick={handleExit} className="pointer-events-auto p-2 rounded-full bg-slate-900/50 hover:bg-slate-800 transition-colors backdrop-blur-md border border-slate-700">
                     <ArrowLeft className="w-5 h-5 text-slate-400" />
                 </button>
                 <div className="flex flex-col items-center">
@@ -77,7 +146,7 @@ export default function TrainingPillPage() {
                 <div className="w-9" /> {/* Spacer */}
             </header>
 
-            <main className="pt-24 pb-12 px-4 max-w-2xl mx-auto">
+            <main className="pt-52 pb-12 px-4 max-w-2xl mx-auto">
                 <AnimatePresence mode="wait">
                     {mode === 'LESSON' && (
                         <motion.div
@@ -114,7 +183,7 @@ export default function TrainingPillPage() {
                             <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-cyan-500 transition-all duration-300"
-                                    style={{ width: `${((currentQuestionIndex + 1) / lesson.questions.length) * 100}%` }}
+                                    style={{ width: `${((currentQuestionIndex + 1) / lesson.questions.length) * 100}% ` }}
                                 />
                             </div>
 
@@ -202,8 +271,8 @@ export default function TrainingPillPage() {
                                     onClick={handleCheckAnswer}
                                     disabled={selectedOption === null}
                                     className={`w-full py-4 rounded-lg font-bold font-orbitron tracking-wider transition-all ${selectedOption !== null
-                                            ? 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg'
-                                            : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                                        ? 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg'
+                                        : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                                         }`}
                                 >
                                     CONFERMA RISPOSTA

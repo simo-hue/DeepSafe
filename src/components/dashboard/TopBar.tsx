@@ -1,17 +1,20 @@
 import React from 'react';
 import { Flame, Heart, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useUserStore } from '@/store/useUserStore';
 
 interface TopBarProps {
     progress: number;
     total: number;
+    className?: string;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ progress, total }) => {
+const TopBar: React.FC<TopBarProps> = ({ progress, total, className = "" }) => {
+    const { xp, streak, lives } = useUserStore();
     const percentage = Math.round((progress / total) * 100) || 0;
 
     return (
-        <div className="absolute top-0 left-0 w-full p-4 z-30 flex flex-col gap-3 pointer-events-none">
+        <div className={`absolute top-0 left-0 w-full p-4 z-30 flex flex-col gap-3 pointer-events-none ${className}`}>
 
             {/* Main Stats Bar */}
             <div className="flex justify-center w-full">
@@ -24,19 +27,19 @@ const TopBar: React.FC<TopBarProps> = ({ progress, total }) => {
                     {/* Rank Widget */}
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50">
                         <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                        <span className="text-xs font-bold font-orbitron text-slate-200">#4</span>
+                        <span className="text-xs font-bold font-orbitron text-slate-200">#{Math.floor(xp / 1000) + 1}</span>
                     </div>
 
                     {/* Streak Widget */}
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50">
                         <Flame className="w-3.5 h-3.5 text-orange-500" />
-                        <span className="text-xs font-bold font-orbitron text-slate-200">4</span>
+                        <span className="text-xs font-bold font-orbitron text-slate-200">{streak}</span>
                     </div>
 
                     {/* Hearts Widget */}
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50">
-                        <Heart className="w-3.5 h-3.5 text-red-500" />
-                        <span className="text-xs font-bold font-orbitron text-slate-200">5</span>
+                        <Heart className={`w-3.5 h-3.5 ${lives > 0 ? 'text-red-500 fill-red-500' : 'text-slate-600'}`} />
+                        <span className="text-xs font-bold font-orbitron text-slate-200">{lives}</span>
                     </div>
 
                     {/* Divider */}
