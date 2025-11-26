@@ -35,6 +35,7 @@ interface Profile {
     xp: number;
     highest_streak: number;
     bio?: string;
+    rank?: number;
 }
 
 
@@ -128,7 +129,17 @@ export default function ProfilePage() {
 
             if (error) throw error;
 
-            setProfile(data as any);
+            // Calculate Rank
+            const { count, error: rankError } = await supabase
+                .from('profiles')
+                .select('*', { count: 'exact', head: true })
+                .gt('xp', data.xp);
+
+            if (rankError) console.error('Error fetching rank:', rankError);
+
+            const rank = (count || 0) + 1;
+
+            setProfile({ ...data, rank } as any);
             setEditName(data.username || '');
             setEditBio((data as any).bio || 'Recluta Cyber Security');
         } catch (error) {
@@ -410,7 +421,7 @@ export default function ProfilePage() {
                     <div className="absolute inset-0 bg-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     <Trophy className="w-6 h-6 text-yellow-500 animate-pulse" />
                     <div className="text-center">
-                        <div className="text-2xl font-bold font-mono text-white">#42</div>
+                        <div className="text-2xl font-bold font-mono text-white">#{profile?.rank || '-'}</div>
                         <div className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">Rango Globale</div>
                     </div>
                 </div>
