@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, AlertCircle, CheckCircle, Shield, Mail, Lock, LogIn, UserPlus, ArrowRight, User } from 'lucide-react';
+import { Logo } from '@/components/ui/Logo';
 
 function LoginContent() {
     const [loading, setLoading] = useState(false);
@@ -17,6 +18,10 @@ function LoginContent() {
     const [localError, setLocalError] = useState<string | null>(null);
 
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+    const [showForgotModal, setShowForgotModal] = useState(false);
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetLoading, setResetLoading] = useState(false);
+    const [resetSuccess, setResetSuccess] = useState(false);
 
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -36,6 +41,10 @@ function LoginContent() {
         if (isSignUp) {
             if (!username || username.length < 3) {
                 setLocalError('Lo username deve essere di almeno 3 caratteri.');
+                return false;
+            }
+            if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                setLocalError('Lo username può contenere solo lettere, numeri e underscore.');
                 return false;
             }
             // Check uniqueness
@@ -67,6 +76,29 @@ function LoginContent() {
         return true;
     };
 
+    const handleResetPassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!resetEmail || !resetEmail.includes('@')) {
+            setLocalError('Inserisci un indirizzo email valido per il recupero.');
+            return;
+        }
+
+        setResetLoading(true);
+        setLocalError(null);
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+                redirectTo: `${window.location.origin}/auth/update-password`,
+            });
+            if (error) throw error;
+            setResetSuccess(true);
+        } catch (err: any) {
+            console.error('Reset password error:', err);
+            setLocalError(err.message || 'Errore durante l\'invio dell\'email di recupero.');
+        } finally {
+            setResetLoading(false);
+        }
+    };
+
     const handleEmailAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         setLocalError(null);
@@ -89,8 +121,6 @@ function LoginContent() {
                 });
                 if (error) throw error;
                 setShowConfirmationModal(true);
-                // setSuccessMessage('Controlla la tua email per confermare la registrazione!');
-                // setIsSignUp(false); // Switch back to login view or keep showing success
             } else {
                 const { error } = await supabase.auth.signInWithPassword({
                     email,
@@ -175,6 +205,75 @@ function LoginContent() {
                 )}
             </AnimatePresence>
 
+            {/* Forgot Password Modal */}
+            <AnimatePresence>
+                {showForgotModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="bg-[#121418] border border-cyan-500/30 rounded-2xl p-8 max-w-md w-full shadow-[0_0_50px_rgba(34,211,238,0.2)] relative overflow-hidden"
+                        >
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+
+                            <h2 className="text-xl font-bold text-white font-orbitron mb-2">RECUPERO ACCESSO</h2>
+                            <p className="text-slate-400 text-sm mb-6">Inserisci la tua email per ricevere le istruzioni di ripristino.</p>
+
+                            {resetSuccess ? (
+                                <div className="text-center py-4">
+                                    <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/30">
+                                        <CheckCircle className="w-8 h-8 text-green-400" />
+                                    </div>
+                                    <p className="text-green-400 font-bold mb-2">Email Inviata!</p>
+                                    <p className="text-slate-400 text-sm mb-6">Controlla la tua casella di posta.</p>
+                                    <button
+                                        onClick={() => {
+                                            setShowForgotModal(false);
+                                            setResetSuccess(false);
+                                            setResetEmail('');
+                                        }}
+                                        className="w-full py-3 bg-zinc-700 hover:bg-zinc-600 text-white font-bold rounded-xl transition-all"
+                                    >
+                                        CHIUDI
+                                    </button>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleResetPassword} className="space-y-4">
+                                    <div className="relative group">
+                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-cyan-400 transition-colors" />
+                                        <input
+                                            type="email"
+                                            placeholder="Email Registrata"
+                                            value={resetEmail}
+                                            onChange={(e) => setResetEmail(e.target.value)}
+                                            className="w-full bg-[#1F2833] border border-white/10 rounded-xl pl-12 pr-4 py-3.5 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 outline-none transition-all font-mono text-sm"
+                                            disabled={resetLoading}
+                                        />
+                                    </div>
+                                    <div className="flex gap-3 pt-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowForgotModal(false)}
+                                            className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold rounded-xl transition-all"
+                                        >
+                                            ANNULLA
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={resetLoading}
+                                            className="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-cyan-900/20 flex items-center justify-center gap-2"
+                                        >
+                                            {resetLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'INVIA'}
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             {/* Main Card */}
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -190,18 +289,10 @@ function LoginContent() {
 
                     {/* Header Section */}
                     <div className="flex flex-col items-center text-center mb-8 space-y-4">
-                        <div className="relative group">
-                            <div className="absolute inset-0 bg-cyan-400/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500" />
-                            <div className="relative w-20 h-20 rounded-full border-2 border-white/10 bg-[#0B0C10] flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.5)]">
-                                <Shield className="w-10 h-10 text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]" strokeWidth={1.5} />
-                            </div>
-                        </div>
+                        <Logo size="xl" showText animated />
 
                         <div className="space-y-1">
-                            <h1 className="text-4xl font-black font-orbitron tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-cyan-100 to-cyan-500 drop-shadow-[0_0_25px_rgba(34,211,238,0.2)]">
-                                DEEPSAFE
-                            </h1>
-                            <p className="text-cyan-500/80 font-mono text-xs tracking-[0.2em] uppercase">
+                            <p className="text-cyan-500/80 font-mono text-xs tracking-[0.2em] uppercase mt-4">
                                 &gt; {isSignUp ? 'Creazione Identità' : 'Inizializzazione Protocollo'}...
                             </p>
                         </div>
@@ -270,16 +361,29 @@ function LoginContent() {
                                     disabled={loading}
                                 />
                             </div>
-                            <div className="relative group">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-cyan-400 transition-colors" />
-                                <input
-                                    type="password"
-                                    placeholder="Codice Accesso (Password)"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-[#1F2833] border border-white/10 rounded-xl pl-12 pr-4 py-3.5 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 outline-none transition-all font-mono text-sm"
-                                    disabled={loading}
-                                />
+                            <div className="space-y-2">
+                                <div className="relative group">
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-cyan-400 transition-colors" />
+                                    <input
+                                        type="password"
+                                        placeholder="Codice Accesso (Password)"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="w-full bg-[#1F2833] border border-white/10 rounded-xl pl-12 pr-4 py-3.5 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 outline-none transition-all font-mono text-sm"
+                                        disabled={loading}
+                                    />
+                                </div>
+                                {!isSignUp && (
+                                    <div className="flex justify-end">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowForgotModal(true)}
+                                            className="text-[10px] text-zinc-500 hover:text-cyan-400 transition-colors font-mono uppercase tracking-wider"
+                                        >
+                                            Password Dimenticata?
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
 

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useUserStore } from '@/store/useUserStore';
+import { Logo } from '@/components/ui/Logo';
 
 export function Header() {
     const { lives, streak } = useUserStore();
@@ -11,14 +12,7 @@ export function Header() {
             <div className="max-w-md mx-auto h-14 flex items-center justify-between px-4">
                 <div className="flex items-center space-x-4">
                     <Link href="/" className="flex items-center gap-2 group">
-                        <div className="relative w-8 h-8">
-                            <img
-                                src="/icon.svg"
-                                alt="Deepsafe Logo"
-                                className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(102,252,241,0.5)] transition-transform group-hover:scale-110"
-                            />
-                        </div>
-                        <span className="font-bold text-lg tracking-tight text-[#66FCF1] group-hover:text-[#45A29E] transition-colors">Deepsafe</span>
+                        <Logo size="sm" showText />
                     </Link>
                 </div>
 
