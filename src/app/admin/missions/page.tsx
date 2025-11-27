@@ -35,25 +35,225 @@ export default function AdminMissionsPage() {
     const [selectedProvince, setSelectedProvince] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
 
-    // ... (Wizard State)
+    // Wizard State
+    const [step, setStep] = useState(1);
+    const [formData, setFormData] = useState<Partial<Mission>>({
+        title: '',
+        content: '',
+        xp_reward: 100,
+        estimated_time: '5 min',
+        level: 'SEMPLICE',
+        region: '',
+        province_id: '',
+        description: ''
+    });
+    const [questions, setQuestions] = useState<Partial<MissionQuestion>[]>([]);
 
-    // ... (useEffect)
+    useEffect(() => {
+        checkAdminAndFetchMissions();
+    }, []);
 
-    // ... (checkAdminAndFetchMissions)
+    const checkAdminAndFetchMissions = async () => {
+        setIsLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                // router.push('/'); // Handled by Layout now
+                setIsLoading(false);
+                return;
+            }
 
-    // ... (handleOpenModal)
+            // Check admin
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('is_admin')
+                .eq('id', user.id)
+                .single();
 
-    // ... (handleAddQuestion)
+            if (!profile?.is_admin) {
+                // router.push('/'); // Handled by Layout now
+                setIsLoading(false);
+                return;
+            }
 
-    // ... (updateQuestion)
+            // Fetch missions
+            const { data, error } = await supabase
+                .from('missions')
+                .select('*')
+                .order('created_at', { ascending: false });
 
-    // ... (updateOption)
+            if (error) throw error;
+            setMissions(data || []);
+        } catch (error) {
+            console.error('Error fetching missions:', error);
+            // alert('Error loading missions');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-    // ... (handleImageUpload)
+    const handleOpenModal = async (mission?: Mission) => {
+        if (mission) {
+            setFormData(mission);
+            // Fetch questions for this mission
+            const { data } = await supabase
+                .from('mission_questions')
+                .select('*')
+                .eq('mission_id', mission.id)
+                .order('created_at', { ascending: true });
 
-    // ... (handleSave)
+            setQuestions(data || []);
+        } else {
+            setFormData({
+                title: '',
+                content: '',
+                xp_reward: 100,
+                estimated_time: '5 min',
+                level: 'SEMPLICE',
+                region: '',
+                province_id: '',
+                description: ''
+            });
+            setQuestions([]);
+        }
+        setStep(1);
+        setIsModalOpen(true);
+    };
 
-    // ... (handleDelete)
+    const handleAddQuestion = (type: 'multiple_choice' | 'true_false' | 'image_true_false') => {
+        const newQuestion: Partial<MissionQuestion> = {
+            text: '',
+            type,
+            options: type === 'multiple_choice' ? ['', '', '', ''] : ['Vero', 'Falso'],
+            correct_answer: 0,
+            explanation: '',
+            image_url: ''
+        };
+        setQuestions([...questions, newQuestion]);
+    };
+
+    const updateQuestion = (index: number, field: keyof MissionQuestion, value: any) => {
+        const newQuestions = [...questions];
+        newQuestions[index] = { ...newQuestions[index], [field]: value };
+        setQuestions(newQuestions);
+    };
+
+    const updateOption = (qIndex: number, oIndex: number, value: string) => {
+        const newQuestions = [...questions];
+        const newOptions = [...(newQuestions[qIndex].options || [])];
+        newOptions[oIndex] = value;
+        newQuestions[qIndex].options = newOptions;
+        setQuestions(newQuestions);
+    };
+
+    const handleImageUpload = async (file: File, index: number) => {
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('mission-images')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('mission-images')
+                .getPublicUrl(filePath);
+
+            updateQuestion(index, 'image_url', publicUrl);
+            // @ts-ignore
+            const newQ = [...questions];
+            // @ts-ignore
+            newQ[index].imageInputType = 'url'; // Switch back to URL view to show preview
+            setQuestions(newQ);
+
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            alert('Error uploading image');
+        }
+    };
+
+    const handleSave = async () => {
+        if (!formData.title || !formData.content) {
+            alert('Please fill in all required fields');
+            return;
+        }
+
+        try {
+            // 1. Upsert Mission
+            const { data: missionData, error: missionError } = await supabase
+                .from('missions')
+                .upsert({
+                    id: formData.id, // If exists, update
+                    title: formData.title,
+                    content: formData.content,
+                    xp_reward: formData.xp_reward,
+                    estimated_time: formData.estimated_time,
+                    level: formData.level,
+                    region: formData.region || null,
+                    province_id: formData.province_id || null,
+                    description: formData.description
+                })
+                .select()
+                .single();
+
+            if (missionError) throw missionError;
+            if (!missionData) throw new Error('No data returned');
+
+            // 2. Handle Questions
+            // First delete existing ones if updating
+            if (formData.id) {
+                await supabase.from('mission_questions').delete().eq('mission_id', formData.id);
+            }
+
+            // Insert new ones
+            if (questions.length > 0) {
+                const questionsToInsert = questions.map(q => ({
+                    mission_id: missionData.id,
+                    text: q.text || '',
+                    type: q.type || 'multiple_choice',
+                    options: q.options || [],
+                    correct_answer: q.correct_answer || 0,
+                    explanation: q.explanation || '',
+                    image_url: q.image_url || null
+                }));
+
+                const { error: qError } = await supabase
+                    .from('mission_questions')
+                    .insert(questionsToInsert);
+
+                if (qError) throw qError;
+            }
+
+            setIsModalOpen(false);
+            checkAdminAndFetchMissions();
+            alert('Mission saved successfully!');
+
+        } catch (error: any) {
+            console.error('Error saving mission:', error);
+            alert(`Error saving mission: ${error.message}`);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this mission?')) return;
+
+        try {
+            const { error } = await supabase
+                .from('missions')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+
+            setMissions(missions.filter(m => m.id !== id));
+        } catch (error: any) {
+            console.error('Error deleting mission:', error);
+            alert(`Error deleting mission: ${error.message}`);
+        }
+    };
 
     if (isLoading) return <div className="min-h-screen bg-black flex items-center justify-center text-cyan-500 font-mono">LOADING MISSIONS...</div>;
 
