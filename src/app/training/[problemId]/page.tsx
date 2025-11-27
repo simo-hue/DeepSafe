@@ -171,10 +171,10 @@ export default function TrainingPillPage() {
                     <span className="text-[10px] font-orbitron tracking-widest text-cyan-500 uppercase">TRAINING MODULE</span>
                     <span className="text-sm font-bold text-white">{lesson.title}</span>
                 </div>
-                <div className="w-9" /> {/* Spacer */}
+                <div className="w-9" />
             </header>
 
-            <main className="pt-52 pb-12 px-4 max-w-2xl mx-auto">
+            <main className="pt-40 pb-12 px-4 max-w-2xl mx-auto">
                 <AnimatePresence mode="wait">
                     {mode === 'LESSON' && (
                         <motion.div

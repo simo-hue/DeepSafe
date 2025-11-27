@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { Database } from '@/types/supabase';
 import { useRouter } from 'next/navigation';
-import { BookOpen, Plus, X, Save, ArrowLeft, Trash2, MapPin, Clock, Award, ChevronRight, Check, Pencil, Upload, Link, Image as ImageIcon } from 'lucide-react';
+import { BookOpen, Plus, X, Save, ArrowLeft, Trash2, MapPin, Clock, Award, ChevronRight, Check, Pencil, Upload, Link, Image as ImageIcon, Search, RotateCcw } from 'lucide-react';
 
 // ... existing code ...
 
@@ -28,6 +28,11 @@ export default function AdminMissionsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [missions, setMissions] = useState<Mission[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Filters
+    const [selectedRegion, setSelectedRegion] = useState('');
+    const [selectedLevel, setSelectedLevel] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Wizard State
     const [step, setStep] = useState(1);
@@ -252,6 +257,19 @@ export default function AdminMissionsPage() {
 
     if (isLoading) return <div className="min-h-screen bg-black flex items-center justify-center text-cyan-500 font-mono">LOADING MISSIONS...</div>;
 
+    const filteredMissions = missions.filter(m => {
+        if (selectedRegion && m.region !== selectedRegion) return false;
+        if (selectedLevel && m.level !== selectedLevel) return false;
+        if (searchQuery && !m.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+        return true;
+    });
+
+    const resetFilters = () => {
+        setSelectedRegion('');
+        setSelectedLevel('');
+        setSearchQuery('');
+    };
+
     return (
         <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-cyan-500/30 p-8">
             {/* Header */}
@@ -275,9 +293,53 @@ export default function AdminMissionsPage() {
                 </button>
             </header>
 
+            {/* Filters */}
+            <div className="flex flex-wrap gap-4 mb-6 items-center bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                <div className="relative flex-1 min-w-[200px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <input
+                        type="text"
+                        placeholder="Search missions..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-sm focus:border-cyan-500 outline-none text-white placeholder:text-slate-600"
+                    />
+                </div>
+
+                <select
+                    value={selectedRegion}
+                    onChange={(e) => setSelectedRegion(e.target.value)}
+                    className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-cyan-500 outline-none text-slate-300"
+                >
+                    <option value="">All Regions</option>
+                    {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+
+                <select
+                    value={selectedLevel}
+                    onChange={(e) => setSelectedLevel(e.target.value)}
+                    className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-cyan-500 outline-none text-slate-300"
+                >
+                    <option value="">All Levels</option>
+                    <option value="SEMPLICE">SEMPLICE</option>
+                    <option value="DIFFICILE">DIFFICILE</option>
+                    <option value="BOSS">BOSS</option>
+                </select>
+
+                {(selectedRegion || selectedLevel || searchQuery) && (
+                    <button
+                        onClick={resetFilters}
+                        className="flex items-center gap-2 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors text-sm"
+                    >
+                        <RotateCcw className="w-4 h-4" />
+                        Reset
+                    </button>
+                )}
+            </div>
+
             {/* Missions List */}
             <div className="grid grid-cols-1 gap-4">
-                {missions.map(mission => (
+                {filteredMissions.map(mission => (
                     <div key={mission.id} className="bg-slate-900/50 border border-slate-800 p-6 rounded-xl hover:border-cyan-500/50 transition-colors flex justify-between items-center group">
                         <div>
                             <div className="flex items-center gap-3 mb-2">
