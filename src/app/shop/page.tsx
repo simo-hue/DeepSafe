@@ -223,20 +223,18 @@ function ShopContent() {
             {/* Top Bar */}
             <TopBar progress={unlockedCount} total={totalProvinces} className="!fixed z-40 top-14" />
 
-            {/* Header */}
-            {/* Header */}
-            <header className="fixed top-20 md:top-32 left-0 w-full p-4 z-30 flex items-center justify-between pointer-events-none">
-                <div className="flex flex-col">
-                    <span className="text-[8px] md:text-[10px] font-orbitron tracking-widest text-cyan-500 uppercase leading-tight">IL MERCATO NERO</span>
-                    <h1 className="text-xl md:text-2xl font-bold text-white font-orbitron leading-none">SHOP</h1>
-                </div>
-                <div className="pointer-events-auto flex items-center gap-2 bg-slate-900/90 backdrop-blur-md border border-cyan-500/30 px-3 py-1.5 md:px-4 md:py-2 rounded-full shadow-lg shadow-cyan-900/20">
-                    <Coins className="w-4 h-4 md:w-5 md:h-5 text-yellow-400" />
-                    <span className="font-bold font-mono text-yellow-400 text-sm md:text-base">{credits} NC</span>
-                </div>
-            </header>
-
-            <main className="pt-36 md:pt-52 px-4 max-w-2xl mx-auto space-y-8">
+            <main className="pt-32 md:pt-36 px-4 max-w-2xl mx-auto space-y-8">
+                {/* Header */}
+                <header className="flex items-center justify-between mb-2">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] md:text-xs font-orbitron tracking-widest text-cyan-500 uppercase leading-tight">IL MERCATO NERO</span>
+                        <h1 className="text-2xl md:text-3xl font-bold text-white font-orbitron leading-none">SHOP</h1>
+                    </div>
+                    <div className="flex items-center gap-2 bg-slate-900/90 backdrop-blur-md border border-cyan-500/30 px-3 py-1.5 md:px-4 md:py-2 rounded-full shadow-lg shadow-cyan-900/20">
+                        <Coins className="w-4 h-4 md:w-5 md:h-5 text-yellow-400" />
+                        <span className="font-bold font-mono text-yellow-400 text-sm md:text-base">{credits} NC</span>
+                    </div>
+                </header>
 
                 {/* Feedback Toast */}
                 <AnimatePresence>
