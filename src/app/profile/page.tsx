@@ -40,7 +40,7 @@ interface Profile {
 
 
 import { AvatarSelector } from '@/components/profile/AvatarSelector';
-import { getAvatarById } from '@/data/avatars';
+import { useAvatars } from '@/hooks/useAvatars';
 import { useUserStore } from '@/store/useUserStore';
 import { BADGES_DATA, BadgeDefinition } from '@/data/badgesData';
 import { MissionControl } from '@/components/gamification/MissionControl';
@@ -100,6 +100,7 @@ function SettingsToggle({ checked, onChange, color = 'blue' }: { checked: boolea
 export default function ProfilePage() {
     const router = useRouter();
     const { earnedBadges, refreshProfile, settings, updateSettings, claimMission, inventory, ownedAvatars } = useUserStore();
+    const { avatars, loading: avatarsLoading } = useAvatars();
 
     // Push Notifications
     const { isSupported, permission, subscribe, unsubscribe, loading: pushLoading } = usePushNotifications();
@@ -266,9 +267,13 @@ export default function ProfilePage() {
         }
     };
 
+    const getCurrentAvatarSrc = () => {
+        if (!profile?.avatar_url) return avatars.find(a => a.is_default)?.src || '/avatars/rookie.png';
+        const avatar = avatars.find(a => a.id === profile.avatar_url);
+        return avatar?.src || '/avatars/rookie.png';
+    };
 
-
-    if (loading) return <div className="flex items-center justify-center min-h-screen text-cyber-blue animate-pulse font-orbitron">INIZIALIZZAZIONE PROTOCOLLI IDENTITÀ...</div>;
+    if (loading || avatarsLoading) return <div className="flex items-center justify-center min-h-screen text-cyber-blue animate-pulse font-orbitron">INIZIALIZZAZIONE PROTOCOLLI IDENTITÀ...</div>;
 
 
 
@@ -318,7 +323,7 @@ export default function ProfilePage() {
                             {/* Avatar Container */}
                             <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-cyber-blue/50 shadow-[0_0_20px_rgba(102,252,241,0.3)] relative bg-black">
                                 <img
-                                    src={getAvatarById(profile?.avatar_url || null).src}
+                                    src={getCurrentAvatarSrc()}
                                     alt="Avatar"
                                     className="w-full h-full object-cover"
                                 />
@@ -347,6 +352,7 @@ export default function ProfilePage() {
                                             ownedAvatars={ownedAvatars}
                                             onSelect={handleAvatarSelect}
                                             isUpdating={uploading}
+                                            avatars={avatars}
                                         />
                                     </div>
 

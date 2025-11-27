@@ -322,6 +322,13 @@ export default function AdminPage() {
                         MANAGE SHOP
                     </button>
                     <button
+                        onClick={() => router.push('/admin/avatars')}
+                        className="px-4 py-2 bg-pink-900/30 border border-pink-700/50 rounded hover:bg-pink-900/50 text-pink-400 font-mono text-xs transition-colors flex items-center gap-2"
+                    >
+                        <Users className="w-4 h-4" />
+                        MANAGE AVATARS
+                    </button>
+                    <button
                         onClick={() => router.push('/admin/missions')}
                         className="px-4 py-2 bg-cyan-900/30 border border-cyan-700/50 rounded hover:bg-cyan-900/50 text-cyan-400 font-mono text-xs transition-colors flex items-center gap-2"
                     >

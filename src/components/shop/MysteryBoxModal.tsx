@@ -4,12 +4,15 @@ import { Gift, Zap, Coins, Clock, X, Lock, Unlock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MatrixRain } from '@/components/ui/MatrixRain';
 
+import { useAvatars } from '@/hooks/useAvatars';
+import Image from 'next/image';
+
 interface MysteryBoxModalProps {
     isOpen: boolean;
     onClose: () => void;
     reward: {
         type: string;
-        value: number;
+        value: number | string;
     } | null;
     isOpening: boolean;
 }
@@ -17,6 +20,7 @@ interface MysteryBoxModalProps {
 export function MysteryBoxModal({ isOpen, onClose, reward, isOpening }: MysteryBoxModalProps) {
     const [step, setStep] = useState<'idle' | 'decrypting' | 'revealed'>('idle');
     const [decryptionText, setDecryptionText] = useState('');
+    const { avatars } = useAvatars();
 
     useEffect(() => {
         if (isOpen && isOpening) {
@@ -32,6 +36,24 @@ export function MysteryBoxModal({ isOpen, onClose, reward, isOpening }: MysteryB
             setStep('idle');
         }
     }, [isOpen, isOpening, reward]);
+
+    const getRewardDetails = () => {
+        if (!reward) return null;
+        if (reward.type === 'avatar') {
+            const avatar = avatars.find(a => a.id === reward.value);
+            return {
+                icon: avatar ? (
+                    <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-pink-500 shadow-[0_0_30px_rgba(236,72,153,0.5)] relative">
+                        <Image src={avatar.src} alt={avatar.name} fill className="object-cover" />
+                    </div>
+                ) : <Gift className="w-24 h-24 text-pink-500" />,
+                title: 'NUOVA IDENTITÀ!',
+                value: avatar?.name || 'Avatar Sbloccato'
+            };
+        }
+        // ... existing mappings
+        return null;
+    };
 
     if (!isOpen) return null;
 
@@ -129,11 +151,19 @@ export function MysteryBoxModal({ isOpen, onClose, reward, isOpening }: MysteryB
                                     initial={{ y: 20, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 0.2 }}
+                                    className="flex items-center justify-center"
                                 >
-                                    {reward.type === 'xp' && <Zap className="w-24 h-24 text-yellow-400 drop-shadow-[0_0_25px_rgba(250,204,21,1)]" />}
-                                    {reward.type === 'credits' && <Coins className="w-24 h-24 text-cyan-400 drop-shadow-[0_0_25px_rgba(34,211,238,1)]" />}
-                                    {reward.type === 'streak_freeze' && <Clock className="w-24 h-24 text-orange-400 drop-shadow-[0_0_25px_rgba(251,146,60,1)]" />}
-                                    {reward.type === 'lives' && <Gift className="w-24 h-24 text-red-400 drop-shadow-[0_0_25px_rgba(248,113,113,1)]" />}
+                                    {reward.type === 'avatar' ? (
+                                        getRewardDetails()?.icon
+                                    ) : (
+                                        <>
+                                            {reward.type === 'xp' && <Zap className="w-24 h-24 text-yellow-400 drop-shadow-[0_0_25px_rgba(250,204,21,1)]" />}
+                                            {reward.type === 'credits' && <Coins className="w-24 h-24 text-cyan-400 drop-shadow-[0_0_25px_rgba(34,211,238,1)]" />}
+                                            {reward.type === 'streak_freeze' && <Clock className="w-24 h-24 text-orange-400 drop-shadow-[0_0_25px_rgba(251,146,60,1)]" />}
+                                            {reward.type === 'lives' && <Gift className="w-24 h-24 text-red-400 drop-shadow-[0_0_25px_rgba(248,113,113,1)]" />}
+                                            {reward.type === 'avatar_duplicate' && <Users className="w-24 h-24 text-slate-400" />}
+                                        </>
+                                    )}
                                 </motion.div>
 
                                 {/* Particle Burst Effect (Simulated with divs) */}
@@ -160,6 +190,8 @@ export function MysteryBoxModal({ isOpen, onClose, reward, isOpening }: MysteryB
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 0.3 }}
                                 >
+                                    {reward.type === 'avatar' && 'NUOVA IDENTITÀ!'}
+                                    {reward.type === 'avatar_duplicate' && 'IDENTITÀ DUPLICATA'}
                                     {reward.type === 'xp' && 'DATI EXTRA RECUPERATI!'}
                                     {reward.type === 'credits' && 'CREDITI RIMBORSATI!'}
                                     {reward.type === 'streak_freeze' && 'CONGELAMENTO SERIE!'}
@@ -171,7 +203,13 @@ export function MysteryBoxModal({ isOpen, onClose, reward, isOpening }: MysteryB
                                     animate={{ scale: 1, opacity: 1 }}
                                     transition={{ delay: 0.4, type: "spring" }}
                                 >
-                                    +{reward.value} {reward.type === 'xp' ? 'XP' : reward.type === 'credits' ? 'NC' : ''}
+                                    {reward.type === 'avatar' ? (
+                                        <span className="text-2xl">{getRewardDetails()?.value}</span>
+                                    ) : reward.type === 'avatar_duplicate' ? (
+                                        <span className="text-xl text-slate-400">Nessuna ricompensa</span>
+                                    ) : (
+                                        <>+{reward.value} {reward.type === 'xp' ? 'XP' : reward.type === 'credits' ? 'NC' : ''}</>
+                                    )}
                                 </motion.p>
                             </div>
 
