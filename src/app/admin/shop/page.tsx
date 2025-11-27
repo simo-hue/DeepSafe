@@ -37,7 +37,8 @@ export default function AdminShopPage() {
         stock: null,
         is_limited: false,
         effect_type: 'none',
-        effect_value: null
+        effect_value: null,
+        label: ''
     });
 
     // Loot State
@@ -114,7 +115,8 @@ export default function AdminShopPage() {
                 stock: null,
                 is_limited: false,
                 effect_type: 'none',
-                effect_value: null
+                effect_value: null,
+                label: ''
             });
             setCurrentLoot([]);
         }
@@ -147,7 +149,8 @@ export default function AdminShopPage() {
             ...formData,
             cost: Number(formData.cost),
             stock: formData.stock ? Number(formData.stock) : null,
-            effect_value: formData.effect_value ? Number(formData.effect_value) : null
+            effect_value: formData.effect_value ? Number(formData.effect_value) : null,
+            label: formData.label || null
         } as ShopItem;
 
         if (editingItem) {
@@ -295,7 +298,12 @@ export default function AdminShopPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {items.filter(i => !i.is_limited || (i.stock !== null && i.stock > 0)).map(item => (
                         <div key={item.id} className="bg-slate-900/50 border border-slate-800 p-6 rounded-xl hover:border-yellow-500/50 transition-colors group relative">
-                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                            {item.label && (
+                                <div className="absolute top-0 right-0 bg-cyan-500 text-black text-[9px] font-bold px-2 py-0.5 rounded-bl rounded-tr-xl z-10">
+                                    {item.label}
+                                </div>
+                            )}
+                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-20">
                                 <button onClick={() => handleOpenModal(item)} className="p-1.5 bg-slate-800 text-cyan-400 rounded hover:bg-slate-700">
                                     <Save className="w-4 h-4" />
                                 </button>
@@ -369,6 +377,16 @@ export default function AdminShopPage() {
                                         onChange={e => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-yellow-500 outline-none"
                                         placeholder="Item Name"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-mono text-slate-500 mb-1">Label (Optional)</label>
+                                    <input
+                                        type="text"
+                                        value={formData.label || ''}
+                                        onChange={e => setFormData({ ...formData, label: e.target.value })}
+                                        className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-yellow-500 outline-none"
+                                        placeholder="e.g. POPOLARE, BEST VALUE"
                                     />
                                 </div>
                                 <div>

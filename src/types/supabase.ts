@@ -31,6 +31,7 @@ export interface Database {
                     settings_notifications: boolean | null
                     settings_sound: boolean | null
                     settings_haptics: boolean | null
+                    has_seen_tutorial: boolean | null
                 }
                 Insert: {
                     avatar_url?: string | null
@@ -53,6 +54,7 @@ export interface Database {
                     settings_notifications?: boolean | null
                     settings_sound?: boolean | null
                     settings_haptics?: boolean | null
+                    has_seen_tutorial?: boolean | null
                 }
                 Update: {
                     avatar_url?: string | null
@@ -75,6 +77,7 @@ export interface Database {
                     settings_notifications?: boolean | null
                     settings_sound?: boolean | null
                     settings_haptics?: boolean | null
+                    has_seen_tutorial?: boolean | null
                 }
                 Relationships: [
                     {
@@ -221,6 +224,7 @@ export interface Database {
                     effect_type: string
                     effect_value: number | null
                     created_at: string
+                    label: string | null
                 }
                 Insert: {
                     id: string
@@ -235,6 +239,7 @@ export interface Database {
                     effect_type?: string
                     effect_value?: number | null
                     created_at?: string
+                    label?: string | null
                 }
                 Update: {
                     id?: string
@@ -249,6 +254,7 @@ export interface Database {
                     effect_type?: string
                     effect_value?: number | null
                     created_at?: string
+                    label?: string | null
                 }
                 Relationships: []
             }

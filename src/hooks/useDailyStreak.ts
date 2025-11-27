@@ -2,13 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { useUserStore } from '@/store/useUserStore';
 import { getToday, isYesterday } from '@/utils/dateUtils';
 
-export const useDailyStreak = () => {
+export const useDailyStreak = (enabled: boolean = true) => {
     const { streak, lastLoginDate, incrementStreak, resetStreak, setLastLoginDate } = useUserStore();
     const [showModal, setShowModal] = useState(false);
     const hasChecked = useRef(false); // Prevent double-check on strict mode/remounts
 
     useEffect(() => {
-        if (hasChecked.current) return;
+        if (!enabled || hasChecked.current) return;
 
         const checkStreak = () => {
             const today = getToday();

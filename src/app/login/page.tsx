@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, AlertCircle, CheckCircle, Shield, Mail, Lock, LogIn, UserPlus, ArrowRight } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle, Shield, Mail, Lock, LogIn, UserPlus, ArrowRight, User } from 'lucide-react';
 
 function LoginContent() {
     const [loading, setLoading] = useState(false);
@@ -12,8 +12,11 @@ function LoginContent() {
     const [isSignUp, setIsSignUp] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [username, setUsername] = useState('');
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [localError, setLocalError] = useState<string | null>(null);
+
+    const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -29,7 +32,30 @@ function LoginContent() {
         setMounted(true);
     }, []);
 
-    const validateForm = () => {
+    const validateForm = async () => {
+        if (isSignUp) {
+            if (!username || username.length < 3) {
+                setLocalError('Lo username deve essere di almeno 3 caratteri.');
+                return false;
+            }
+            // Check uniqueness
+            const { count, error } = await supabase
+                .from('profiles')
+                .select('*', { count: 'exact', head: true })
+                .eq('username', username);
+
+            if (error) {
+                console.error('Error checking username:', error);
+                setLocalError('Errore durante la verifica dello username.');
+                return false;
+            }
+
+            if (count && count > 0) {
+                setLocalError('Username già in uso. Scegline un altro.');
+                return false;
+            }
+        }
+
         if (!email || !email.includes('@')) {
             setLocalError('Inserisci un indirizzo email valido.');
             return false;
@@ -46,7 +72,7 @@ function LoginContent() {
         setLocalError(null);
         setSuccessMessage(null);
 
-        if (!validateForm()) return;
+        if (!await validateForm()) return;
 
         setLoading(true);
         try {
@@ -56,11 +82,15 @@ function LoginContent() {
                     password,
                     options: {
                         emailRedirectTo: `${window.location.origin}/auth/callback`,
+                        data: {
+                            username: username
+                        }
                     },
                 });
                 if (error) throw error;
-                setSuccessMessage('Controlla la tua email per confermare la registrazione!');
-                setIsSignUp(false); // Switch back to login view or keep showing success
+                setShowConfirmationModal(true);
+                // setSuccessMessage('Controlla la tua email per confermare la registrazione!');
+                // setIsSignUp(false); // Switch back to login view or keep showing success
             } else {
                 const { error } = await supabase.auth.signInWithPassword({
                     email,
@@ -106,6 +136,44 @@ function LoginContent() {
 
             {/* Radial Glow */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(69,162,158,0.08)_0%,transparent_70%)] pointer-events-none" />
+
+            {/* Confirmation Modal */}
+            <AnimatePresence>
+                {showConfirmationModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="bg-[#121418] border border-cyan-500/30 rounded-2xl p-8 max-w-md w-full shadow-[0_0_50px_rgba(34,211,238,0.2)] text-center relative overflow-hidden"
+                        >
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+
+                            <div className="w-20 h-20 bg-cyan-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-cyan-500/30">
+                                <Mail className="w-10 h-10 text-cyan-400" />
+                            </div>
+
+                            <h2 className="text-2xl font-bold text-white font-orbitron mb-4">CONTROLLA LA TUA EMAIL</h2>
+
+                            <p className="text-slate-300 mb-8 leading-relaxed">
+                                Abbiamo inviato un link di conferma a <span className="text-cyan-400 font-bold">{email}</span>.
+                                <br />
+                                Clicca sul link per attivare la tua identità e accedere al sistema.
+                            </p>
+
+                            <button
+                                onClick={() => {
+                                    setShowConfirmationModal(false);
+                                    setIsSignUp(false);
+                                }}
+                                className="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-cyan-900/20"
+                            >
+                                HO CAPITO, TORNA AL LOGIN
+                            </button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* Main Card */}
             <motion.div
@@ -178,6 +246,19 @@ function LoginContent() {
                     {/* Email/Password Form */}
                     <form onSubmit={handleEmailAuth} className="space-y-4 mb-6">
                         <div className="space-y-4">
+                            {isSignUp && (
+                                <div className="relative group">
+                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-cyan-400 transition-colors" />
+                                    <input
+                                        type="text"
+                                        placeholder="Username Unico"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        className="w-full bg-[#1F2833] border border-white/10 rounded-xl pl-12 pr-4 py-3.5 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 outline-none transition-all font-mono text-sm"
+                                        disabled={loading}
+                                    />
+                                </div>
+                            )}
                             <div className="relative group">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-cyan-400 transition-colors" />
                                 <input

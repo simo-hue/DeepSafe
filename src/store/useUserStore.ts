@@ -38,7 +38,7 @@ interface UserState {
     completeTutorial: () => void;
     updateSettings: (settings: Partial<{ notifications: boolean; sound: boolean; haptics: boolean }>) => Promise<void>;
     claimMission: (missionId: string) => Promise<boolean>;
-    completeLevel: (levelId: string, score: number) => Promise<boolean>;
+    completeLevel: (levelId: string, score: number, earnedXp: number) => Promise<boolean>;
     addCredits: (amount: number) => Promise<void>;
     spendCredits: (amount: number) => Promise<boolean>;
     buyItem: (itemId: string, cost: number) => Promise<{ success: boolean; message?: string; reward?: any }>;
@@ -79,7 +79,20 @@ export const useUserStore = create<UserState>()(
                 sound: true,
                 haptics: true
             },
-            completeTutorial: () => set({ hasSeenTutorial: true }),
+            completeTutorial: async () => {
+                set({ hasSeenTutorial: true });
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        await supabase
+                            .from('profiles')
+                            .update({ has_seen_tutorial: true })
+                            .eq('id', user.id);
+                    }
+                } catch (err) {
+                    console.error('Error syncing tutorial status:', err);
+                }
+            },
             updateSettings: async (newSettings) => {
                 const state = get();
                 const updatedSettings = { ...state.settings, ...newSettings };
@@ -131,7 +144,7 @@ export const useUserStore = create<UserState>()(
                 }
             },
 
-            completeLevel: async (levelId, score) => {
+            completeLevel: async (levelId, score, earnedXp) => {
                 try {
                     const { data: { user } } = await supabase.auth.getUser();
                     if (!user) return false;
@@ -139,7 +152,8 @@ export const useUserStore = create<UserState>()(
                     const { data, error } = await supabase.rpc('complete_level', {
                         p_user_id: user.id,
                         p_level_id: levelId,
-                        p_score: score
+                        p_score: score,
+                        p_earned_xp: earnedXp
                     });
 
                     if (error) {
@@ -432,7 +446,7 @@ export const useUserStore = create<UserState>()(
 
                     const { data: profile, error } = await supabase
                         .from('profiles')
-                        .select('xp, current_hearts, highest_streak, unlocked_provinces, province_scores, last_login, earned_badges, credits, streak_freezes, inventory, settings_notifications, settings_sound, settings_haptics')
+                        .select('xp, current_hearts, highest_streak, unlocked_provinces, province_scores, last_login, earned_badges, credits, streak_freezes, inventory, settings_notifications, settings_sound, settings_haptics, has_seen_tutorial')
                         .eq('id', user.id)
                         .single();
 
@@ -457,7 +471,8 @@ export const useUserStore = create<UserState>()(
                                 notifications: profile.settings_notifications ?? true,
                                 sound: profile.settings_sound ?? true,
                                 haptics: profile.settings_haptics ?? true
-                            }
+                            },
+                            hasSeenTutorial: profile.has_seen_tutorial ?? false
                         });
                         console.log('🔄 Profile refreshed from DB:', profile);
                     }

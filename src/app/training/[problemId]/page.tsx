@@ -127,7 +127,7 @@ export default function TrainingPillPage() {
                 unlockProvince(provinceId); // This is still client-side but less critical than XP/Score. Ideally move to RPC too.
 
                 // Secure Server-Side Completion
-                completeLevel(lesson.id, score);
+                completeLevel(lesson.id, score, lesson.xpReward);
             }
             setMode('COMPLETE');
         }

@@ -19,7 +19,8 @@ import {
     Loader2,
     Cpu,
     Activity,
-    Shield
+    Shield,
+    LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import posthog from 'posthog-js';
@@ -142,7 +143,7 @@ export default function ProfilePage() {
             earned_at: earned?.earned_at,
             rarity: badgeDef.rarity
         };
-    });
+    }).filter(b => b.is_unlocked);
 
     /**
      * Handles the "Claim" action for a mission.
@@ -263,6 +264,12 @@ export default function ProfilePage() {
         } finally {
             setUploading(false);
         }
+    };
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push('/login');
+        router.refresh();
     };
 
     const handleSaveProfile = async () => {
@@ -580,6 +587,15 @@ export default function ProfilePage() {
                             color="orange"
                         />
                     </div>
+
+                    {/* Logout Button */}
+                    <button
+                        onClick={handleLogout}
+                        className="w-full mt-4 py-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 font-bold font-orbitron tracking-widest hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-2 group"
+                    >
+                        <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                        DISCONNETTI SISTEMA
+                    </button>
                 </div>
             </div>
 

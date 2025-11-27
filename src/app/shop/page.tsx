@@ -394,7 +394,12 @@ function ShopContent() {
                         {/* Regular Items Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {regularItems.map(item => (
-                                <div key={item.id} className="bg-slate-900/50 border border-slate-800 rounded-xl p-4 hover:border-cyan-500/50 transition-colors group">
+                                <div key={item.id} className="relative overflow-hidden bg-slate-900/50 border border-slate-800 rounded-xl p-4 hover:border-cyan-500/50 transition-colors group">
+                                    {item.label && (
+                                        <div className="absolute top-0 right-0 bg-cyan-500 text-black text-[9px] font-bold px-2 py-0.5 rounded-bl z-10">
+                                            {item.label}
+                                        </div>
+                                    )}
                                     <div className="flex justify-between items-start mb-4">
                                         <div className="p-3 rounded-lg bg-slate-800 group-hover:bg-cyan-950/30 transition-colors text-3xl">
                                             {item.icon}

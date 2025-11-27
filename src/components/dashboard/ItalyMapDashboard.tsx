@@ -40,7 +40,8 @@ const ItalyMapDashboard: React.FC<ItalyMapDashboardProps> = ({ className }) => {
 
     const [toastState, setToastState] = useState<{ message: string; type: 'info' | 'error' } | null>(null);
     const { unlockedProvinces, provinceScores, refreshProfile, checkBadges } = useUserStore();
-    const { streak: currentStreak, showModal: showStreakModal, closeModal: closeStreakModal } = useDailyStreak();
+    const [isProfileLoaded, setIsProfileLoaded] = useState(false);
+    const { streak: currentStreak, showModal: showStreakModal, closeModal: closeStreakModal } = useDailyStreak(isProfileLoaded);
     const { playSound } = useSound();
     const { triggerHaptic } = useHaptic();
 
@@ -62,6 +63,7 @@ const ItalyMapDashboard: React.FC<ItalyMapDashboardProps> = ({ className }) => {
                 setUnlockedBadgeId(newBadges[0]); // Show first new badge
                 setIsBadgeModalOpen(true);
             }
+            setIsProfileLoaded(true);
         };
         initProfile();
     }, [refreshProfile]);
