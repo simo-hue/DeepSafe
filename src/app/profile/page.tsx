@@ -60,16 +60,16 @@ type ToggleColor = 'blue' | 'purple' | 'orange';
 function SettingsToggle({ checked, onChange, color = 'blue' }: { checked: boolean; onChange: (c: boolean) => void; color?: ToggleColor }) {
     const colorStyles = {
         blue: {
-            active: "bg-cyber-blue/20 border-cyber-blue shadow-[0_0_15px_rgba(102,252,241,0.3)]",
-            thumb: "bg-cyber-blue shadow-[0_0_10px_rgba(102,252,241,0.8)]",
+            active: "bg-cyan-500/20 border-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.4)]",
+            thumb: "bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]",
         },
         purple: {
-            active: "bg-cyber-purple/20 border-cyber-purple shadow-[0_0_15px_rgba(168,85,247,0.3)]",
-            thumb: "bg-cyber-purple shadow-[0_0_10px_rgba(168,85,247,0.8)]",
+            active: "bg-purple-500/20 border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]",
+            thumb: "bg-purple-400 shadow-[0_0_15px_rgba(192,132,252,0.8)]",
         },
         orange: {
-            active: "bg-orange-500/20 border-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.3)]",
-            thumb: "bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.8)]",
+            active: "bg-orange-500/20 border-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.4)]",
+            thumb: "bg-orange-400 shadow-[0_0_15px_rgba(251,146,60,0.8)]",
         }
     };
 
