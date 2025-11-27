@@ -35,7 +35,6 @@ interface Profile {
     avatar_url: string | null;
     xp: number;
     highest_streak: number;
-    bio?: string;
     rank?: number;
 }
 
@@ -114,7 +113,7 @@ export default function ProfilePage() {
 
     // Edit Form State
     const [editName, setEditName] = useState('');
-    const [editBio, setEditBio] = useState('');
+
 
     // Gamification State
     const [missions, setMissions] = useState<Mission[]>(MOCK_MISSIONS);
@@ -214,7 +213,6 @@ export default function ProfilePage() {
 
             setProfile({ ...data, rank } as any);
             setEditName(data.username || '');
-            setEditBio((data as any).bio || 'Recluta Cyber Security');
         } catch (error) {
             console.error('Error fetching profile:', error);
         } finally {
@@ -268,25 +266,11 @@ export default function ProfilePage() {
         }
     };
 
-    const getRankTitle = (xp: number) => {
-        if (xp < 100) return 'Recluta';
-        if (xp < 500) return 'Script Kiddie';
-        if (xp < 1000) return 'White Hat';
-        if (xp < 2500) return 'Sentinella Cyber';
-        return 'Leggenda Netrunner';
-    };
 
-    const getRankColor = (xp: number) => {
-        if (xp < 100) return 'bg-zinc-600 text-zinc-100 border-zinc-500';
-        if (xp < 500) return 'bg-cyber-blue/20 text-cyber-blue border-cyber-blue';
-        if (xp < 1000) return 'bg-cyber-green/20 text-cyber-green border-cyber-green';
-        if (xp < 2500) return 'bg-cyber-purple/20 text-cyber-purple border-cyber-purple';
-        return 'bg-amber-500/20 text-amber-500 border-amber-500';
-    };
 
     if (loading) return <div className="flex items-center justify-center min-h-screen text-cyber-blue animate-pulse font-orbitron">INIZIALIZZAZIONE PROTOCOLLI IDENTITÀ...</div>;
 
-    const currentLevel = Math.floor((profile?.xp || 0) / 100) + 1;
+
 
 
     return (
@@ -345,11 +329,7 @@ export default function ProfilePage() {
                                 </div>
                             </div>
 
-                            {/* Level Badge */}
-                            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-cyber-dark border border-cyber-blue px-4 py-1.5 rounded-full shadow-lg flex items-center gap-2 z-20 whitespace-nowrap">
-                                <span className="text-[10px] text-cyber-gray font-mono uppercase">LIV</span>
-                                <span className="text-lg font-bold font-orbitron text-white leading-none">{currentLevel}</span>
-                            </div>
+
                         </div>
 
                         {/* User Info */}
@@ -382,25 +362,18 @@ export default function ProfilePage() {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-1 text-left">
-                                        <label className="text-[10px] text-cyber-blue font-mono uppercase tracking-widest">Dati_Bio</label>
-                                        <textarea
-                                            value={editBio}
-                                            onChange={(e) => setEditBio(e.target.value)}
-                                            className="w-full bg-black/60 border border-cyber-green/50 rounded-lg p-3 text-cyber-green font-mono text-sm focus:outline-none focus:border-cyber-green focus:shadow-[0_0_15px_rgba(0,255,136,0.2)] h-24 resize-none"
-                                        />
-                                    </div>
+
 
                                     <div className="flex gap-3 pt-2">
                                         <button
                                             onClick={handleSaveProfile}
-                                            className="flex-1 bg-cyber-green text-cyber-dark font-bold py-3 rounded-lg hover:bg-white hover:text-black transition-all flex items-center justify-center gap-2 font-orbitron tracking-wide shadow-[0_0_15px_rgba(102,252,241,0.3)] hover:shadow-[0_0_20px_rgba(102,252,241,0.6)]"
+                                            className="flex-1 bg-cyan-600 text-white font-bold py-3 rounded-lg hover:bg-cyan-500 transition-all flex items-center justify-center gap-2 font-orbitron tracking-wide shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(6,182,212,0.6)]"
                                         >
                                             <Save className="w-4 h-4" /> SALVA DATI
                                         </button>
                                         <button
                                             onClick={() => setIsEditing(false)}
-                                            className="px-4 border border-cyber-red text-cyber-red rounded-lg hover:bg-cyber-red hover:text-white transition-all"
+                                            className="px-4 border border-red-500/50 text-red-400 rounded-lg hover:bg-red-500/10 hover:text-red-300 transition-all"
                                         >
                                             <X className="w-5 h-5" />
                                         </button>
@@ -412,19 +385,8 @@ export default function ProfilePage() {
                                         <h1 className="text-3xl font-bold font-orbitron text-white tracking-widest uppercase text-glow">
                                             {profile?.username || 'AGENTE_SCONOSCIUTO'}
                                         </h1>
-                                        <div className={cn(
-                                            "inline-block px-3 py-1 rounded-md text-xs font-bold uppercase tracking-widest border",
-                                            getRankColor(profile?.xp || 0)
-                                        )}>
-                                            {getRankTitle(profile?.xp || 0)}
-                                        </div>
+
                                     </div>
-
-
-
-                                    <p className="text-sm text-zinc-400 max-w-xs mx-auto italic font-mono leading-relaxed">
-                                        "{editBio}"
-                                    </p>
 
                                     <button
                                         onClick={() => setIsEditing(true)}
@@ -511,13 +473,6 @@ export default function ProfilePage() {
                         DISCONNETTI SISTEMA
                     </button>
                 </div>
-            </div>
-
-            {/* Divider: AGENT RECORD */}
-            <div className="relative flex items-center gap-4 py-4">
-                <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-cyber-gray to-transparent" />
-                <div className="text-xs font-mono text-cyber-gray uppercase tracking-[0.2em]">// REGISTRO AGENTE</div>
-                <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-cyber-gray to-transparent" />
             </div>
 
             {/* Section D: Mission Control */}
