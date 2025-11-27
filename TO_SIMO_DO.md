@@ -116,3 +116,15 @@ Get your API Keys.
 Create the 3 Credit Pack products.
 Configure the Webhook.
 Once configured, you can test purchasing credits in Stripe Test Mode! 🚀
+    
+### 🛡️ Checkout Security Update
+    
+I have secured the checkout flow to prevent price manipulation. You **MUST** ensure your `.env.local` file has the correct Price IDs for the credit packs:
+    
+```bash
+NEXT_PUBLIC_STRIPE_PRICE_SMALL=price_... (ID for 500 NC)
+NEXT_PUBLIC_STRIPE_PRICE_MEDIUM=price_... (ID for 1200 NC)
+NEXT_PUBLIC_STRIPE_PRICE_LARGE=price_... (ID for 2500 NC)
+```
+    
+If these are missing or incorrect, payments will fail with an "Invalid Price ID" error.

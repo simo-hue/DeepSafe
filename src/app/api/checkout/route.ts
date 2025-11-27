@@ -27,6 +27,8 @@
 
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 // Initialize Stripe safely
 const stripe = process.env.STRIPE_SECRET_KEY
@@ -35,23 +37,58 @@ const stripe = process.env.STRIPE_SECRET_KEY
     })
     : null;
 
+const PRICE_TO_CREDITS: Record<string, number> = {
+    [process.env.NEXT_PUBLIC_STRIPE_PRICE_SMALL || 'price_small']: 500,
+    [process.env.NEXT_PUBLIC_STRIPE_PRICE_MEDIUM || 'price_medium']: 1200,
+    [process.env.NEXT_PUBLIC_STRIPE_PRICE_LARGE || 'price_large']: 2500,
+};
+
 export async function POST(req: Request) {
     if (!stripe) {
         console.error('Stripe Secret Key is missing');
         return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
-    try {
-        const body = await req.json();
-        const { priceId, userId, mode, actionType, metadata } = body;
 
-        if (!priceId || !userId || !mode || !actionType) {
+    try {
+        // 1. Authenticate User
+        const cookieStore = await cookies();
+        const supabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                cookies: {
+                    get(name: string) {
+                        return cookieStore.get(name)?.value;
+                    },
+                },
+            }
+        );
+
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const body = await req.json();
+        const { priceId, mode, actionType } = body;
+
+        // 2. Validate Inputs
+        if (!priceId || !mode || !actionType) {
             return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
+        }
+
+        // 3. Validate Price ID and Determine Amount
+        const creditsAmount = PRICE_TO_CREDITS[priceId];
+        if (!creditsAmount) {
+            return NextResponse.json({ error: 'Invalid Price ID' }, { status: 400 });
         }
 
         const origin = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
+        // 4. Create Session with Trusted Metadata
         const session = await stripe.checkout.sessions.create({
-            mode: mode, // 'subscription' or 'payment'
+            mode: mode,
             payment_method_types: ['card'],
             line_items: [
                 {
@@ -62,9 +99,9 @@ export async function POST(req: Request) {
             success_url: `${origin}/shop?success=true&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}/shop?canceled=true`,
             metadata: {
-                userId: userId,
+                userId: user.id, // Use authenticated user ID
                 actionType: actionType,
-                ...(metadata || {}) // Merge extra metadata like 'amount'
+                amount: creditsAmount.toString() // Force trusted amount
             },
         });
 

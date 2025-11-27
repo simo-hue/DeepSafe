@@ -20,7 +20,7 @@ export default function TrainingPillPage() {
     const missionId = searchParams.get('missionId');
     const problemId = params?.problemId as string;
 
-    const { addXp, unlockProvince, lives, decrementLives, addHeart, refillLives, unlockedProvinces, updateProvinceScore, updateMissionScore } = useUserStore();
+    const { unlockProvince, lives, decrementLives, addHeart, refillLives, unlockedProvinces, completeLevel } = useUserStore();
 
     const [lesson, setLesson] = useState<TrainingLesson | null>(null);
     const [mode, setMode] = useState<'LESSON' | 'QUIZ' | 'COMPLETE'>('LESSON');
@@ -110,7 +110,7 @@ export default function TrainingPillPage() {
 
         if (isCorrect) {
             setScore(prev => prev + 1);
-            addXp(100); // XP Reward per question
+            // XP is now awarded at the end via completeLevel
         } else {
             decrementLives(); // Penalty
         }
@@ -124,13 +124,10 @@ export default function TrainingPillPage() {
         } else {
             // Mission Complete
             if (provinceId) {
-                unlockProvince(provinceId);
-                // Save Score
-                if (missionId) {
-                    updateMissionScore(provinceId, missionId, score, lesson.questions.length, true);
-                } else {
-                    updateProvinceScore(provinceId, score, lesson.questions.length, true);
-                }
+                unlockProvince(provinceId); // This is still client-side but less critical than XP/Score. Ideally move to RPC too.
+
+                // Secure Server-Side Completion
+                completeLevel(lesson.id, score);
             }
             setMode('COMPLETE');
         }

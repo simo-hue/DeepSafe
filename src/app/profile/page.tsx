@@ -98,7 +98,7 @@ function SettingsToggle({ checked, onChange, color = 'blue' }: { checked: boolea
 export default function ProfilePage() {
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const { earnedBadges, refreshProfile, settings, updateSettings } = useUserStore();
+    const { earnedBadges, refreshProfile, settings, updateSettings, claimMission, inventory } = useUserStore();
 
     // Push Notifications
     const { isSupported, permission, subscribe, unsubscribe, loading: pushLoading } = usePushNotifications();
@@ -117,6 +117,16 @@ export default function ProfilePage() {
     // Gamification State
     const [missions, setMissions] = useState<Mission[]>(MOCK_MISSIONS);
     const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
+
+    // Sync Missions with Inventory (Claimed Status)
+    useEffect(() => {
+        if (inventory) {
+            setMissions(prev => prev.map(m => ({
+                ...m,
+                is_claimed: inventory.includes(`mission_${m.id}`) || m.is_claimed
+            })));
+        }
+    }, [inventory]);
 
     // Compute Badges with Unlock Status
     const badges = BADGES_DATA.map(badgeDef => {
@@ -138,11 +148,26 @@ export default function ProfilePage() {
      * Handles the "Claim" action for a mission.
      * In a real app, this would call an API to award XP and update the DB.
      */
-    const handleClaimMission = (id: string) => {
+    const handleClaimMission = async (id: string) => {
+        const mission = missions.find(m => m.id === id);
+        if (!mission || mission.is_claimed) return;
+
+        // Optimistic update
         setMissions(prev => prev.map(m =>
             m.id === id ? { ...m, is_claimed: true } : m
         ));
-        // Trigger particle effect here
+
+        const success = await claimMission(id);
+
+        if (!success) {
+            // Revert if failed
+            setMissions(prev => prev.map(m =>
+                m.id === id ? { ...m, is_claimed: false } : m
+            ));
+            alert('Errore durante il riscatto della missione. Riprova.');
+        } else {
+            // Trigger particle effect here
+        }
     };
 
     useEffect(() => {

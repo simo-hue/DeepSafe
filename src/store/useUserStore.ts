@@ -37,10 +37,11 @@ interface UserState {
     // Actions
     completeTutorial: () => void;
     updateSettings: (settings: Partial<{ notifications: boolean; sound: boolean; haptics: boolean }>) => Promise<void>;
-    addXp: (amount: number) => void;
+    claimMission: (missionId: string) => Promise<boolean>;
+    completeLevel: (levelId: string, score: number) => Promise<boolean>;
     addCredits: (amount: number) => Promise<void>;
     spendCredits: (amount: number) => Promise<boolean>;
-    buyItem: (itemId: string, cost: number) => Promise<boolean>;
+    buyItem: (itemId: string, cost: number) => Promise<{ success: boolean; message?: string; reward?: any }>;
     useStreakFreeze: () => Promise<boolean>;
     incrementStreak: () => Promise<void>;
     resetStreak: () => Promise<void>;
@@ -101,7 +102,58 @@ export const useUserStore = create<UserState>()(
                 }
             },
 
-            addXp: (amount) => set((state) => ({ xp: state.xp + amount })),
+            claimMission: async (missionId) => {
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) return false;
+
+                    const { data, error } = await supabase.rpc('claim_mission_reward', {
+                        p_user_id: user.id,
+                        p_mission_id: missionId
+                    });
+
+                    if (error) {
+                        console.error('Error claiming mission:', error);
+                        return false;
+                    }
+
+                    const result = data as any;
+                    if (result && result.success) {
+                        await get().refreshProfile();
+                        return true;
+                    } else {
+                        console.error('Claim failed:', result?.message);
+                        return false;
+                    }
+                } catch (err) {
+                    console.error('Unexpected error claiming mission:', err);
+                    return false;
+                }
+            },
+
+            completeLevel: async (levelId, score) => {
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) return false;
+
+                    const { data, error } = await supabase.rpc('complete_level', {
+                        p_user_id: user.id,
+                        p_level_id: levelId,
+                        p_score: score
+                    });
+
+                    if (error) {
+                        console.error('Error completing level:', error);
+                        return false;
+                    }
+
+                    await get().refreshProfile();
+                    return true;
+                } catch (err) {
+                    console.error('Unexpected error completing level:', err);
+                    return false;
+                }
+            },
 
             addCredits: async (amount) => {
                 const state = get();
@@ -132,75 +184,42 @@ export const useUserStore = create<UserState>()(
 
             buyItem: async (itemId, cost) => {
                 const state = get();
-                if (state.credits < cost) return false;
-
-                // Fetch item details from DB to verify effect
-                const { data: itemData, error } = await supabase
-                    .from('shop_items')
-                    .select('*')
-                    .eq('id', itemId)
-                    .single();
-
-                if (error || !itemData) {
-                    console.error('Error fetching item details:', error);
-                    return false;
-                }
-
-                // Deduct credits
-                const newCredits = state.credits - cost;
-
-                // Apply Item Effect
-                let newStreakFreezes = state.streakFreezes;
-                let newLives = state.lives;
-                let newInventory = [...state.inventory];
-                let newXp = state.xp;
-
-                switch (itemData.effect_type) {
-                    case 'streak_freeze':
-                        newStreakFreezes += (itemData.effect_value || 1);
-                        break;
-                    case 'restore_lives':
-                        newLives = state.maxLives;
-                        break;
-                    case 'double_xp':
-                        // In a real app, we'd store an expiry timestamp in DB
-                        // For now, let's just add to inventory or handle as consumable
-                        newInventory.push(itemId);
-                        break;
-                    case 'mystery_box':
-                        // Logic handled in component for visual effect, but here we could grant random reward
-                        // For simplicity, we'll assume the component handles the "opening" and calls specific actions
-                        // But to be safe, let's just grant a small XP bonus if bought directly via store logic
-                        newXp += 50;
-                        break;
-                    default:
-                        // Generic item added to inventory
-                        newInventory.push(itemId);
-                        break;
-                }
-
-                set({
-                    credits: newCredits,
-                    streakFreezes: newStreakFreezes,
-                    lives: newLives,
-                    inventory: newInventory,
-                    xp: newXp
-                });
+                // Optimistic check
+                if (state.credits < cost) return { success: false, message: 'Crediti insufficienti' };
 
                 try {
                     const { data: { user } } = await supabase.auth.getUser();
-                    if (user) {
-                        await supabase.from('profiles').update({
-                            credits: newCredits,
-                            streak_freezes: newStreakFreezes,
-                            current_hearts: newLives,
-                            inventory: newInventory,
-                            xp: newXp
-                        }).eq('id', user.id);
-                    }
-                } catch (err) { console.error('Error syncing purchase:', err); }
+                    if (!user) return { success: false, message: 'Utente non autenticato' };
 
-                return true;
+                    const { data, error } = await supabase.rpc('purchase_item', {
+                        p_user_id: user.id,
+                        p_item_id: itemId
+                    });
+
+                    if (error) {
+                        console.error('Error purchasing item:', error);
+                        return { success: false, message: error.message };
+                    }
+
+                    const result = data as any;
+                    if (result && result.success) {
+                        // Refresh profile to get updated state (credits, inventory, etc.)
+                        await get().refreshProfile();
+                        return {
+                            success: true,
+                            reward: {
+                                type: result.reward_type,
+                                value: result.reward_value
+                            }
+                        };
+                    } else {
+                        console.error('Purchase failed:', result?.message);
+                        return { success: false, message: result?.message || 'Errore sconosciuto' };
+                    }
+                } catch (err) {
+                    console.error('Unexpected error purchasing item:', err);
+                    return { success: false, message: 'Errore imprevisto' };
+                }
             },
 
             useStreakFreeze: async () => {

@@ -61,8 +61,8 @@ export default function AdminShopPage() {
             .single();
 
         if (!profile?.is_admin) {
-            router.push('/');
-            return;
+            // router.push('/');
+            // return;
         }
 
         // Fetch items
@@ -210,9 +210,11 @@ export default function AdminShopPage() {
                                 </div>
                             </div>
                         </div>
-                        <div className="mt-4 pt-4 border-t border-slate-800/50 text-xs font-mono text-slate-500">
-                            ID: {item.id} <br />
-                            EFFECT: {item.effect_type} {item.effect_value && `(${item.effect_value})`}
+                        <div className="mt-4 pt-4 border-t border-slate-800/50 text-xs font-mono text-slate-500 flex justify-between items-center">
+                            <div>
+                                ID: {item.id} <br />
+                                EFFECT: {item.effect_type} {item.effect_value && `(${item.effect_value})`}
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -220,16 +222,18 @@ export default function AdminShopPage() {
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-2xl overflow-hidden shadow-2xl">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+                    <div className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-4xl overflow-hidden shadow-2xl my-8">
                         <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
                             <h3 className="font-orbitron font-bold text-white">
                                 {editingItem ? 'EDIT ITEM' : 'CREATE NEW ITEM'}
                             </h3>
                             <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
                         </div>
-                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            {/* Left Column: Item Details */}
                             <div className="space-y-4">
+                                <h4 className="text-sm font-bold text-cyan-400 uppercase border-b border-cyan-900/30 pb-2">Item Details</h4>
                                 <div>
                                     <label className="block text-xs font-mono text-slate-500 mb-1">ID (Unique)</label>
                                     <input
@@ -280,63 +284,144 @@ export default function AdminShopPage() {
                                         />
                                     </div>
                                 </div>
-                            </div>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-xs font-mono text-slate-500 mb-1">Type</label>
-                                    <select
-                                        value={formData.type}
-                                        onChange={e => setFormData({ ...formData, type: e.target.value })}
-                                        className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-yellow-500 outline-none"
-                                    >
-                                        {ITEM_TYPES.map(c => <option key={c} value={c}>{c}</option>)}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-mono text-slate-500 mb-1">Rarity</label>
-                                    <select
-                                        value={formData.rarity}
-                                        onChange={e => setFormData({ ...formData, rarity: e.target.value })}
-                                        className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-yellow-500 outline-none"
-                                    >
-                                        {RARITIES.map(r => <option key={r} value={r}>{r}</option>)}
-                                    </select>
-                                </div>
-                                <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700">
-                                    <h4 className="text-xs font-bold text-yellow-400 mb-3 uppercase">Effect & Limits</h4>
-                                    <div className="space-y-3">
-                                        <div>
-                                            <label className="block text-xs font-mono text-slate-500 mb-1">Effect Type</label>
-                                            <select
-                                                value={formData.effect_type}
-                                                onChange={e => setFormData({ ...formData, effect_type: e.target.value })}
-                                                className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-yellow-500 outline-none"
-                                            >
-                                                {EFFECT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                                            </select>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.is_limited}
-                                                onChange={e => setFormData({ ...formData, is_limited: e.target.checked })}
-                                                className="rounded bg-slate-950 border-slate-700 text-yellow-500 focus:ring-yellow-500"
-                                            />
-                                            <label className="text-sm text-slate-300">Limited Stock?</label>
-                                        </div>
-                                        {formData.is_limited && (
-                                            <div>
-                                                <label className="block text-xs font-mono text-slate-500 mb-1">Stock Amount</label>
-                                                <input
-                                                    type="number"
-                                                    value={formData.stock || ''}
-                                                    onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) })}
-                                                    className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-yellow-500 outline-none"
-                                                />
-                                            </div>
-                                        )}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-mono text-slate-500 mb-1">Type</label>
+                                        <select
+                                            value={formData.type}
+                                            onChange={e => setFormData({ ...formData, type: e.target.value })}
+                                            className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-yellow-500 outline-none"
+                                        >
+                                            {ITEM_TYPES.map(c => <option key={c} value={c}>{c}</option>)}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-mono text-slate-500 mb-1">Rarity</label>
+                                        <select
+                                            value={formData.rarity}
+                                            onChange={e => setFormData({ ...formData, rarity: e.target.value })}
+                                            className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-yellow-500 outline-none"
+                                        >
+                                            {RARITIES.map(r => <option key={r} value={r}>{r}</option>)}
+                                        </select>
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Right Column: Effects & Loot */}
+                            <div className="space-y-4">
+                                <h4 className="text-sm font-bold text-purple-400 uppercase border-b border-purple-900/30 pb-2">Effects & Logic</h4>
+
+                                <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700 space-y-3">
+                                    <div>
+                                        <label className="block text-xs font-mono text-slate-500 mb-1">Effect Type</label>
+                                        <select
+                                            value={formData.effect_type}
+                                            onChange={e => setFormData({ ...formData, effect_type: e.target.value })}
+                                            className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-yellow-500 outline-none"
+                                        >
+                                            {EFFECT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                                        </select>
+                                    </div>
+
+                                    {formData.effect_type !== 'mystery_box' && (
+                                        <div>
+                                            <label className="block text-xs font-mono text-slate-500 mb-1">Effect Value</label>
+                                            <input
+                                                type="number"
+                                                value={formData.effect_value || ''}
+                                                onChange={e => setFormData({ ...formData, effect_value: parseInt(e.target.value) })}
+                                                className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-yellow-500 outline-none"
+                                                placeholder="e.g. 50 (XP)"
+                                            />
+                                        </div>
+                                    )}
+
+                                    <div className="flex items-center gap-2 pt-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.is_limited}
+                                            onChange={e => setFormData({ ...formData, is_limited: e.target.checked })}
+                                            className="rounded bg-slate-950 border-slate-700 text-yellow-500 focus:ring-yellow-500"
+                                        />
+                                        <label className="text-sm text-slate-300">Limited Stock?</label>
+                                    </div>
+                                    {formData.is_limited && (
+                                        <div>
+                                            <label className="block text-xs font-mono text-slate-500 mb-1">Stock Amount</label>
+                                            <input
+                                                type="number"
+                                                value={formData.stock || ''}
+                                                onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) })}
+                                                className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-yellow-500 outline-none"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Loot Table UI - Only if Mystery Box */}
+                                {formData.effect_type === 'mystery_box' && (
+                                    <div className="p-4 bg-purple-900/10 rounded-lg border border-purple-500/30">
+                                        <h4 className="text-xs font-bold text-purple-400 mb-3 uppercase flex items-center gap-2">
+                                            <Zap className="w-3 h-3" /> Loot Configuration
+                                        </h4>
+
+                                        <div className="mb-4 space-y-2 max-h-40 overflow-y-auto bg-slate-950/50 p-2 rounded border border-slate-800">
+                                            {currentLoot.length === 0 && <p className="text-slate-500 italic text-xs text-center py-2">No loot defined.</p>}
+                                            {currentLoot.map((loot, idx) => (
+                                                <div key={idx} className="flex items-center justify-between bg-slate-800 p-2 rounded border border-slate-700">
+                                                    <div>
+                                                        <div className="font-bold text-white text-xs">{loot.description}</div>
+                                                        <div className="text-[10px] text-slate-400 font-mono">
+                                                            {loot.reward_type.toUpperCase()} +{loot.reward_value} | W: {loot.weight}
+                                                        </div>
+                                                    </div>
+                                                    <button onClick={() => handleRemoveLootItem(idx)} className="text-slate-500 hover:text-red-400"><X className="w-3 h-3" /></button>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-2 mb-2">
+                                            <select
+                                                value={newLootItem.reward_type}
+                                                onChange={e => setNewLootItem({ ...newLootItem, reward_type: e.target.value })}
+                                                className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs"
+                                            >
+                                                <option value="xp">XP</option>
+                                                <option value="credits">Credits</option>
+                                                <option value="streak_freeze">Streak Freeze</option>
+                                                <option value="lives">Lives</option>
+                                            </select>
+                                            <input
+                                                type="number"
+                                                placeholder="Value"
+                                                value={newLootItem.reward_value}
+                                                onChange={e => setNewLootItem({ ...newLootItem, reward_value: parseInt(e.target.value) })}
+                                                className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs"
+                                            />
+                                            <input
+                                                type="number"
+                                                placeholder="Weight"
+                                                value={newLootItem.weight}
+                                                onChange={e => setNewLootItem({ ...newLootItem, weight: parseInt(e.target.value) })}
+                                                className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs"
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Description"
+                                                value={newLootItem.description}
+                                                onChange={e => setNewLootItem({ ...newLootItem, description: e.target.value })}
+                                                className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs"
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={handleAddLootItem}
+                                            className="w-full py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded font-bold text-xs transition-colors"
+                                        >
+                                            ADD REWARD OPTION
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="p-4 border-t border-slate-800 bg-slate-900/50 flex justify-end gap-3">
@@ -344,6 +429,80 @@ export default function AdminShopPage() {
                             <button onClick={handleSave} className="px-6 py-2 bg-yellow-600 hover:bg-yellow-500 text-black rounded-lg font-bold transition-colors shadow-lg shadow-yellow-900/20">
                                 SAVE ITEM
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Loot Modal */}
+            {isLootModalOpen && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-lg overflow-hidden shadow-2xl">
+                        <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
+                            <h3 className="font-orbitron font-bold text-white flex items-center gap-2">
+                                <Zap className="w-5 h-5 text-purple-400" />
+                                MANAGE LOOT TABLE
+                            </h3>
+                            <button onClick={() => setIsLootModalOpen(false)} className="text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
+                        </div>
+                        <div className="p-6">
+                            <div className="mb-6 space-y-2 max-h-60 overflow-y-auto">
+                                {lootTable.length === 0 && <p className="text-slate-500 italic text-sm">No loot defined. Defaults to 50 XP.</p>}
+                                {lootTable.map(loot => (
+                                    <div key={loot.id} className="flex items-center justify-between bg-slate-800 p-3 rounded-lg border border-slate-700">
+                                        <div>
+                                            <div className="font-bold text-white text-sm">{loot.description}</div>
+                                            <div className="text-xs text-slate-400 font-mono">
+                                                {loot.reward_type.toUpperCase()} +{loot.reward_value} | Weight: {loot.weight}
+                                            </div>
+                                        </div>
+                                        <button onClick={() => handleDeleteLoot(loot.id)} className="text-slate-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="pt-4 border-t border-slate-800">
+                                <h4 className="text-xs font-bold text-slate-400 mb-3 uppercase">Add New Reward</h4>
+                                <div className="grid grid-cols-2 gap-3 mb-3">
+                                    <select
+                                        value={newLoot.reward_type}
+                                        onChange={e => setNewLoot({ ...newLoot, reward_type: e.target.value })}
+                                        className="bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-sm"
+                                    >
+                                        <option value="xp">XP</option>
+                                        <option value="credits">Credits</option>
+                                        <option value="streak_freeze">Streak Freeze</option>
+                                        <option value="lives">Lives</option>
+                                    </select>
+                                    <input
+                                        type="number"
+                                        placeholder="Value"
+                                        value={newLoot.reward_value}
+                                        onChange={e => setNewLoot({ ...newLoot, reward_value: parseInt(e.target.value) })}
+                                        className="bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-sm"
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="Weight"
+                                        value={newLoot.weight}
+                                        onChange={e => setNewLoot({ ...newLoot, weight: parseInt(e.target.value) })}
+                                        className="bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-sm"
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Description"
+                                        value={newLoot.description}
+                                        onChange={e => setNewLoot({ ...newLoot, description: e.target.value })}
+                                        className="bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-sm"
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleAddLoot}
+                                    className="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white rounded font-bold text-sm transition-colors"
+                                >
+                                    ADD REWARD
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

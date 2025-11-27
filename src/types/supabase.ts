@@ -598,6 +598,20 @@ export interface Database {
                 }
                 Returns: void
             }
+            purchase_item: {
+                Args: {
+                    p_user_id: string
+                    p_item_id: string
+                }
+                Returns: Json
+            }
+            claim_mission_reward: {
+                Args: {
+                    p_user_id: string
+                    p_mission_id: string
+                }
+                Returns: Json
+            }
         }
         Enums: {
             [_ in never]: never

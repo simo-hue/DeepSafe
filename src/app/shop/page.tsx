@@ -9,9 +9,9 @@ import TopBar from '@/components/dashboard/TopBar';
 import { provincesData } from '@/data/provincesData';
 import { createBrowserClient } from '@supabase/ssr';
 import { Database } from '@/types/supabase';
-import { loadStripe } from '@stripe/stripe-js';
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+// Stripe is handled via API redirect, no need to load it here
+// import { loadStripe } from '@stripe/stripe-js';
+import { MysteryBoxModal } from '@/components/shop/MysteryBoxModal';
 
 // Initialize Supabase Client
 const supabase = createBrowserClient<Database>(
@@ -119,7 +119,56 @@ function ShopContent() {
         }
     };
 
+    const buyMysteryItem = async (itemId: string, itemCost: number) => {
+        console.log('🎁 Mystery Item Clicked:', itemId);
+
+        if (credits < itemCost) {
+            console.log('❌ Insufficient credits');
+            setFeedback({ type: 'error', message: 'Crediti insufficienti!' });
+            setTimeout(() => setFeedback(null), 3000);
+            return;
+        }
+
+        console.log('🔓 Opening Mystery Box...');
+        setIsBuying(itemId);
+        setMysteryBoxOpen(true); // Open modal immediately
+
+        try {
+            console.log('📡 Calling buyItem RPC...');
+            const result = await buyItem(itemId, itemCost);
+            console.log('✅ RPC Result:', result);
+
+            // Artificial delay for animation
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            setIsBuying(null);
+
+            if (result.success && result.reward) {
+                console.log('🏆 Reward:', result.reward);
+                setMysteryReward(result.reward);
+                // Refresh shop items to update stock if limited
+                fetchShopItems();
+            } else {
+                console.error('❌ Purchase failed:', result.message);
+                setMysteryBoxOpen(false);
+                setFeedback({ type: 'error', message: result.message || 'Errore apertura cassa.' });
+                setTimeout(() => setFeedback(null), 3000);
+            }
+        } catch (error) {
+            console.error('🔥 Error in buyMysteryItem:', error);
+            setIsBuying(null);
+            setMysteryBoxOpen(false);
+            setFeedback({ type: 'error', message: 'Errore imprevisto.' });
+        }
+    };
+
     const handleBuy = async (item: ShopItem) => {
+        // Check if it's a mystery box type
+        if (item.effect_type === 'mystery_box') {
+            await buyMysteryItem(item.id, item.cost);
+            return;
+        }
+
         if (credits < item.cost) {
             setFeedback({ type: 'error', message: 'Crediti insufficienti!' });
             setTimeout(() => setFeedback(null), 3000);
@@ -127,56 +176,24 @@ function ShopContent() {
         }
 
         setIsBuying(item.id);
-        const success = await buyItem(item.id, item.cost);
+        const result = await buyItem(item.id, item.cost);
         setIsBuying(null);
 
-        if (success) {
+        if (result.success) {
             setFeedback({ type: 'success', message: `${item.name} acquistato!` });
+            // Refresh shop items to update stock
+            fetchShopItems();
         } else {
-            setFeedback({ type: 'error', message: 'Errore durante l\'acquisto.' });
+            setFeedback({ type: 'error', message: result.message || 'Errore durante l\'acquisto.' });
         }
         setTimeout(() => setFeedback(null), 3000);
     };
 
-    const handleMysteryBox = async () => {
-        const COST = 50;
-        if (credits < COST) {
-            setFeedback({ type: 'error', message: 'Crediti insufficienti!' });
-            setTimeout(() => setFeedback(null), 3000);
-            return;
-        }
+    const [mysteryReward, setMysteryReward] = useState<{ type: string; value: number } | null>(null);
 
-        setIsBuying('mystery_box');
-        // Simulate "opening" delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        // Random Reward Logic
-        const roll = Math.random();
-        let rewardMsg = "";
-
-        // Note: Actual logic should be server-side or more robust in buyItem
-        // Here we just simulate the visual feedback
-        if (roll < 0.5) {
-            await buyItem('mystery_box', COST); // This adds 50 XP in store logic
-            rewardMsg = "Hai trovato 50 XP!";
-        } else if (roll < 0.8) {
-            // Refund credits (simulated)
-            // In real app, buyItem would handle this or return a result object
-            await buyItem('mystery_box', COST);
-            // We'd need a way to add credits back, but for now let's just say XP/Item
-            rewardMsg = "Hai trovato un oggetto raro!";
-        } else {
-            await buyItem('mystery_box', COST);
-            rewardMsg = "JACKPOT! Streak Freeze!";
-        }
-
-        setMysteryBoxOpen(true);
-        setFeedback({ type: 'success', message: rewardMsg });
-        setIsBuying(null);
-        setTimeout(() => {
-            setFeedback(null);
-            setMysteryBoxOpen(false);
-        }, 4000);
+    // Wrapper for the specific "Cassa Crittografata" section
+    const handleMysteryBoxSection = () => {
+        buyMysteryItem('mystery_box', 50);
     };
 
     // Filter items for display
@@ -189,18 +206,19 @@ function ShopContent() {
             <TopBar progress={unlockedCount} total={totalProvinces} className="!fixed z-40 top-14" />
 
             {/* Header */}
-            <header className="fixed top-32 left-0 w-full p-4 z-30 flex items-center justify-between pointer-events-none">
+            {/* Header */}
+            <header className="fixed top-20 md:top-32 left-0 w-full p-4 z-30 flex items-center justify-between pointer-events-none">
                 <div className="flex flex-col">
-                    <span className="text-[10px] font-orbitron tracking-widest text-cyan-500 uppercase">IL MERCATO NERO</span>
-                    <h1 className="text-2xl font-bold text-white font-orbitron">SHOP</h1>
+                    <span className="text-[8px] md:text-[10px] font-orbitron tracking-widest text-cyan-500 uppercase leading-tight">IL MERCATO NERO</span>
+                    <h1 className="text-xl md:text-2xl font-bold text-white font-orbitron leading-none">SHOP</h1>
                 </div>
-                <div className="pointer-events-auto flex items-center gap-2 bg-slate-900/80 backdrop-blur border border-cyan-500/30 px-4 py-2 rounded-full">
-                    <Coins className="w-5 h-5 text-yellow-400" />
-                    <span className="font-bold font-mono text-yellow-400">{credits} NC</span>
+                <div className="pointer-events-auto flex items-center gap-2 bg-slate-900/90 backdrop-blur-md border border-cyan-500/30 px-3 py-1.5 md:px-4 md:py-2 rounded-full shadow-lg shadow-cyan-900/20">
+                    <Coins className="w-4 h-4 md:w-5 md:h-5 text-yellow-400" />
+                    <span className="font-bold font-mono text-yellow-400 text-sm md:text-base">{credits} NC</span>
                 </div>
             </header>
 
-            <main className="pt-52 px-4 max-w-2xl mx-auto space-y-8">
+            <main className="pt-36 md:pt-52 px-4 max-w-2xl mx-auto space-y-8">
 
                 {/* Feedback Toast */}
                 <AnimatePresence>
@@ -301,7 +319,7 @@ function ShopContent() {
                             <p className="text-sm text-slate-400 mb-6">Tenta la fortuna! Contiene premi casuali.</p>
 
                             <button
-                                onClick={handleMysteryBox}
+                                onClick={handleMysteryBoxSection}
                                 disabled={isBuying === 'mystery_box'}
                                 className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(147,51,234,0.3)] flex items-center justify-center gap-2"
                             >
@@ -313,6 +331,16 @@ function ShopContent() {
                                 )}
                             </button>
                         </section>
+
+                        <MysteryBoxModal
+                            isOpen={mysteryBoxOpen}
+                            onClose={() => {
+                                setMysteryBoxOpen(false);
+                                setMysteryReward(null);
+                            }}
+                            reward={mysteryReward}
+                            isOpening={!!isBuying && (isBuying === 'mystery_box' || shopItems.find(i => i.id === isBuying)?.effect_type === 'mystery_box')}
+                        />
 
                         {/* Regular Items Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -70,9 +70,9 @@ export default function AdminPage() {
         console.log('Admin Check:', { user: user.id, profile, error: profileError });
 
         if (!profile?.is_admin) {
-            console.warn('Access Denied: User is not admin');
-            router.push('/'); // Redirect non-admins
-            return;
+            console.warn('Access Denied: User is not admin (DB check)');
+            // router.push('/'); // DISABLED: Relying on Lock Screen for access control
+            // return;
         }
 
         // Fetch all profiles

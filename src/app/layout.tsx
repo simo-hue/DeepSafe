@@ -6,19 +6,7 @@ import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 const orbitron = Orbitron({ subsets: ["latin"], variable: '--font-orbitron' });
 
-// Service Worker Registration
-if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/custom-sw.js').then(
-      (registration) => {
-        console.log('Service Worker registered with scope:', registration.scope);
-      },
-      (error) => {
-        console.error('Service Worker registration failed:', error);
-      }
-    );
-  });
-}
+
 
 export const viewport: Viewport = {
   themeColor: "#0f172a",

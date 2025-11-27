@@ -29,7 +29,7 @@ export default function QuizPage() {
     const searchParams = useSearchParams();
     const mode = searchParams.get('mode');
     const challengeId = searchParams.get('challengeId');
-    const { lives, decrementLives, addXp, incrementStreak } = useUserStore();
+    const { lives, decrementLives, incrementStreak } = useUserStore();
 
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -215,7 +215,7 @@ export default function QuizPage() {
                 const calculatedXp = Math.round((finalScore / totalQuestions) * quiz.xpReward);
 
                 setEarnedXp(calculatedXp);
-                addXp(calculatedXp);
+                // addXp removed - handled by complete_level RPC
                 incrementStreak();
                 setShowReward(true);
 

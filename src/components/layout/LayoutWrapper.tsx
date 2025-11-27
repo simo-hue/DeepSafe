@@ -11,6 +11,15 @@ export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
     const pathname = usePathname();
     const isAdmin = pathname?.startsWith('/admin');
 
+    React.useEffect(() => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/custom-sw.js').then(
+                (registration) => console.log('Service Worker registered with scope:', registration.scope),
+                (error) => console.error('Service Worker registration failed:', error)
+            );
+        }
+    }, []);
+
     return (
         <div className={`min-h-screen flex flex-col relative overflow-hidden ${isAdmin ? 'w-full' : 'max-w-md mx-auto pt-24 pb-24'}`}>
             {!isAdmin && <Header />}
