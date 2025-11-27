@@ -31,7 +31,7 @@ interface FriendRequest {
 
 export default function LeaderboardPage() {
     const [user, setUser] = useState<any>(null);
-    const [leaderboardTab, setLeaderboardTab] = useState<'global' | 'friends'>('global');
+    const [leaderboardTab, setLeaderboardTab] = useState<'global' | 'friends'>('friends');
     const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
     const [pendingRequests, setPendingRequests] = useState<FriendRequest[]>([]);
     const [isAddFriendOpen, setIsAddFriendOpen] = useState(false);
@@ -72,7 +72,7 @@ export default function LeaderboardPage() {
                 // Friends Leaderboard
                 // 1. Get accepted friendships
                 const { data: friendships, error: friendsError } = await supabase
-                    .from('friends')
+                    .from('friendships')
                     .select('user_id, friend_id')
                     .eq('status', 'accepted')
                     .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`);
@@ -115,7 +115,7 @@ export default function LeaderboardPage() {
         try {
             // Fetch requests where current user is the friend_id (receiver) and status is pending
             const { data, error } = await supabase
-                .from('friends')
+                .from('friendships')
                 .select(`
                     id,
                     user_id,
@@ -143,7 +143,7 @@ export default function LeaderboardPage() {
     const handleAcceptRequest = async (friendshipId: string) => {
         try {
             const { error } = await supabase
-                .from('friends')
+                .from('friendships')
                 .update({ status: 'accepted' })
                 .eq('id', friendshipId);
 
@@ -160,7 +160,7 @@ export default function LeaderboardPage() {
     const handleRejectRequest = async (friendshipId: string) => {
         try {
             const { error } = await supabase
-                .from('friends')
+                .from('friendships')
                 .delete()
                 .eq('id', friendshipId);
 
@@ -247,8 +247,20 @@ export default function LeaderboardPage() {
                     {loading ? (
                         <div className="text-center py-10 text-zinc-500 animate-pulse">Caricamento dati rete...</div>
                     ) : leaderboardData.length === 0 ? (
-                        <div className="text-center py-10 text-zinc-500">
-                            {leaderboardTab === 'friends' ? "Nessun membro nella squadra. Invita qualcuno!" : "Nessun dato disponibile."}
+                        <div className="text-center py-10 text-zinc-500 flex flex-col items-center gap-4">
+                            {leaderboardTab === 'friends' ? (
+                                <>
+                                    <p>La tua squadra è vuota. Inizia a costruire il tuo network!</p>
+                                    <button
+                                        onClick={() => setIsAddFriendOpen(true)}
+                                        className="px-4 py-2 bg-cyber-blue/20 text-cyber-blue border border-cyber-blue/50 rounded-lg hover:bg-cyber-blue/30 transition-colors font-bold text-sm"
+                                    >
+                                        AGGIUNGI MEMBRI
+                                    </button>
+                                </>
+                            ) : (
+                                "Nessun dato disponibile."
+                            )}
                         </div>
                     ) : (
                         leaderboardData.map((entry, index) => (

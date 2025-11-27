@@ -45,8 +45,8 @@ export function AddFriendModal({ isOpen, onClose, currentUserId }: AddFriendModa
     const sendRequest = async (friendId: string) => {
         try {
             const { error } = await supabase
-                .from('friends')
-                .insert({ user_id: currentUserId, friend_id: friendId });
+                .from('friendships')
+                .insert({ user_id: currentUserId, friend_id: friendId, status: 'pending' });
 
             if (error) throw error;
 
@@ -117,8 +117,8 @@ export function AddFriendModal({ isOpen, onClose, currentUserId }: AddFriendModa
                                         onClick={() => sendRequest(user.id)}
                                         disabled={sentRequests.has(user.id)}
                                         className={`p-2 rounded-lg transition-colors ${sentRequests.has(user.id)
-                                                ? 'bg-green-500/20 text-green-500'
-                                                : 'bg-cyber-blue/10 text-cyber-blue hover:bg-cyber-blue/20'
+                                            ? 'bg-green-500/20 text-green-500'
+                                            : 'bg-cyber-blue/10 text-cyber-blue hover:bg-cyber-blue/20'
                                             }`}
                                     >
                                         {sentRequests.has(user.id) ? <Check className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
