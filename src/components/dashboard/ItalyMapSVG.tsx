@@ -38,7 +38,7 @@ const ItalyMapSVG: React.FC<ItalyMapSVGProps> = ({
             <motion.svg
                 viewBox={viewBox}
                 className="w-full h-full"
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 1 }}
                 animate={{ opacity: 1, viewBox }}
                 transition={{ duration: 0.8, ease: "easeInOut" }}
                 preserveAspectRatio="xMidYMid meet"

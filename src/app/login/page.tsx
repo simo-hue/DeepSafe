@@ -289,7 +289,7 @@ function LoginContent() {
 
                     {/* Header Section */}
                     <div className="flex flex-col items-center text-center mb-8 space-y-4">
-                        <Logo size="xl" showText animated />
+                        <Logo size="lg" showText animated />
 
                         <div className="space-y-1">
                             <p className="text-cyan-500/80 font-mono text-xs tracking-[0.2em] uppercase mt-4">

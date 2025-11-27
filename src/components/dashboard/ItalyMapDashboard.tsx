@@ -361,7 +361,7 @@ const ItalyMapDashboard: React.FC<ItalyMapDashboardProps> = ({ className }) => {
                     alignmentAnimation={{ sizeX: 0, sizeY: 0 }}
                 >
                     <TransformComponent
-                        wrapperClass="!w-full !h-full bg-slate-950"
+                        wrapperClass="!w-full !h-full"
                         contentClass="!w-full !h-full flex items-center justify-center"
                     >
                         <div
