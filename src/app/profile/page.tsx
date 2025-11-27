@@ -47,6 +47,7 @@ import { MissionControl } from '@/components/gamification/MissionControl';
 import { ArtifactGrid } from '@/components/gamification/ArtifactGrid';
 import { Mission } from '@/components/gamification/MissionCard';
 import { Badge } from '@/components/gamification/BadgeCard';
+import { StatisticsSection } from '@/components/profile/StatisticsSection';
 
 const MOCK_MISSIONS: Mission[] = [
     { id: '1', title: 'Accesso Giornaliero', target_count: 1, current_count: 1, reward_xp: 50, is_completed: true, is_claimed: false, frequency: 'daily' },
@@ -99,7 +100,7 @@ function SettingsToggle({ checked, onChange, color = 'blue' }: { checked: boolea
 
 export default function ProfilePage() {
     const router = useRouter();
-    const { earnedBadges, refreshProfile, settings, updateSettings, claimMission, inventory, ownedAvatars } = useUserStore();
+    const { earnedBadges, refreshProfile, settings, updateSettings, claimMission, inventory, ownedAvatars, isPremium } = useUserStore();
     const { avatars, loading: avatarsLoading } = useAvatars();
 
     // Push Notifications
@@ -408,6 +409,11 @@ export default function ProfilePage() {
             </div>
 
 
+
+
+            {/* Section B: Premium Statistics */}
+            {/* Section B: Premium Statistics */}
+            <StatisticsSection isPremium={isPremium} />
 
             {/* Section C: Settings */}
             <div className="bg-black/40 border border-cyber-gray/30 rounded-xl p-6 space-y-6 relative overflow-hidden">

@@ -29,6 +29,7 @@ interface UserState {
     inventory: string[]; // List of item IDs
     ownedAvatars: string[]; // List of owned avatar IDs
     hasSeenTutorial: boolean;
+    isPremium: boolean;
     settings: {
         notifications: boolean;
         sound: boolean;
@@ -58,6 +59,7 @@ interface UserState {
     refreshProfile: () => Promise<void>;
     checkBadges: (force?: boolean) => Promise<{ newBadges: string[] }>;
     lastBadgeCheck: number | null;
+    setPremium: (isPremium: boolean) => Promise<void>;
 }
 
 export const useUserStore = create<UserState>()(
@@ -78,6 +80,7 @@ export const useUserStore = create<UserState>()(
             inventory: [],
             ownedAvatars: ['avatar_rookie'], // Default avatar
             hasSeenTutorial: false,
+            isPremium: false,
             lastBadgeCheck: null,
             settings: {
                 notifications: true,
@@ -472,7 +475,7 @@ export const useUserStore = create<UserState>()(
 
                     const { data: profile, error } = await supabase
                         .from('profiles')
-                        .select('xp, current_hearts, highest_streak, unlocked_provinces, province_scores, last_login, earned_badges, credits, streak_freezes, inventory, owned_avatars, settings_notifications, settings_sound, settings_haptics, has_seen_tutorial')
+                        .select('xp, current_hearts, highest_streak, unlocked_provinces, province_scores, last_login, earned_badges, credits, streak_freezes, inventory, owned_avatars, settings_notifications, settings_sound, settings_haptics, has_seen_tutorial, is_premium')
                         .eq('id', user.id)
                         .single();
 
@@ -499,7 +502,8 @@ export const useUserStore = create<UserState>()(
                                 sound: profile.settings_sound ?? true,
                                 haptics: profile.settings_haptics ?? true
                             },
-                            hasSeenTutorial: profile.has_seen_tutorial ?? false
+                            hasSeenTutorial: profile.has_seen_tutorial ?? false,
+                            isPremium: profile.is_premium ?? false
                         });
                         console.log('🔄 Profile refreshed from DB:', profile);
                     }
@@ -600,6 +604,20 @@ export const useUserStore = create<UserState>()(
                 }
 
                 return { newBadges };
+            },
+            setPremium: async (isPremium) => {
+                set({ isPremium });
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        await supabase
+                            .from('profiles')
+                            .update({ is_premium: isPremium })
+                            .eq('id', user.id);
+                    }
+                } catch (err) {
+                    console.error('Error syncing premium status:', err);
+                }
             }
         }),
         {
