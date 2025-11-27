@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { Database } from '@/types/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Camera,
     Edit2,
     Save,
     X,
@@ -20,7 +19,10 @@ import {
     Cpu,
     Activity,
     Shield,
-    LogOut
+    LogOut,
+    Bell,
+    Volume2,
+    Smartphone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import posthog from 'posthog-js';
@@ -40,6 +42,8 @@ interface Profile {
 }
 
 
+import { AvatarSelector } from '@/components/profile/AvatarSelector';
+import { getAvatarById } from '@/data/avatars';
 import { useUserStore } from '@/store/useUserStore';
 import { BADGES_DATA, BadgeDefinition } from '@/data/badgesData';
 import { MissionControl } from '@/components/gamification/MissionControl';
@@ -54,7 +58,7 @@ const MOCK_MISSIONS: Mission[] = [
 ];
 
 import { usePushNotifications } from '@/hooks/usePushNotifications';
-import { Bell, BellOff, Volume2, Smartphone } from 'lucide-react';
+import { BellOff } from 'lucide-react';
 
 type ToggleColor = 'blue' | 'purple' | 'orange';
 
@@ -98,7 +102,6 @@ function SettingsToggle({ checked, onChange, color = 'blue' }: { checked: boolea
 
 export default function ProfilePage() {
     const router = useRouter();
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const { earnedBadges, refreshProfile, settings, updateSettings, claimMission, inventory } = useUserStore();
 
     // Push Notifications
@@ -221,46 +224,21 @@ export default function ProfilePage() {
         }
     };
 
-
-
-    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAvatarSelect = async (avatarId: string) => {
         try {
-            if (!user) {
-                console.error('No user found');
-                return;
-            }
+            if (!user) return;
             setUploading(true);
 
-            if (!event.target.files || event.target.files.length === 0) {
-                throw new Error('Devi selezionare un\'immagine da caricare.');
-            }
-
-            const file = event.target.files[0];
-            const fileExt = file.name.split('.').pop();
-            const filePath = `${user.id}/avatar.${fileExt}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from('avatars')
-                .upload(filePath, file, { upsert: true });
-
-            if (uploadError) throw uploadError;
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('avatars')
-                .getPublicUrl(filePath);
-
-            const { error: updateError } = await supabase
+            const { error } = await supabase
                 .from('profiles')
-                .update({ avatar_url: publicUrl })
+                .update({ avatar_url: avatarId }) // Storing ID in avatar_url column
                 .eq('id', user.id);
 
-            if (updateError) throw updateError;
+            if (error) throw error;
 
-            setProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
-
+            setProfile(prev => prev ? { ...prev, avatar_url: avatarId } : null);
         } catch (error) {
-            console.error('Error uploading avatar:', error);
-            alert('Errore caricamento avatar!');
+            console.error('Error updating avatar:', error);
         } finally {
             setUploading(false);
         }
@@ -351,47 +329,51 @@ export default function ProfilePage() {
                     )}
 
                     <div className="p-6 flex flex-col items-center relative z-10">
-                        {/* Avatar Scanner */}
-                        <div className="relative mb-20 group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                        {/* Avatar Display (Click to Edit) */}
+                        <div className="relative mb-8 group cursor-pointer" onClick={() => setIsEditing(true)}>
                             {/* Rotating Rings */}
                             <div className="absolute -inset-4 border border-cyber-blue/30 rounded-full border-dashed animate-spin-slow pointer-events-none" />
                             <div className="absolute -inset-2 border border-cyber-purple/30 rounded-full border-dotted animate-spin-reverse-slower pointer-events-none" />
 
                             {/* Avatar Container */}
                             <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-cyber-blue/50 shadow-[0_0_20px_rgba(102,252,241,0.3)] relative bg-black">
-                                {profile?.avatar_url ? (
-                                    <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-cyber-dark">
-                                        <Users className="w-12 h-12 text-cyber-gray" />
-                                    </div>
-                                )}
+                                <img
+                                    src={getAvatarById(profile?.avatar_url).src}
+                                    alt="Avatar"
+                                    className="w-full h-full object-cover"
+                                />
 
                                 {/* Hover Overlay */}
                                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Camera className="w-8 h-8 text-white" />
+                                    <Edit2 className="w-8 h-8 text-white" />
                                 </div>
                             </div>
 
                             {/* Level Badge */}
-                            <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 bg-cyber-dark border border-cyber-blue px-4 py-1.5 rounded-full shadow-lg flex items-center gap-2 z-20">
+                            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-cyber-dark border border-cyber-blue px-4 py-1.5 rounded-full shadow-lg flex items-center gap-2 z-20 whitespace-nowrap">
                                 <span className="text-[10px] text-cyber-gray font-mono uppercase">LIV</span>
                                 <span className="text-lg font-bold font-orbitron text-white leading-none">{currentLevel}</span>
                             </div>
-
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                className="hidden"
-                                accept="image/*"
-                                onChange={handleImageUpload}
-                            />
                         </div>
 
                         {/* User Info */}
                         <div className="w-full text-center space-y-4">
                             {isEditing ? (
-                                <div className="space-y-4 w-full max-w-xs mx-auto animate-in fade-in slide-in-from-bottom-4">
+                                <div className="space-y-6 w-full max-w-md mx-auto animate-in fade-in slide-in-from-bottom-4 bg-black/40 p-6 rounded-2xl border border-cyber-blue/20">
+
+                                    <h3 className="text-cyber-blue font-orbitron font-bold text-lg">MODIFICA IDENTITÀ</h3>
+
+                                    {/* Avatar Selector */}
+                                    <div className="space-y-2 text-left">
+                                        <label className="text-[10px] text-cyber-blue font-mono uppercase tracking-widest">Seleziona Avatar</label>
+                                        <AvatarSelector
+                                            currentAvatarId={profile?.avatar_url || null}
+                                            userLevel={currentLevel}
+                                            onSelect={handleAvatarSelect}
+                                            isUpdating={uploading}
+                                        />
+                                    </div>
+
                                     <div className="space-y-1 text-left">
                                         <label className="text-[10px] text-cyber-blue font-mono uppercase tracking-widest">Nome in Codice</label>
                                         <div className="relative">
@@ -400,9 +382,7 @@ export default function ProfilePage() {
                                                 value={editName}
                                                 onChange={(e) => setEditName(e.target.value)}
                                                 className="w-full bg-black/60 border border-cyber-green/50 rounded-lg p-3 text-cyber-green font-mono text-sm focus:outline-none focus:border-cyber-green focus:shadow-[0_0_15px_rgba(0,255,136,0.2)]"
-                                                autoFocus
                                             />
-                                            <span className="absolute right-3 top-3 w-2 h-4 bg-cyber-green animate-pulse" />
                                         </div>
                                     </div>
 
@@ -525,8 +505,6 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-
-
             {/* Section C: Settings */}
             <div className="bg-black/40 border border-cyber-gray/30 rounded-xl p-6 space-y-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-cyber-blue/5 blur-[40px] rounded-full pointer-events-none" />
@@ -612,8 +590,6 @@ export default function ProfilePage() {
             {/* Section E: Artifact Grid */}
             <ArtifactGrid badges={badges} onSelectBadge={setSelectedBadge} />
 
-
-
             {/* Badge Inspection Modal */}
             <AnimatePresence>
                 {selectedBadge && (
@@ -685,6 +661,6 @@ export default function ProfilePage() {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div >
+        </div>
     );
 }
