@@ -309,8 +309,8 @@ const ItalyMapDashboard: React.FC<ItalyMapDashboardProps> = ({ className }) => {
     const activeTarget = selectedTarget || hoveredTarget;
 
     // Calculate Progress
-    const unlockedCount = useMemo(() => {
-        return dynamicProvincesData.filter(p => p.status === 'unlocked' || p.status === 'safe').length;
+    const completedCount = useMemo(() => {
+        return dynamicProvincesData.filter(p => p.isCompleted).length;
     }, [dynamicProvincesData]);
     const totalProvinces = dynamicProvincesData.length;
 
@@ -327,7 +327,7 @@ const ItalyMapDashboard: React.FC<ItalyMapDashboardProps> = ({ className }) => {
             <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-amber-900/10 rounded-full blur-[120px] pointer-events-none" />
 
             {/* HUD Elements */}
-            <TopBar progress={unlockedCount} total={totalProvinces} />
+            <TopBar progress={completedCount} total={totalProvinces} />
 
             {/* Back Button (Only in Regional View) */}
             <AnimatePresence>
