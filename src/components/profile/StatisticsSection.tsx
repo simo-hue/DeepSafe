@@ -15,23 +15,32 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({ isPremium 
     const setPremium = useUserStore(state => state.setPremium);
     const provinceScores = useUserStore(state => state.provinceScores);
     const xp = useUserStore(state => state.xp);
+    const globalRank = useUserStore(state => state.globalRank) || 0;
+    const totalMissions = useUserStore(state => state.totalMissions) || 0; // Use dynamic count from store
 
-    // Calculate Stats
-    const totalMissions = Object.values(provinceScores).reduce((acc, p) => {
-        return acc + (p.missions ? Object.keys(p.missions).length : 0);
-    }, 0);
-
+    // Calculate Completed Missions from user progress
     const completedMissions = Object.values(provinceScores).reduce((acc, p) => {
         return acc + (p.missions ? Object.values(p.missions).filter(m => m.isCompleted).length : 0);
     }, 0);
 
     const missionCompletionRate = totalMissions > 0 ? Math.round((completedMissions / totalMissions) * 100) : 0;
 
-    // Mock Accuracy (Randomized for demo if no real data)
-    const accuracy = 87;
+    // Calculate Accuracy
+    let totalScore = 0;
+    let totalMaxScore = 0;
+    Object.values(provinceScores).forEach(p => {
+        totalScore += p.score;
+        totalMaxScore += p.maxScore;
+        if (p.missions) {
+            Object.values(p.missions).forEach(m => {
+                totalScore += m.score;
+                totalMaxScore += m.maxScore;
+            });
+        }
+    });
+    const accuracy = totalMaxScore > 0 ? Math.min(100, Math.round((totalScore / totalMaxScore) * 100)) : 0;
 
-    // Mock Global Rank
-    const globalRank = Math.max(1, 1000 - Math.floor(xp / 100));
+
 
     const handleUpgrade = async () => {
         await setPremium(true);

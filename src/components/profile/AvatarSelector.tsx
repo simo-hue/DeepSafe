@@ -15,7 +15,7 @@ interface AvatarSelectorProps {
 
 export function AvatarSelector({ currentAvatarId, ownedAvatars, onSelect, isUpdating, avatars }: AvatarSelectorProps) {
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-3">
             {avatars.filter(avatar => ownedAvatars.includes(avatar.id) || avatar.is_default).map((avatar) => {
                 const isSelected = currentAvatarId === avatar.id || (!currentAvatarId && avatar.is_default);
 
@@ -24,10 +24,10 @@ export function AvatarSelector({ currentAvatarId, ownedAvatars, onSelect, isUpda
                         key={avatar.id}
                         onClick={() => onSelect(avatar.id)}
                         disabled={isUpdating}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         className={cn(
-                            "relative group flex flex-col items-center p-4 rounded-xl border transition-all overflow-hidden",
+                            "relative group flex flex-row items-center gap-3 p-3 rounded-xl border transition-all overflow-hidden text-left",
                             isSelected
                                 ? "bg-cyan-950/30 border-cyan-500 shadow-[0_0_15px_rgba(34,211,238,0.3)]"
                                 : "bg-slate-900 border-slate-700 hover:border-cyan-500/50 hover:bg-slate-800"
@@ -35,7 +35,7 @@ export function AvatarSelector({ currentAvatarId, ownedAvatars, onSelect, isUpda
                     >
                         {/* Avatar Image */}
                         <div className={cn(
-                            "relative w-20 h-20 rounded-full mb-3 overflow-hidden border-2",
+                            "relative w-12 h-12 rounded-full overflow-hidden border-2 shrink-0",
                             isSelected ? "border-cyan-400" : "border-slate-600 group-hover:border-cyan-400/50"
                         )}>
                             <Image
@@ -43,28 +43,28 @@ export function AvatarSelector({ currentAvatarId, ownedAvatars, onSelect, isUpda
                                 alt={avatar.name}
                                 fill
                                 className="object-cover"
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                sizes="48px"
                             />
 
                             {/* Selected Overlay */}
                             {isSelected && (
                                 <div className="absolute inset-0 bg-cyan-500/20 flex items-center justify-center">
-                                    <Check className="w-8 h-8 text-cyan-400 drop-shadow-lg" strokeWidth={3} />
+                                    <Check className="w-5 h-5 text-cyan-400 drop-shadow-lg" strokeWidth={3} />
                                 </div>
                             )}
                         </div>
 
                         {/* Info */}
-                        <div className="text-center w-full">
+                        <div className="flex-1 min-w-0">
                             <h3 className={cn(
-                                "font-bold text-sm font-orbitron truncate w-full",
+                                "font-bold text-xs font-orbitron truncate w-full",
                                 isSelected ? "text-cyan-400" : "text-white group-hover:text-cyan-200"
                             )}>
                                 {avatar.name}
                             </h3>
 
                             <p className={cn(
-                                "text-[10px] font-mono mt-1 capitalize",
+                                "text-[9px] font-mono capitalize",
                                 avatar.rarity === 'legendary' ? "text-yellow-400" :
                                     avatar.rarity === 'epic' ? "text-purple-400" :
                                         avatar.rarity === 'rare' ? "text-blue-400" : "text-slate-400"
@@ -75,7 +75,7 @@ export function AvatarSelector({ currentAvatarId, ownedAvatars, onSelect, isUpda
 
                         {/* Selection Indicator */}
                         {isSelected && (
-                            <div className="absolute top-2 right-2 w-2 h-2 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,211,238,1)]" />
+                            <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,211,238,1)]" />
                         )}
                     </motion.button>
                 );

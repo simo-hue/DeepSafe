@@ -106,6 +106,7 @@ export interface Database {
                     last_login?: string | null
                     earned_badges?: Json
                     province_scores?: Json
+                    owned_avatars?: string[] | null
                     settings_notifications?: boolean | null
                     settings_sound?: boolean | null
                     settings_haptics?: boolean | null
@@ -699,6 +700,14 @@ export interface Database {
             get_mission_stats: {
                 Args: Record<PropertyKey, never>
                 Returns: Json
+            }
+            get_advanced_stats: {
+                Args: Record<PropertyKey, never>
+                Returns: Json
+            }
+            get_user_rank: {
+                Args: Record<PropertyKey, never>
+                Returns: number
             }
             admin_restore_data: {
                 Args: {

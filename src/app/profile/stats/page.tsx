@@ -7,63 +7,32 @@ import { ArrowLeft, Activity, TrendingUp, Zap, PieChart as PieIcon, List } from 
 import { useUserStore } from '@/store/useUserStore';
 import { XPTrendChart, SkillsRadarChart, MissionPieChart } from '@/components/profile/StatsCharts';
 
-// Mock Data Generators
-const generateXPTrend = (currentXP: number) => {
-    const data = [];
-    let xp = Math.max(0, currentXP - 500);
-    const now = new Date();
-    for (let i = 6; i >= 0; i--) {
-        const date = new Date(now);
-        date.setDate(date.getDate() - i);
-        data.push({
-            date: date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' }),
-            xp: Math.floor(xp)
-        });
-        xp += Math.random() * 100;
-    }
-    // Ensure last point matches current XP
-    data[data.length - 1].xp = currentXP;
-    return data;
-};
-
-const SKILLS_DATA = [
-    { subject: 'Combattimento', A: 80, fullMark: 100 },
-    { subject: 'Intelligence', A: 65, fullMark: 100 },
-    { subject: 'Tecnologia', A: 90, fullMark: 100 },
-    { subject: 'Carisma', A: 50, fullMark: 100 },
-    { subject: 'Agilità', A: 70, fullMark: 100 },
-];
-
-const MISSION_DATA = [
-    { name: 'Sabotaggio', value: 400 },
-    { name: 'Infiltrazione', value: 300 },
-    { name: 'Ricognizione', value: 300 },
-    { name: 'Hacking', value: 200 },
-];
-
 export default function AdvancedStatsPage() {
     const router = useRouter();
-    const { xp, isPremium, refreshProfile } = useUserStore();
-    const [xpData, setXpData] = useState<any[]>([]);
+    const { isPremium, refreshProfile, fetchAdvancedStats } = useUserStore();
+    const [stats, setStats] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const init = async () => {
-            // Give a small buffer for hydration or fetch fresh data
             await refreshProfile();
+            const data = await fetchAdvancedStats();
+            if (data?.error) {
+                setError(data.error);
+            } else {
+                setStats(data);
+            }
             setIsLoading(false);
         };
         init();
-    }, [refreshProfile]);
+    }, [refreshProfile, fetchAdvancedStats]);
 
     useEffect(() => {
         if (!isLoading && !isPremium) {
             router.push('/profile');
         }
-        if (!isLoading) {
-            setXpData(generateXPTrend(xp));
-        }
-    }, [xp, isPremium, router, isLoading]);
+    }, [isPremium, router, isLoading]);
 
     if (isLoading) {
         return (
@@ -74,6 +43,39 @@ export default function AdvancedStatsPage() {
     }
 
     if (!isPremium) return null;
+
+    // Error Modal
+    if (error) {
+        return (
+            <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+                <div className="bg-black/90 border border-red-500/50 rounded-xl p-8 max-w-md w-full text-center relative overflow-hidden backdrop-blur-xl">
+                    <div className="absolute inset-0 bg-red-500/10 animate-pulse pointer-events-none" />
+                    <Activity className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                    <h2 className="text-xl font-bold font-orbitron text-white mb-2">ERRORE SISTEMA</h2>
+                    <p className="text-slate-400 font-mono text-sm mb-6">{error}</p>
+                    <button
+                        onClick={() => router.back()}
+                        className="px-6 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded text-red-400 font-bold font-orbitron transition-all"
+                    >
+                        RITORNA AL PROFILO
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    const xpTrendData = stats?.xp_trend || [];
+    const missionData = stats?.mission_distribution || [];
+    const recentActivity = stats?.recent_activity || [];
+
+    // Use real skills or zeroed data if empty
+    const skillsData = stats?.skills?.length ? stats.skills : [
+        { subject: 'Combattimento', A: 0, fullMark: 100 },
+        { subject: 'Intelligence', A: 0, fullMark: 100 },
+        { subject: 'Tecnologia', A: 0, fullMark: 100 },
+        { subject: 'Carisma', A: 0, fullMark: 100 },
+        { subject: 'Agilità', A: 0, fullMark: 100 },
+    ];
 
     return (
         <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-cyan-500/30 pb-20">
@@ -109,11 +111,17 @@ export default function AdvancedStatsPage() {
                         CRESCITA ESPERIENZA (7 GIORNI)
                     </h2>
                     <div className="h-[300px] w-full">
-                        <XPTrendChart data={xpData} />
+                        {xpTrendData.length > 0 ? (
+                            <XPTrendChart data={xpTrendData} />
+                        ) : (
+                            <div className="flex items-center justify-center h-full text-slate-500 font-mono text-sm">
+                                DATI INSUFFICIENTI
+                            </div>
+                        )}
                     </div>
                 </section>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                     {/* Skills Radar */}
                     <section className="bg-black/40 border border-cyber-gray/30 rounded-xl p-6 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 blur-[40px] rounded-full pointer-events-none" />
@@ -122,7 +130,7 @@ export default function AdvancedStatsPage() {
                             PROFILO COMPETENZE
                         </h2>
                         <div className="h-[300px] w-full">
-                            <SkillsRadarChart data={SKILLS_DATA} />
+                            <SkillsRadarChart data={skillsData} />
                         </div>
                     </section>
 
@@ -134,44 +142,27 @@ export default function AdvancedStatsPage() {
                             TIPOLOGIA MISSIONI
                         </h2>
                         <div className="h-[300px] w-full flex items-center justify-center">
-                            <MissionPieChart data={MISSION_DATA} />
+                            {missionData.length > 0 ? (
+                                <MissionPieChart data={missionData} />
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-slate-500 font-mono text-sm">
+                                    NESSUNA MISSIONE COMPLETATA
+                                </div>
+                            )}
                         </div>
                         {/* Legend */}
-                        <div className="grid grid-cols-2 gap-2 mt-4">
-                            {MISSION_DATA.map((entry, index) => (
-                                <div key={index} className="flex items-center gap-2 text-xs text-slate-400 font-mono">
-                                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ['#06b6d4', '#a855f7', '#f59e0b', '#10b981'][index] }} />
-                                    {entry.name}
-                                </div>
-                            ))}
-                        </div>
+                        {missionData.length > 0 && (
+                            <div className="grid grid-cols-2 gap-2 mt-4">
+                                {missionData.map((entry: any, index: number) => (
+                                    <div key={index} className="flex items-center gap-2 text-xs text-slate-400 font-mono">
+                                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ['#06b6d4', '#a855f7', '#f59e0b', '#10b981'][index % 4] }} />
+                                        {entry.name}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </section>
                 </div>
-
-                {/* Recent Activity List */}
-                <section className="bg-black/40 border border-cyber-gray/30 rounded-xl p-6 relative overflow-hidden">
-                    <h2 className="text-lg font-bold font-orbitron text-white mb-4 flex items-center gap-2">
-                        <List className="w-5 h-5 text-emerald-500" />
-                        REGISTRO ATTIVITÀ RECENTI
-                    </h2>
-                    <div className="space-y-3">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                            <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                                    <div>
-                                        <div className="text-sm font-bold text-white font-orbitron">MISSIONE COMPLETATA</div>
-                                        <div className="text-xs text-slate-500 font-mono">Operazione "Ombra Notturna" - Settore 7</div>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-sm font-bold text-cyan-400">+150 XP</div>
-                                    <div className="text-[10px] text-slate-600 font-mono">2 ORE FA</div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
 
             </main>
         </div>

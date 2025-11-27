@@ -30,6 +30,8 @@ interface UserState {
     ownedAvatars: string[]; // List of owned avatar IDs
     hasSeenTutorial: boolean;
     isPremium: boolean;
+    globalRank: number | null;
+    totalMissions: number;
     settings: {
         notifications: boolean;
         sound: boolean;
@@ -60,6 +62,7 @@ interface UserState {
     checkBadges: (force?: boolean) => Promise<{ newBadges: string[] }>;
     lastBadgeCheck: number | null;
     setPremium: (isPremium: boolean) => Promise<void>;
+    fetchAdvancedStats: () => Promise<any>;
 }
 
 export const useUserStore = create<UserState>()(
@@ -81,6 +84,8 @@ export const useUserStore = create<UserState>()(
             ownedAvatars: ['avatar_rookie'], // Default avatar
             hasSeenTutorial: false,
             isPremium: false,
+            globalRank: null,
+            totalMissions: 0,
             lastBadgeCheck: null,
             settings: {
                 notifications: true,
@@ -506,6 +511,21 @@ export const useUserStore = create<UserState>()(
                             isPremium: profile.is_premium ?? false
                         });
                         console.log('🔄 Profile refreshed from DB:', profile);
+
+                        // Fetch Rank
+                        const { data: rank, error: rankError } = await supabase.rpc('get_user_rank');
+                        if (!rankError) {
+                            set({ globalRank: rank });
+                        }
+
+                        // Fetch Total Missions Count
+                        const { count: missionsCount, error: missionsError } = await supabase
+                            .from('missions')
+                            .select('*', { count: 'exact', head: true });
+
+                        if (!missionsError && missionsCount !== null) {
+                            set({ totalMissions: missionsCount });
+                        }
                     }
                 } catch (err) {
                     console.error('Unexpected error refreshing profile:', err);
@@ -617,6 +637,19 @@ export const useUserStore = create<UserState>()(
                     }
                 } catch (err) {
                     console.error('Error syncing premium status:', err);
+                }
+            },
+            fetchAdvancedStats: async () => {
+                try {
+                    const { data, error } = await supabase.rpc('get_advanced_stats');
+                    if (error) {
+                        console.error('Error fetching advanced stats:', JSON.stringify(error, null, 2));
+                        return { error: error.message || 'Errore nel recupero delle statistiche' };
+                    }
+                    return data;
+                } catch (err: any) {
+                    console.error('Unexpected error fetching stats:', err);
+                    return { error: err.message || 'Errore imprevisto' };
                 }
             }
         }),
