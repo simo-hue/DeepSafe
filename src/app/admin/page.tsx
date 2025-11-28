@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Shield, Users, Coins, Search, Save, Ban, RefreshCw, Crown, Package, Medal, Zap, Trash2, Plus, X, ShoppingCart, BookOpen, Activity } from 'lucide-react';
 import { BADGES_DATA } from '@/data/badgesData';
 import { GiftModal } from '@/components/admin/GiftModal';
+import { ConfirmationModal } from '@/components/admin/ConfirmationModal';
 import { Gift } from 'lucide-react';
 
 // Initialize Supabase Client
@@ -35,6 +36,43 @@ export default function AdminPage() {
     // Modal States
     const [activeModal, setActiveModal] = useState<'inventory' | 'badges' | 'gift' | null>(null);
     const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
+    const [confirmationModal, setConfirmationModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        variant?: 'info' | 'danger' | 'warning' | 'success';
+        confirmText?: string;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => { },
+    });
+
+    const closeConfirmation = () => {
+        setConfirmationModal(prev => ({ ...prev, isOpen: false }));
+    };
+
+    const askConfirmation = (
+        title: string,
+        message: string,
+        onConfirm: () => void,
+        variant: 'info' | 'danger' | 'warning' | 'success' = 'info',
+        confirmText = 'Conferma'
+    ) => {
+        setConfirmationModal({
+            isOpen: true,
+            title,
+            message,
+            onConfirm: () => {
+                onConfirm();
+                closeConfirmation();
+            },
+            variant,
+            confirmText
+        });
+    };
 
     // KPI Stats
     const totalUsers = users.length;
@@ -101,65 +139,93 @@ export default function AdminPage() {
     };
 
     const handleSave = async (id: string) => {
-        const { error } = await supabase
-            .from('profiles')
-            .update(editForm)
-            .eq('id', id);
+        askConfirmation(
+            'Salva Modifiche',
+            'Sei sicuro di voler salvare le modifiche a questo utente?',
+            async () => {
+                const { error } = await supabase
+                    .from('profiles')
+                    .update(editForm)
+                    .eq('id', id);
 
-        if (error) {
-            alert('Error updating user');
-        } else {
-            setUsers(users.map(u => u.id === id ? { ...u, ...editForm } : u));
-            setEditingId(null);
-        }
+                if (error) {
+                    alert('Error updating user');
+                } else {
+                    setUsers(users.map(u => u.id === id ? { ...u, ...editForm } : u));
+                    setEditingId(null);
+                }
+            },
+            'info',
+            'Salva'
+        );
     };
 
     const handleBan = async (id: string) => {
-        if (!confirm('Are you sure you want to reset this user?')) return;
+        askConfirmation(
+            'Reset Utente',
+            'Sei sicuro di voler resettare questo utente? Verranno azzerati XP, Crediti e Streak.',
+            async () => {
+                // Soft ban / Reset
+                const { error } = await supabase
+                    .from('profiles')
+                    .update({ xp: 0, credits: 0, highest_streak: 0, unlocked_provinces: ['CB', 'IS', 'FG'] })
+                    .eq('id', id);
 
-        // Soft ban / Reset
-        const { error } = await supabase
-            .from('profiles')
-            .update({ xp: 0, credits: 0, highest_streak: 0, unlocked_provinces: ['CB', 'IS', 'FG'] })
-            .eq('id', id);
-
-        if (!error) {
-            checkAdminAndFetchData();
-        }
+                if (!error) {
+                    checkAdminAndFetchData();
+                }
+            },
+            'warning',
+            'Reset Utente'
+        );
     };
 
     const handleDeleteUser = async (id: string) => {
-        if (!confirm('DANGER: Are you sure you want to PERMANENTLY DELETE this user? This action cannot be undone.')) return;
+        askConfirmation(
+            'ELIMINAZIONE DEFINITIVA',
+            'ATTENZIONE: Stai per eliminare DEFINITIVAMENTE questo utente. Questa azione NON può essere annullata. Sei assolutamente sicuro?',
+            async () => {
+                try {
+                    const response = await fetch(`/api/admin/users/delete?userId=${id}`, {
+                        method: 'DELETE',
+                    });
 
-        try {
-            const response = await fetch(`/api/admin/users/delete?userId=${id}`, {
-                method: 'DELETE',
-            });
+                    if (!response.ok) {
+                        const data = await response.json();
+                        throw new Error(data.error || 'Delete failed');
+                    }
 
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || 'Delete failed');
-            }
-
-            // Remove from local state
-            setUsers(users.filter(u => u.id !== id));
-            alert('User deleted successfully.');
-        } catch (error: any) {
-            console.error('Delete error:', error);
-            alert(`Failed to delete user: ${error.message}`);
-        }
+                    // Remove from local state
+                    setUsers(users.filter(u => u.id !== id));
+                    // alert('User deleted successfully.'); // Optional: maybe show a success toast or just update UI
+                } catch (error: any) {
+                    console.error('Delete error:', error);
+                    alert(`Failed to delete user: ${error.message}`);
+                }
+            },
+            'danger',
+            'ELIMINA PER SEMPRE'
+        );
     };
 
     const handleTogglePremium = async (user: Profile) => {
         const newStatus = !user.is_premium;
-        const { error } = await supabase
-            .from('profiles')
-            .update({ is_premium: newStatus })
-            .eq('id', user.id);
+        askConfirmation(
+            newStatus ? 'Attiva Premium' : 'Disattiva Premium',
+            `Sei sicuro di voler ${newStatus ? 'attivare' : 'disattivare'} lo stato Premium per ${user.username}?`,
+            async () => {
+                const { error } = await supabase
+                    .from('profiles')
+                    .update({ is_premium: newStatus })
+                    .eq('id', user.id);
 
-        if (!error) {
-            setUsers(users.map(u => u.id === user.id ? { ...u, is_premium: newStatus } : u));
-        }
+                if (!error) {
+                    setUsers(users.map(u => u.id === user.id ? { ...u, is_premium: newStatus } : u));
+                }
+            },
+            'info',
+            newStatus ? 'Attiva' : 'Disattiva'
+        );
     };
 
     // --- Inventory Management ---
@@ -261,32 +327,42 @@ export default function AdminPage() {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        if (!confirm('WARNING: This will OVERWRITE the entire database with the backup data. This action cannot be undone. Are you sure?')) {
-            event.target.value = ''; // Reset input
-            return;
-        }
+        // Store file and target to use in callback
+        // Since we can't pass event to async callback easily if it's pooled (though React 17+ doesn't pool),
+        // we just read the file here.
 
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            try {
-                const json = JSON.parse(e.target?.result as string);
-                const response = await fetch('/api/admin/restore', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: json.data || json }) // Handle wrapped or direct data
-                });
+        askConfirmation(
+            'RIPRISTINO DATABASE',
+            'ATTENZIONE: Questa azione SOVRASCRIVERÀ l\'intero database con i dati del backup. Tutti i dati attuali andranno persi. Sei sicuro?',
+            () => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const json = JSON.parse(e.target?.result as string);
+                        const response = await fetch('/api/admin/restore', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ data: json.data || json }) // Handle wrapped or direct data
+                        });
 
-                const result = await response.json();
-                if (!response.ok) throw new Error(result.error || 'Restore failed');
+                        const result = await response.json();
+                        if (!response.ok) throw new Error(result.error || 'Restore failed');
 
-                alert('Restore successful! The page will now reload.');
-                window.location.reload();
-            } catch (error: any) {
-                console.error('Restore error:', error);
-                alert(`Restore failed: ${error.message}`);
-            }
-        };
-        reader.readAsText(file);
+                        alert('Restore successful! The page will now reload.');
+                        window.location.reload();
+                    } catch (error: any) {
+                        console.error('Restore error:', error);
+                        alert(`Restore failed: ${error.message}`);
+                    }
+                };
+                reader.readAsText(file);
+            },
+            'danger',
+            'RIPRISTINA ORA'
+        );
+
+        // Reset input value to allow selecting same file again if cancelled/failed
+        event.target.value = '';
     };
 
     if (isLoading) {
@@ -632,6 +708,17 @@ export default function AdminPage() {
                 onClose={() => setActiveModal(null)}
                 users={users}
                 currentAdminId="" // Not strictly needed for logic as we use auth.uid() in RLS/RPC, but good for prop
+            />
+
+            {/* Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={confirmationModal.isOpen}
+                onClose={closeConfirmation}
+                onConfirm={confirmationModal.onConfirm}
+                title={confirmationModal.title}
+                message={confirmationModal.message}
+                variant={confirmationModal.variant}
+                confirmText={confirmationModal.confirmText}
             />
         </div>
     );

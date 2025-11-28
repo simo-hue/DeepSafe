@@ -15,10 +15,11 @@ const supabase = createBrowserClient<Database>(
 
 interface GiftData {
     id: string;
-    type: 'credits' | 'xp' | 'item';
+    type: 'credits' | 'xp' | 'hearts' | 'avatar';
     amount: number;
     item_id: string | null;
     message: string;
+    icon_url: string | null;
 }
 
 export function GiftOverlay() {
@@ -71,11 +72,16 @@ export function GiftOverlay() {
         setIsClaiming(true);
 
         try {
-            const { error } = await (supabase.rpc as any)('claim_gift', {
+            const { data, error } = await (supabase.rpc as any)('claim_gift', {
                 gift_id: gift.id
             });
 
             if (error) throw error;
+
+            // Check logical error from RPC
+            if (data && !data.success) {
+                throw new Error(data.message || 'Errore sconosciuto nel riscatto');
+            }
 
             // Refresh user profile to show new stats
             await refreshProfile();
@@ -88,7 +94,7 @@ export function GiftOverlay() {
             checkForGifts();
         } catch (error) {
             console.error('Error claiming gift:', error);
-            alert('Errore durante il riscatto del regalo.');
+            alert(`Errore durante il riscatto del regalo: ${(error as any).message || 'Errore sconosciuto'}`);
         } finally {
             setIsClaiming(false);
         }
@@ -159,16 +165,35 @@ export function GiftOverlay() {
                                 <div className="py-8 flex flex-col items-center justify-center gap-4">
                                     <div className="relative">
                                         <div className="absolute inset-0 bg-cyan-500/30 blur-2xl rounded-full" />
-                                        {gift.type === 'credits' && <div className="text-6xl">🪙</div>}
-                                        {gift.type === 'xp' && <div className="text-6xl">⚡</div>}
-                                        {gift.type === 'item' && <div className="text-6xl">📦</div>}
+                                        {gift.icon_url ? (
+                                            gift.icon_url.startsWith('/') || gift.icon_url.startsWith('http') ? (
+                                                <img
+                                                    src={gift.icon_url}
+                                                    alt="Gift Icon"
+                                                    className="w-32 h-32 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+                                                />
+                                            ) : (
+                                                <div className="text-8xl relative z-10 animate-bounce">
+                                                    {gift.icon_url}
+                                                </div>
+                                            )
+                                        ) : (
+                                            <>
+                                                {gift.type === 'credits' && <div className="text-6xl">🪙</div>}
+                                                {gift.type === 'xp' && <div className="text-6xl">⚡</div>}
+                                                {gift.type === 'hearts' && <div className="text-6xl">❤️</div>}
+                                                {gift.type === 'avatar' && <div className="text-6xl">👤</div>}
+                                            </>
+                                        )}
                                     </div>
 
                                     <div className="text-4xl font-bold text-white font-mono text-glow">
-                                        {gift.type === 'item' ? (
-                                            <span className="uppercase">{gift.item_id?.replace('_', ' ')}</span>
+                                        {gift.type === 'avatar' ? (
+                                            <span className="uppercase">NUOVO AVATAR</span>
                                         ) : (
-                                            <span>+{gift.amount} <span className="text-sm text-cyan-400 uppercase">{gift.type}</span></span>
+                                            <>
+                                                +{gift.amount} <span className="text-cyan-400 text-2xl ml-2 uppercase">{gift.type}</span>
+                                            </>
                                         )}
                                     </div>
                                 </div>
