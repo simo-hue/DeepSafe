@@ -23,8 +23,6 @@ export function ConfirmationModal({
     cancelText = 'Annulla',
     variant = 'info'
 }: ConfirmationModalProps) {
-    if (!isOpen) return null;
-
     const getVariantStyles = () => {
         switch (variant) {
             case 'danger':
@@ -58,57 +56,61 @@ export function ConfirmationModal({
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                {/* Backdrop */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={onClose}
-                    className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-                />
+            {isOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    {/* Backdrop */}
+                    <motion.div
+                        key="confirm-backdrop"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={onClose}
+                        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                    />
 
-                {/* Modal */}
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                    className={`relative w-full max-w-md bg-slate-950 rounded-2xl border ${styles.border} p-6 shadow-2xl overflow-hidden`}
-                >
-                    {/* Background Effects */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-[50px] rounded-full pointer-events-none" />
+                    {/* Modal */}
+                    <motion.div
+                        key="confirm-modal"
+                        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                        className={`relative w-full max-w-md bg-slate-950 rounded-2xl border ${styles.border} p-6 shadow-2xl overflow-hidden`}
+                    >
+                        {/* Background Effects */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-[50px] rounded-full pointer-events-none" />
 
-                    <div className="flex flex-col items-center text-center space-y-4 relative z-10">
-                        <div className="p-4 bg-slate-900/50 rounded-full border border-slate-800">
-                            {styles.icon}
+                        <div className="flex flex-col items-center text-center space-y-4 relative z-10">
+                            <div className="p-4 bg-slate-900/50 rounded-full border border-slate-800">
+                                {styles.icon}
+                            </div>
+
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-bold text-white font-orbitron tracking-wide">
+                                    {title}
+                                </h3>
+                                <p className="text-slate-400 text-sm leading-relaxed">
+                                    {message}
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 w-full pt-4">
+                                <button
+                                    onClick={onClose}
+                                    className="px-4 py-3 rounded-xl border border-slate-700 text-slate-300 font-bold hover:bg-slate-800 transition-colors"
+                                >
+                                    {cancelText}
+                                </button>
+                                <button
+                                    onClick={onConfirm}
+                                    className={`px-4 py-3 rounded-xl font-bold transition-all ${styles.button}`}
+                                >
+                                    {confirmText}
+                                </button>
+                            </div>
                         </div>
-
-                        <div className="space-y-2">
-                            <h3 className="text-xl font-bold text-white font-orbitron tracking-wide">
-                                {title}
-                            </h3>
-                            <p className="text-slate-400 text-sm leading-relaxed">
-                                {message}
-                            </p>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3 w-full pt-4">
-                            <button
-                                onClick={onClose}
-                                className="px-4 py-3 rounded-xl border border-slate-700 text-slate-300 font-bold hover:bg-slate-800 transition-colors"
-                            >
-                                {cancelText}
-                            </button>
-                            <button
-                                onClick={onConfirm}
-                                className={`px-4 py-3 rounded-xl font-bold transition-all ${styles.button}`}
-                            >
-                                {confirmText}
-                            </button>
-                        </div>
-                    </div>
-                </motion.div>
-            </div>
+                    </motion.div>
+                </div>
+            )}
         </AnimatePresence>
     );
 }
