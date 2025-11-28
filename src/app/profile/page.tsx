@@ -20,7 +20,8 @@ import {
     LogOut,
     Bell,
     Volume2,
-    Smartphone
+    Smartphone,
+    MessageSquare
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import posthog from 'posthog-js';
@@ -48,7 +49,9 @@ import { ArtifactGrid } from '@/components/gamification/ArtifactGrid';
 import { Mission } from '@/components/gamification/MissionCard';
 import { Badge } from '@/components/gamification/BadgeCard';
 import { StatisticsSection } from '@/components/profile/StatisticsSection';
+
 import { CyberLoading } from '@/components/ui/CyberLoading';
+import { FeedbackModal } from '@/components/profile/FeedbackModal';
 
 const MOCK_MISSIONS: Mission[] = [
     { id: '1', title: 'Accesso Giornaliero', target_count: 1, current_count: 1, reward_xp: 50, is_completed: true, is_claimed: false, frequency: 'daily' },
@@ -113,6 +116,7 @@ export default function ProfilePage() {
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
     // Edit Form State
     const [editName, setEditName] = useState('');
@@ -475,7 +479,19 @@ export default function ProfilePage() {
                             onChange={(checked) => updateSettings({ haptics: checked })}
                             color="orange"
                         />
+
                     </div>
+
+                    {/* Feedback Button */}
+                    <button
+                        onClick={() => setIsFeedbackOpen(true)}
+                        className="w-full py-3 rounded-lg border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 font-bold font-orbitron tracking-widest hover:bg-cyan-500 hover:text-white transition-all flex items-center justify-center gap-2 group"
+                    >
+                        <MessageSquare className="w-5 h-5 group-hover:-translate-y-1 transition-transform" />
+                        INVIA FEEDBACK
+                    </button>
+
+                    {/* Logout Button */}
 
                     {/* Logout Button */}
                     <button
@@ -565,6 +581,17 @@ export default function ProfilePage() {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+
+
+            {
+                user && (
+                    <FeedbackModal
+                        isOpen={isFeedbackOpen}
+                        onClose={() => setIsFeedbackOpen(false)}
+                        userId={user.id}
+                    />
+                )
+            }
+        </div >
     );
 }

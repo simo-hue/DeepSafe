@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { Database } from '@/types/supabase';
 import { useRouter } from 'next/navigation';
-import { Shield, Users, Coins, Search, Save, Ban, RefreshCw, Crown, Package, Medal, Zap, Trash2, Plus, X, ShoppingCart, BookOpen, Activity } from 'lucide-react';
+import { Shield, Users, Coins, Search, Save, Ban, RefreshCw, Crown, Package, Medal, Zap, Trash2, Plus, X, ShoppingCart, BookOpen, Activity, MessageSquare } from 'lucide-react';
 import { BADGES_DATA } from '@/data/badgesData';
 import { GiftModal } from '@/components/admin/GiftModal';
 import { ConfirmationModal } from '@/components/admin/ConfirmationModal';
@@ -416,6 +416,13 @@ export default function AdminPage() {
                     >
                         <Activity className="w-4 h-4" />
                         ANALYTICS
+                    </button>
+                    <button
+                        onClick={() => router.push('/admin/feedback')}
+                        className="px-4 py-2 bg-blue-900/30 border border-blue-700/50 rounded hover:bg-blue-900/50 text-blue-400 font-mono text-xs transition-colors flex items-center gap-2"
+                    >
+                        <MessageSquare className="w-4 h-4" />
+                        FEEDBACK
                     </button>
                     <button
                         onClick={() => setActiveModal('gift')}

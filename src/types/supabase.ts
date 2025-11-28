@@ -641,6 +641,44 @@ export interface Database {
                     }
                 ]
             }
+            feedback: {
+                Row: {
+                    id: string
+                    user_id: string
+                    type: 'bug' | 'feature' | 'like' | 'dislike'
+                    message: string
+                    status: 'new' | 'read' | 'archived'
+                    device_info: Json
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    user_id: string
+                    type: 'bug' | 'feature' | 'like' | 'dislike'
+                    message: string
+                    status?: 'new' | 'read' | 'archived'
+                    device_info?: Json
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    user_id?: string
+                    type?: 'bug' | 'feature' | 'like' | 'dislike'
+                    message?: string
+                    status?: 'new' | 'read' | 'archived'
+                    device_info?: Json
+                    created_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "feedback_user_id_fkey"
+                        columns: ["user_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
         }
         Views: {
             [_ in never]: never
