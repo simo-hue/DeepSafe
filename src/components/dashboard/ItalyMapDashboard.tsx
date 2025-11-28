@@ -432,7 +432,7 @@ const ItalyMapDashboard: React.FC<ItalyMapDashboardProps> = ({ className }) => {
             </AnimatePresence>
 
             {/* Tutorial Overlay */}
-            <TutorialOverlay />
+            {isProfileLoaded && <TutorialOverlay />}
         </div>
     );
 };

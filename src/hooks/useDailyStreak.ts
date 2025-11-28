@@ -12,10 +12,15 @@ export const useDailyStreak = (enabled: boolean = true) => {
 
         const checkStreak = () => {
             const today = getToday();
+            const STREAK_MODAL_KEY = 'deepsafe_streak_modal_pending';
 
             // Case 1: Same Day (Already logged in today)
             if (lastLoginDate === today) {
-                // Do nothing
+                // Check if we have a pending modal from a previous mount/reload
+                if (sessionStorage.getItem(STREAK_MODAL_KEY) === 'true') {
+                    setShowModal(true);
+                    hasChecked.current = true;
+                }
                 return;
             }
 
@@ -23,6 +28,7 @@ export const useDailyStreak = (enabled: boolean = true) => {
             if (lastLoginDate && isYesterday(lastLoginDate)) {
                 incrementStreak();
                 setLastLoginDate(today);
+                sessionStorage.setItem(STREAK_MODAL_KEY, 'true');
                 setShowModal(true);
                 hasChecked.current = true;
                 return;
@@ -32,14 +38,18 @@ export const useDailyStreak = (enabled: boolean = true) => {
             // Reset to 1 (since user logged in today)
             resetStreak();
             setLastLoginDate(today);
+            sessionStorage.setItem(STREAK_MODAL_KEY, 'true');
             setShowModal(true);
             hasChecked.current = true;
         };
 
         checkStreak();
-    }, [lastLoginDate, incrementStreak, resetStreak, setLastLoginDate]);
+    }, [lastLoginDate, incrementStreak, resetStreak, setLastLoginDate, enabled]);
 
-    const closeModal = () => setShowModal(false);
+    const closeModal = () => {
+        sessionStorage.removeItem('deepsafe_streak_modal_pending');
+        setShowModal(false);
+    };
 
     return {
         streak,
