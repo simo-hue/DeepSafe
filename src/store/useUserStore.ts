@@ -734,7 +734,7 @@ export const useUserStore = create<UserState>()(
                     return { success: false, message: `Insufficient credits. Need ${cost} NC.` };
                 }
 
-                // 2. Find Starter Province
+                // 2. Find All Provinces in Region
                 const { provincesData } = await import('@/data/provincesData');
                 const regionProvinces = provincesData.filter(p => p.region === regionId);
 
@@ -742,8 +742,18 @@ export const useUserStore = create<UserState>()(
                     return { success: false, message: 'Region data not found.' };
                 }
 
-                // Use the first province as the starter
-                const starterProvinceId = regionProvinces[0].id;
+                // Get all province IDs that are not yet unlocked
+                const newProvinceIds = regionProvinces
+                    .map(p => p.id)
+                    .filter(id => !state.unlockedProvinces.includes(id));
+
+                if (newProvinceIds.length === 0) {
+                    // Already unlocked everything, but maybe we want to allow "re-unlocking" or just return success?
+                    // For now, let's assume if they pay, they want to ensure it's unlocked.
+                    // But if they already unlocked everything, they shouldn't be paying again?
+                    // The UI should prevent this, but let's be safe.
+                    return { success: true, message: 'Region already fully unlocked.' };
+                }
 
                 // 3. Deduct Credits
                 const spent = await state.spendCredits(cost);
@@ -751,8 +761,22 @@ export const useUserStore = create<UserState>()(
                     return { success: false, message: 'Transaction failed.' };
                 }
 
-                // 4. Unlock Province
-                await state.unlockProvince(starterProvinceId);
+                // 4. Unlock All Provinces
+                const newUnlocked = [...state.unlockedProvinces, ...newProvinceIds];
+                set({ unlockedProvinces: newUnlocked });
+
+                // Sync with Supabase
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        await supabase
+                            .from('profiles')
+                            .update({ unlocked_provinces: newUnlocked })
+                            .eq('id', user.id);
+                    }
+                } catch (err) {
+                    console.error('Error syncing unlocked provinces:', err);
+                }
 
                 return { success: true };
             }

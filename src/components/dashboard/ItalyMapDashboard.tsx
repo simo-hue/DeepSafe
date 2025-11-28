@@ -406,6 +406,12 @@ const ItalyMapDashboard: React.FC<ItalyMapDashboardProps> = ({ className }) => {
             const result = await unlockRegion(targetId);
             if (result.success) {
                 setUnlockModalState(null);
+
+                // Immediately update the selected target status to unlocked
+                if (selectedTarget && selectedTarget.id === targetId) {
+                    setSelectedTarget(prev => prev ? { ...prev, status: 'unlocked' } : null);
+                }
+
                 playSound('success');
                 triggerHaptic('success');
                 showToast(`${targetName} UNLOCKED`, 'info');
