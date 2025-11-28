@@ -6,6 +6,8 @@ import { Database } from '@/types/supabase';
 import { useRouter } from 'next/navigation';
 import { Shield, Users, Coins, Search, Save, Ban, RefreshCw, Crown, Package, Medal, Zap, Trash2, Plus, X, ShoppingCart, BookOpen, Activity } from 'lucide-react';
 import { BADGES_DATA } from '@/data/badgesData';
+import { GiftModal } from '@/components/admin/GiftModal';
+import { Gift } from 'lucide-react';
 
 // Initialize Supabase Client
 const supabase = createBrowserClient<Database>(
@@ -31,7 +33,7 @@ export default function AdminPage() {
     const [editForm, setEditForm] = useState<Partial<Profile>>({});
 
     // Modal States
-    const [activeModal, setActiveModal] = useState<'inventory' | 'badges' | null>(null);
+    const [activeModal, setActiveModal] = useState<'inventory' | 'badges' | 'gift' | null>(null);
     const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
 
     // KPI Stats
@@ -233,10 +235,7 @@ export default function AdminPage() {
     };
 
     // --- System Actions ---
-    const handleResetDaily = async () => {
-        if (!confirm('Reset all daily streaks? This is a simulation.')) return;
-        alert('Simulation: Daily streaks would be reset here.');
-    };
+
 
     const handleBackup = async () => {
         try {
@@ -343,11 +342,13 @@ export default function AdminPage() {
                         ANALYTICS
                     </button>
                     <button
-                        onClick={handleResetDaily}
-                        className="px-4 py-2 bg-slate-900 border border-slate-700 rounded hover:bg-red-900/30 text-red-400 font-mono text-xs transition-colors"
+                        onClick={() => setActiveModal('gift')}
+                        className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 border border-cyan-500/50 rounded hover:from-cyan-500 hover:to-blue-500 text-white font-mono text-xs transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
                     >
-                        SIMULATE DAY RESET
+                        <Gift className="w-4 h-4" />
+                        SEND GIFT
                     </button>
+
                     <button
                         onClick={checkAdminAndFetchData}
                         className="p-2 bg-slate-900 border border-slate-700 rounded hover:bg-slate-800 transition-colors"
@@ -624,6 +625,14 @@ export default function AdminPage() {
                     </div>
                 </div>
             )}
+
+            {/* Gift Modal */}
+            <GiftModal
+                isOpen={activeModal === 'gift'}
+                onClose={() => setActiveModal(null)}
+                users={users}
+                currentAdminId="" // Not strictly needed for logic as we use auth.uid() in RLS/RPC, but good for prop
+            />
         </div>
     );
 }

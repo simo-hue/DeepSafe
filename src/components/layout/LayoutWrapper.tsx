@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Header } from "@/components/layout/Header";
 import { CyberToast } from "@/components/ui/CyberToast";
 import { SystemModal } from "@/components/ui/SystemModal";
+import { GiftOverlay } from '@/components/gamification/GiftOverlay';
 
 export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
     const pathname = usePathname();
@@ -29,6 +30,7 @@ export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
             {!isAdmin && <BottomNav />}
             <CyberToast />
             <SystemModal />
+            <GiftOverlay />
         </div>
     );
 };
