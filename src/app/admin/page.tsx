@@ -303,67 +303,7 @@ export default function AdminPage() {
     // --- System Actions ---
 
 
-    const handleBackup = async () => {
-        try {
-            const response = await fetch('/api/admin/backup');
-            if (!response.ok) throw new Error('Backup failed');
 
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `deepsafe-backup-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        } catch (error) {
-            console.error('Backup error:', error);
-            alert('Backup failed. Check console for details.');
-        }
-    };
-
-    const handleRestore = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        // Store file and target to use in callback
-        // Since we can't pass event to async callback easily if it's pooled (though React 17+ doesn't pool),
-        // we just read the file here.
-
-        askConfirmation(
-            'RIPRISTINO DATABASE',
-            'ATTENZIONE: Questa azione SOVRASCRIVERÀ l\'intero database con i dati del backup. Tutti i dati attuali andranno persi. Sei sicuro?',
-            () => {
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    try {
-                        const json = JSON.parse(e.target?.result as string);
-                        const response = await fetch('/api/admin/restore', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ data: json.data || json }) // Handle wrapped or direct data
-                        });
-
-                        const result = await response.json();
-                        if (!response.ok) throw new Error(result.error || 'Restore failed');
-
-                        alert('Restore successful! The page will now reload.');
-                        window.location.reload();
-                    } catch (error: any) {
-                        console.error('Restore error:', error);
-                        alert(`Restore failed: ${error.message}`);
-                    }
-                };
-                reader.readAsText(file);
-            },
-            'danger',
-            'RIPRISTINA ORA'
-        );
-
-        // Reset input value to allow selecting same file again if cancelled/failed
-        event.target.value = '';
-    };
 
     if (isLoading) {
         return <div className="min-h-screen bg-black flex items-center justify-center text-cyan-500 font-mono">INITIALIZING GOD MODE...</div>;
@@ -381,65 +321,100 @@ export default function AdminPage() {
                         <p className="text-slate-500 font-mono text-sm">SYSTEM ADMINISTRATION CONSOLE</p>
                     </div>
                 </div>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => router.push('/admin/badges')}
-                        className="px-4 py-2 bg-purple-900/30 border border-purple-700/50 rounded hover:bg-purple-900/50 text-purple-400 font-mono text-xs transition-colors flex items-center gap-2"
-                    >
-                        <Medal className="w-4 h-4" />
-                        MANAGE BADGES
-                    </button>
-                    <button
-                        onClick={() => router.push('/admin/shop')}
-                        className="px-4 py-2 bg-yellow-900/30 border border-yellow-700/50 rounded hover:bg-yellow-900/50 text-yellow-400 font-mono text-xs transition-colors flex items-center gap-2"
-                    >
-                        <ShoppingCart className="w-4 h-4" />
-                        MANAGE SHOP
-                    </button>
-                    <button
-                        onClick={() => router.push('/admin/avatars')}
-                        className="px-4 py-2 bg-pink-900/30 border border-pink-700/50 rounded hover:bg-pink-900/50 text-pink-400 font-mono text-xs transition-colors flex items-center gap-2"
-                    >
-                        <Users className="w-4 h-4" />
-                        MANAGE AVATARS
-                    </button>
-                    <button
-                        onClick={() => router.push('/admin/missions')}
-                        className="px-4 py-2 bg-cyan-900/30 border border-cyan-700/50 rounded hover:bg-cyan-900/50 text-cyan-400 font-mono text-xs transition-colors flex items-center gap-2"
-                    >
-                        <BookOpen className="w-4 h-4" />
-                        MISSION CREATOR
-                    </button>
-                    <button
-                        onClick={() => router.push('/admin/analytics')}
-                        className="px-4 py-2 bg-emerald-900/30 border border-emerald-700/50 rounded hover:bg-emerald-900/50 text-emerald-400 font-mono text-xs transition-colors flex items-center gap-2"
-                    >
-                        <Activity className="w-4 h-4" />
-                        ANALYTICS
-                    </button>
-                    <button
-                        onClick={() => router.push('/admin/feedback')}
-                        className="px-4 py-2 bg-blue-900/30 border border-blue-700/50 rounded hover:bg-blue-900/50 text-blue-400 font-mono text-xs transition-colors flex items-center gap-2"
-                    >
-                        <MessageSquare className="w-4 h-4" />
-                        FEEDBACK
-                    </button>
-                    <button
-                        onClick={() => setActiveModal('gift')}
-                        className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 border border-cyan-500/50 rounded hover:from-cyan-500 hover:to-blue-500 text-white font-mono text-xs transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
-                    >
-                        <Gift className="w-4 h-4" />
-                        SEND GIFT
-                    </button>
-
+                <div className="flex gap-2 items-center">
                     <button
                         onClick={checkAdminAndFetchData}
                         className="p-2 bg-slate-900 border border-slate-700 rounded hover:bg-slate-800 transition-colors"
+                        title="Refresh Data"
                     >
                         <RefreshCw className="w-5 h-5 text-cyan-500" />
                     </button>
+
+                    <div className="w-px h-8 bg-slate-800 mx-2" />
+
+                    <button
+                        onClick={() => router.push('/admin/dev')}
+                        className="p-2 bg-slate-900 border border-slate-700 rounded hover:bg-slate-800 transition-colors group relative"
+                        title="Dev Console"
+                    >
+                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                        <code className="text-xs font-bold text-slate-400 group-hover:text-green-400 transition-colors">DEV</code>
+                    </button>
                 </div>
             </header>
+
+            {/* Control Panel Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
+                <button
+                    onClick={() => router.push('/admin/badges')}
+                    className="p-4 bg-slate-900/50 border border-slate-800 rounded-xl hover:bg-purple-900/20 hover:border-purple-500/50 transition-all group flex flex-col items-center gap-3"
+                >
+                    <div className="p-3 bg-purple-900/20 rounded-full group-hover:scale-110 transition-transform">
+                        <Medal className="w-6 h-6 text-purple-400" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-400 group-hover:text-purple-300 font-mono">BADGES</span>
+                </button>
+
+                <button
+                    onClick={() => router.push('/admin/shop')}
+                    className="p-4 bg-slate-900/50 border border-slate-800 rounded-xl hover:bg-yellow-900/20 hover:border-yellow-500/50 transition-all group flex flex-col items-center gap-3"
+                >
+                    <div className="p-3 bg-yellow-900/20 rounded-full group-hover:scale-110 transition-transform">
+                        <ShoppingCart className="w-6 h-6 text-yellow-400" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-400 group-hover:text-yellow-300 font-mono">SHOP</span>
+                </button>
+
+                <button
+                    onClick={() => router.push('/admin/avatars')}
+                    className="p-4 bg-slate-900/50 border border-slate-800 rounded-xl hover:bg-pink-900/20 hover:border-pink-500/50 transition-all group flex flex-col items-center gap-3"
+                >
+                    <div className="p-3 bg-pink-900/20 rounded-full group-hover:scale-110 transition-transform">
+                        <Users className="w-6 h-6 text-pink-400" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-400 group-hover:text-pink-300 font-mono">AVATARS</span>
+                </button>
+
+                <button
+                    onClick={() => router.push('/admin/missions')}
+                    className="p-4 bg-slate-900/50 border border-slate-800 rounded-xl hover:bg-cyan-900/20 hover:border-cyan-500/50 transition-all group flex flex-col items-center gap-3"
+                >
+                    <div className="p-3 bg-cyan-900/20 rounded-full group-hover:scale-110 transition-transform">
+                        <BookOpen className="w-6 h-6 text-cyan-400" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-400 group-hover:text-cyan-300 font-mono">MISSIONS</span>
+                </button>
+
+                <button
+                    onClick={() => router.push('/admin/analytics')}
+                    className="p-4 bg-slate-900/50 border border-slate-800 rounded-xl hover:bg-emerald-900/20 hover:border-emerald-500/50 transition-all group flex flex-col items-center gap-3"
+                >
+                    <div className="p-3 bg-emerald-900/20 rounded-full group-hover:scale-110 transition-transform">
+                        <Activity className="w-6 h-6 text-emerald-400" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-400 group-hover:text-emerald-300 font-mono">ANALYTICS</span>
+                </button>
+
+                <button
+                    onClick={() => router.push('/admin/feedback')}
+                    className="p-4 bg-slate-900/50 border border-slate-800 rounded-xl hover:bg-blue-900/20 hover:border-blue-500/50 transition-all group flex flex-col items-center gap-3"
+                >
+                    <div className="p-3 bg-blue-900/20 rounded-full group-hover:scale-110 transition-transform">
+                        <MessageSquare className="w-6 h-6 text-blue-400" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-400 group-hover:text-blue-300 font-mono">FEEDBACK</span>
+                </button>
+
+                <button
+                    onClick={() => setActiveModal('gift')}
+                    className="p-4 bg-slate-900/50 border border-slate-800 rounded-xl hover:bg-indigo-900/20 hover:border-indigo-500/50 transition-all group flex flex-col items-center gap-3"
+                >
+                    <div className="p-3 bg-indigo-900/20 rounded-full group-hover:scale-110 transition-transform">
+                        <Gift className="w-6 h-6 text-indigo-400" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-400 group-hover:text-indigo-300 font-mono">SEND GIFT</span>
+                </button>
+            </div>
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -466,40 +441,7 @@ export default function AdminPage() {
                 </div>
             </div>
 
-            {/* System Maintenance */}
-            <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-6 mb-8">
-                <h2 className="text-lg font-bold text-white font-orbitron mb-4 flex items-center gap-2">
-                    <Save className="w-5 h-5 text-cyan-500" />
-                    SYSTEM MAINTENANCE
-                </h2>
-                <div className="flex flex-wrap gap-4">
-                    <button
-                        onClick={handleBackup}
-                        className="px-6 py-3 bg-blue-900/30 border border-blue-700/50 rounded-lg hover:bg-blue-900/50 text-blue-400 font-mono text-sm transition-colors flex items-center gap-2"
-                    >
-                        <Save className="w-4 h-4" />
-                        DOWNLOAD BACKUP (.JSON)
-                    </button>
 
-                    <div className="relative">
-                        <input
-                            type="file"
-                            accept=".json"
-                            onChange={handleRestore}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        />
-                        <button
-                            className="px-6 py-3 bg-red-900/30 border border-red-700/50 rounded-lg hover:bg-red-900/50 text-red-400 font-mono text-sm transition-colors flex items-center gap-2 pointer-events-none"
-                        >
-                            <RefreshCw className="w-4 h-4" />
-                            RESTORE FROM BACKUP
-                        </button>
-                    </div>
-                </div>
-                <p className="text-xs text-slate-500 mt-2 font-mono">
-                    * Restore will overwrite all current data. Use with caution.
-                </p>
-            </div>
             <div className="bg-slate-900/30 border border-slate-800 rounded-xl overflow-hidden">
                 <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
                     <h2 className="text-lg font-bold text-white font-orbitron">USER DATABASE</h2>
