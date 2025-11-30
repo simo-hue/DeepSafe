@@ -68,6 +68,14 @@ To democratize AI safety knowledge through gamification. We believe that learnin
     ```
     Open [http://localhost:3000](http://localhost:3000) to start your journey.
 
+5.  **Run the Landing Page**
+    To run the static landing page:
+    ```bash
+    cd "LANDING PAGE"
+    python3 -m http.server 8000
+    ```
+    Open [http://localhost:8000](http://localhost:8000) to view the landing page.
+
 ## 📚 Documentation Index
 
 Explore the detailed documentation to understand the system:

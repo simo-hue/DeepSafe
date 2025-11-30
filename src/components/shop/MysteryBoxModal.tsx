@@ -39,6 +39,7 @@ export function MysteryBoxModal({ isOpen, onClose, reward, isOpening }: MysteryB
 
     const getRewardDetails = () => {
         if (!reward) return null;
+        console.log('🎁 Mystery Box Reward:', reward); // Debug logging
         if (reward.type === 'avatar') {
             const avatar = avatars.find(a => a.id === reward.value);
             return {
@@ -162,6 +163,11 @@ export function MysteryBoxModal({ isOpen, onClose, reward, isOpening }: MysteryB
                                             {reward.type === 'streak_freeze' && <Clock className="w-24 h-24 text-orange-400 drop-shadow-[0_0_25px_rgba(251,146,60,1)]" />}
                                             {reward.type === 'lives' && <Gift className="w-24 h-24 text-red-400 drop-shadow-[0_0_25px_rgba(248,113,113,1)]" />}
                                             {reward.type === 'avatar_duplicate' && <Users className="w-24 h-24 text-slate-400" />}
+
+                                            {/* Fallback for unknown types */}
+                                            {!['xp', 'credits', 'streak_freeze', 'lives', 'avatar_duplicate'].includes(reward.type) && (
+                                                <Gift className="w-24 h-24 text-pink-500 drop-shadow-[0_0_25px_rgba(236,72,153,1)] animate-pulse" />
+                                            )}
                                         </>
                                     )}
                                 </motion.div>
@@ -196,6 +202,9 @@ export function MysteryBoxModal({ isOpen, onClose, reward, isOpening }: MysteryB
                                     {reward.type === 'credits' && 'CREDITI RIMBORSATI!'}
                                     {reward.type === 'streak_freeze' && 'CONGELAMENTO SERIE!'}
                                     {reward.type === 'lives' && 'RIPRISTINO SISTEMA!'}
+
+                                    {/* Fallback Title */}
+                                    {!['avatar', 'avatar_duplicate', 'xp', 'credits', 'streak_freeze', 'lives'].includes(reward.type) && 'RICOMPENSA MISTERIOSA!'}
                                 </motion.h3>
                                 <motion.p
                                     className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-cyan-400 to-purple-400 bg-300% animate-gradient"
@@ -208,7 +217,15 @@ export function MysteryBoxModal({ isOpen, onClose, reward, isOpening }: MysteryB
                                     ) : reward.type === 'avatar_duplicate' ? (
                                         <span className="text-xl text-slate-400">Nessuna ricompensa</span>
                                     ) : (
-                                        <>+{reward.value} {reward.type === 'xp' ? 'XP' : reward.type === 'credits' ? 'NC' : ''}</>
+                                        <>
+                                            {/* Standard Value Display */}
+                                            {reward.type && ['xp', 'credits', 'streak_freeze', 'lives'].includes(reward.type) ? (
+                                                <>+{reward.value} {reward.type === 'xp' ? 'XP' : reward.type === 'credits' ? 'NC' : ''}</>
+                                            ) : (
+                                                /* Fallback Value Display */
+                                                <span className="text-3xl">+{reward.value} {(reward.type || 'UNKNOWN').toUpperCase()}</span>
+                                            )}
+                                        </>
                                     )}
                                 </motion.p>
                             </div>
