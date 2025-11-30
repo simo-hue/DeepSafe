@@ -1,0 +1,8 @@
+Eseguire da terminale: npm run dev
+
+Dalla barra degli indirizzi ( URL ) accedere a http://localhost:3000
+
+
+Aggiungere alla URL: /admin. quindi il risultato finale: http://localhost:3000/admin
+
+la password è: admin123

@@ -202,12 +202,20 @@ export default function QuizPage() {
         }
     };
 
+    const [percentage, setPercentage] = useState(0);
+
     const handleNext = async () => {
         if (isLastQuestion) {
             if (isCorrect || isAnswered) {
                 const finalScore = score + (isCorrect ? 1 : 0);
                 const totalQuestions = quiz.questions.length;
-                const calculatedXp = Math.round((finalScore / totalQuestions) * quiz.xpReward);
+
+                // Calculate percentage
+                const finalPercentage = Math.round((finalScore / totalQuestions) * 100);
+                setPercentage(finalPercentage);
+
+                // Only award XP if 100% accuracy
+                const calculatedXp = finalScore === totalQuestions ? quiz.xpReward : 0;
 
                 setEarnedXp(calculatedXp);
                 // addXp removed - handled by complete_level RPC
@@ -255,7 +263,7 @@ export default function QuizPage() {
                         const rpcResult = data as { success?: boolean; error?: string; new_badge_id?: string } | null;
 
                         if (error || (rpcResult && !rpcResult.success)) {
-                            console.error('❌ Error completing level (RPC):', error || rpcResult?.error);
+                            console.error('❌ Error completing level (RPC):', error, rpcResult);
                             // Fallback: Insert directly into user_progress (Partial fix if RPC fails)
                             await supabase.from('user_progress').upsert({
                                 user_id: user.id,
@@ -309,7 +317,15 @@ export default function QuizPage() {
                 </div>
                 <div className="space-y-2">
                     <h2 className="text-3xl font-bold text-cyber-purple font-orbitron text-glow">Missione Compiuta</h2>
-                    <p className="text-xl font-medium text-cyber-blue">Dati Messi in Sicurezza: +{earnedXp} XP</p>
+                    <p className="text-xl font-medium text-cyber-blue">
+                        Accuratezza: <span className={percentage === 100 ? "text-green-400" : "text-yellow-400"}>{percentage}%</span>
+                    </p>
+                    {earnedXp > 0 ? (
+                        <p className="text-lg text-green-400 font-bold">Dati Messi in Sicurezza: +{earnedXp} XP</p>
+                    ) : (
+                        <p className="text-sm text-red-400">Nessun XP guadagnato (Richiesto 100%)</p>
+                    )}
+
                     {newBadgeId && (
                         <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-500/50 rounded-xl animate-pulse">
                             <p className="text-yellow-400 font-bold">NUOVO BADGE SBLOCCATO!</p>
