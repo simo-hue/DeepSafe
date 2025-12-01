@@ -56,6 +56,7 @@ export interface Database {
                     inventory: Json
                     is_admin: boolean
                     last_login: string | null
+                    last_streak_date: string | null
                     owned_avatars: string[] | null
                     earned_badges: Json
                     province_scores: Json | null
@@ -83,6 +84,7 @@ export interface Database {
                     inventory?: Json
                     is_admin?: boolean
                     last_login?: string | null
+                    last_streak_date?: string | null
                     earned_badges?: Json
                     province_scores?: Json
                     settings_notifications?: boolean | null
@@ -108,6 +110,7 @@ export interface Database {
                     inventory?: Json
                     is_admin?: boolean
                     last_login?: string | null
+                    last_streak_date?: string | null
                     earned_badges?: Json
                     province_scores?: Json
                     owned_avatars?: string[] | null
@@ -208,6 +211,7 @@ export interface Database {
                     level?: 'TUTORIAL' | 'SEMPLICE' | 'DIFFICILE' | 'BOSS'
                     description?: string | null
                     tier?: 'level_1' | 'level_2' | 'level_3'
+                    credits_reward?: number
                 }
                 Relationships: []
             }
@@ -675,7 +679,7 @@ export interface Database {
                     id?: string
                     user_id?: string
                     type?: 'bug' | 'feature' | 'like' | 'dislike'
-                    message?: string
+                    message: string
                     status?: 'new' | 'read' | 'archived'
                     device_info?: Json
                     created_at?: string

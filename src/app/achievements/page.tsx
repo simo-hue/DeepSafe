@@ -77,7 +77,7 @@ export default function AchievementsPage() {
                 <section className="space-y-4">
                     <div className="flex items-center gap-2 text-cyber-purple mb-2">
                         <Trophy className="w-5 h-5" />
-                        <h2 className="font-bold font-orbitron tracking-wide text-sm">ARTIFACT GRID</h2>
+                        <h2 className="font-bold font-orbitron tracking-wide text-sm">I TUOI BADGE</h2>
                     </div>
 
                     {/* Hex Grid Layout */}

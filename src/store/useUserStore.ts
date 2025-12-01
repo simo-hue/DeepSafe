@@ -24,6 +24,7 @@ interface UserState {
         missions?: Record<string, { score: number; maxScore: number; isCompleted: boolean }>;
     }>;
     lastLoginDate: string | null; // ISO Date string YYYY-MM-DD
+    lastStreakDate: string | null; // Dedicated date for streak tracking
     earnedBadges: { id: string; earned_at: string }[];
     streakFreezes: number;
     inventory: string[]; // List of item IDs
@@ -53,6 +54,7 @@ interface UserState {
     incrementStreak: () => Promise<void>;
     resetStreak: () => Promise<void>;
     setLastLoginDate: (date: string) => Promise<void>;
+    setLastStreakDate: (date: string) => Promise<void>;
     decrementLives: () => Promise<void>;
     addHeart: (amount: number) => Promise<void>;
     refillLives: () => Promise<void>;
@@ -84,6 +86,7 @@ export const useUserStore = create<UserState>()(
             unlockedProvinces: ['CB', 'IS', 'FG'], // Molise (CB, IS) + Foggia (FG) unlocked by default
             provinceScores: {},
             lastLoginDate: null,
+            lastStreakDate: null,
             earnedBadges: [],
             streakFreezes: 0,
             inventory: [],
@@ -377,20 +380,28 @@ export const useUserStore = create<UserState>()(
             incrementStreak: async () => {
                 const state = get();
                 const newStreak = state.streak + 1;
-                set({ streak: newStreak });
+                const today = new Date().toISOString().split('T')[0];
+                set({ streak: newStreak, lastStreakDate: today });
                 try {
                     const { data: { user } } = await supabase.auth.getUser();
                     if (user) {
-                        await supabase.from('profiles').update({ highest_streak: newStreak }).eq('id', user.id);
+                        await supabase.from('profiles').update({
+                            highest_streak: newStreak,
+                            last_streak_date: today
+                        }).eq('id', user.id);
                     }
                 } catch (err) { console.error('Error syncing streak:', err); }
             },
             resetStreak: async () => {
-                set({ streak: 1 });
+                const today = new Date().toISOString().split('T')[0];
+                set({ streak: 1, lastStreakDate: today });
                 try {
                     const { data: { user } } = await supabase.auth.getUser();
                     if (user) {
-                        await supabase.from('profiles').update({ highest_streak: 1 }).eq('id', user.id);
+                        await supabase.from('profiles').update({
+                            highest_streak: 1,
+                            last_streak_date: today
+                        }).eq('id', user.id);
                     }
                 } catch (err) { console.error('Error syncing streak:', err); }
             },
@@ -402,6 +413,15 @@ export const useUserStore = create<UserState>()(
                         await supabase.from('profiles').update({ last_login: date }).eq('id', user.id);
                     }
                 } catch (err) { console.error('Error syncing last login:', err); }
+            },
+            setLastStreakDate: async (date) => {
+                set({ lastStreakDate: date });
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        await supabase.from('profiles').update({ last_streak_date: date }).eq('id', user.id);
+                    }
+                } catch (err) { console.error('Error syncing last streak date:', err); }
             },
             decrementLives: async () => {
                 const state = get();
@@ -489,7 +509,7 @@ export const useUserStore = create<UserState>()(
 
                     const { data: profile, error } = await supabase
                         .from('profiles')
-                        .select('xp, current_hearts, highest_streak, unlocked_provinces, province_scores, last_login, earned_badges, credits, streak_freezes, inventory, owned_avatars, settings_notifications, settings_sound, settings_haptics, has_seen_tutorial, is_premium, map_tier, completed_tiers')
+                        .select('xp, current_hearts, highest_streak, unlocked_provinces, province_scores, last_login, last_streak_date, earned_badges, credits, streak_freezes, inventory, owned_avatars, settings_notifications, settings_sound, settings_haptics, has_seen_tutorial, is_premium, map_tier, completed_tiers')
                         .eq('id', user.id)
                         .single();
 
@@ -507,6 +527,7 @@ export const useUserStore = create<UserState>()(
                             unlockedProvinces: profile.unlocked_provinces ?? ['CB', 'IS', 'FG'],
                             provinceScores: (profile.province_scores as any) ?? {},
                             lastLoginDate: profile.last_login ?? null,
+                            lastStreakDate: profile.last_streak_date ?? null,
                             earnedBadges: (profile.earned_badges as any) ?? [],
                             streakFreezes: profile.streak_freezes ?? 0,
                             inventory: (profile.inventory as any) ?? [],

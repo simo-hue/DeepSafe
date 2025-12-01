@@ -44,20 +44,16 @@ import { AvatarSelector } from '@/components/profile/AvatarSelector';
 import { useAvatars } from '@/hooks/useAvatars';
 import { useUserStore } from '@/store/useUserStore';
 import { BADGES_DATA, BadgeDefinition } from '@/data/badgesData';
-import { MissionControl } from '@/components/gamification/MissionControl';
+
 import { ArtifactGrid } from '@/components/gamification/ArtifactGrid';
-import { Mission } from '@/components/gamification/MissionCard';
+
 import { Badge } from '@/components/gamification/BadgeCard';
 import { StatisticsSection } from '@/components/profile/StatisticsSection';
 
 import { CyberLoading } from '@/components/ui/CyberLoading';
 import { FeedbackModal } from '@/components/profile/FeedbackModal';
 
-const MOCK_MISSIONS: Mission[] = [
-    { id: '1', title: 'Accesso Giornaliero', target_count: 1, current_count: 1, reward_xp: 50, is_completed: true, is_claimed: false, frequency: 'daily' },
-    { id: '2', title: 'Maestro dei Quiz', target_count: 3, current_count: 2, reward_xp: 150, is_completed: false, is_claimed: false, frequency: 'daily' },
-    { id: '3', title: 'Serie Perfetta', target_count: 1, current_count: 1, reward_xp: 200, is_completed: true, is_claimed: true, frequency: 'weekly' },
-];
+
 
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { BellOff } from 'lucide-react';
@@ -104,7 +100,7 @@ function SettingsToggle({ checked, onChange, color = 'blue' }: { checked: boolea
 
 export default function ProfilePage() {
     const router = useRouter();
-    const { earnedBadges, refreshProfile, settings, updateSettings, claimMission, inventory, ownedAvatars, isPremium } = useUserStore();
+    const { earnedBadges, refreshProfile, settings, updateSettings, inventory, ownedAvatars, isPremium } = useUserStore();
     const { avatars, loading: avatarsLoading } = useAvatars();
 
     // Push Notifications
@@ -123,18 +119,11 @@ export default function ProfilePage() {
 
 
     // Gamification State
-    const [missions, setMissions] = useState<Mission[]>(MOCK_MISSIONS);
+
     const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
 
     // Sync Missions with Inventory (Claimed Status)
-    useEffect(() => {
-        if (inventory) {
-            setMissions(prev => prev.map(m => ({
-                ...m,
-                is_claimed: inventory.includes(`mission_${m.id}`) || m.is_claimed
-            })));
-        }
-    }, [inventory]);
+
 
     // Compute Badges with Unlock Status
     const badges = BADGES_DATA.map(badgeDef => {
@@ -152,31 +141,7 @@ export default function ProfilePage() {
         };
     }).filter(b => b.is_unlocked);
 
-    /**
-     * Handles the "Claim" action for a mission.
-     * In a real app, this would call an API to award XP and update the DB.
-     */
-    const handleClaimMission = async (id: string) => {
-        const mission = missions.find(m => m.id === id);
-        if (!mission || mission.is_claimed) return;
 
-        // Optimistic update
-        setMissions(prev => prev.map(m =>
-            m.id === id ? { ...m, is_claimed: true } : m
-        ));
-
-        const success = await claimMission(id);
-
-        if (!success) {
-            // Revert if failed
-            setMissions(prev => prev.map(m =>
-                m.id === id ? { ...m, is_claimed: false } : m
-            ));
-            alert('Errore durante il riscatto della missione. Riprova.');
-        } else {
-            // Trigger particle effect here
-        }
-    };
 
     useEffect(() => {
         fetchProfile();
@@ -504,8 +469,7 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            {/* Section D: Mission Control */}
-            <MissionControl missions={missions} onClaim={handleClaimMission} />
+
 
             {/* Section E: Artifact Grid */}
             <ArtifactGrid badges={badges} onSelectBadge={setSelectedBadge} />
