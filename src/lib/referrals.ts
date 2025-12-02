@@ -16,6 +16,6 @@ export async function redeemReferral(code: string, userId: string) {
 
     } catch (error) {
         console.error('Error redeeming code:', error);
-        return { success: false, message: 'Redemption failed.' };
+        return { success: false, message: 'Riscatto fallito.' };
     }
 }

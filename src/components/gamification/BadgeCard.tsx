@@ -68,7 +68,7 @@ export function BadgeCard({ badge, onClick }: BadgeCardProps) {
                             "text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded",
                             badge.is_unlocked ? `${iconBg} ${textColor}` : "bg-zinc-800 text-zinc-500"
                         )}>
-                            {badge.rarity || 'Common'}
+                            {badge.rarity === 'legendary' ? 'Leggendario' : badge.rarity === 'rare' ? 'Raro' : 'Comune'}
                         </span>
                         {badge.is_unlocked && (
                             <span className="text-[10px] text-cyber-green font-mono">

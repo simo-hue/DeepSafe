@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Target, Zap, Trophy, Activity, Crosshair, Lock } from 'lucide-react';
 import { PremiumLockOverlay } from './PremiumLockOverlay';
 import { PremiumModal } from './PremiumModal';
+import { ComingSoonModal } from '../common/ComingSoonModal';
 import { useUserStore } from '@/store/useUserStore';
 
 interface StatisticsSectionProps {
@@ -12,7 +14,9 @@ interface StatisticsSectionProps {
 
 export const StatisticsSection: React.FC<StatisticsSectionProps> = ({ isPremium }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const setPremium = useUserStore(state => state.setPremium);
+    const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
+    // const setPremium = useUserStore(state => state.setPremium); // REMOVED: Insecure client-side update
+    const router = useRouter();
     const provinceScores = useUserStore(state => state.provinceScores);
     const xp = useUserStore(state => state.xp);
     const globalRank = useUserStore(state => state.globalRank) || 0;
@@ -49,8 +53,10 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({ isPremium 
 
 
     const handleUpgrade = async () => {
-        await setPremium(true);
+        // await setPremium(true); // REMOVED: Premium is activated via Stripe Webhook
+        // router.push('/shop'); // CHANGED: Feature coming soon
         setIsModalOpen(false);
+        setIsComingSoonOpen(true);
     };
 
     return (
@@ -133,6 +139,12 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({ isPremium 
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onUpgrade={handleUpgrade}
+            />
+
+            <ComingSoonModal
+                isOpen={isComingSoonOpen}
+                onClose={() => setIsComingSoonOpen(false)}
+                featureName="L'abbonamento Premium"
             />
         </>
     );

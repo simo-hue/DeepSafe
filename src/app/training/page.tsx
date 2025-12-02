@@ -90,7 +90,7 @@ export default function TrainingPillPage() {
     };
 
     if (!lesson) {
-        return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-cyan-500">LOADING DATA...</div>;
+        return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-cyan-500">CARICAMENTO DATI...</div>;
     }
 
     const handleStartQuiz = () => {
@@ -172,7 +172,7 @@ export default function TrainingPillPage() {
                     <ArrowLeft className="w-5 h-5 text-slate-400" />
                 </button>
                 <div className="flex flex-col items-center">
-                    <span className="text-[10px] font-orbitron tracking-widest text-cyan-500 uppercase">TRAINING MODULE</span>
+                    <span className="text-[10px] font-orbitron tracking-widest text-cyan-500 uppercase">MODULO ADDESTRAMENTO</span>
                     <span className="text-sm font-bold text-white">{lesson.title}</span>
                 </div>
                 <div className="w-9" />

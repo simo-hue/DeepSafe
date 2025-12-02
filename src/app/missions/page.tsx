@@ -183,7 +183,7 @@ export default function MissionSelectionPage() {
                                                             <div className="flex justify-between items-start mb-3">
                                                                 <div className="flex items-center space-x-2">
                                                                     <span className={`text-[10px] font-bold px-2 py-1 rounded-md border ${getDifficultyColor(problem.difficulty)}`}>
-                                                                        {problem.difficulty}
+                                                                        {problem.difficulty === 'Easy' ? 'Facile' : problem.difficulty === 'Medium' ? 'Medio' : 'Difficile'}
                                                                     </span>
                                                                 </div>
                                                                 <div className="flex items-center space-x-1.5 text-xs text-slate-400 bg-slate-900/50 px-2 py-1 rounded-full border border-slate-700">

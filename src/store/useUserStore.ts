@@ -67,7 +67,7 @@ interface UserState {
     refreshProfile: () => Promise<void>;
     checkBadges: (force?: boolean) => Promise<{ newBadges: string[] }>;
     lastBadgeCheck: number | null;
-    setPremium: (isPremium: boolean) => Promise<void>;
+    // setPremium: (isPremium: boolean) => Promise<void>; // REMOVED: Managed by server
     fetchAdvancedStats: () => Promise<any>;
     upgradeMapTier: () => Promise<boolean>;
     fetchRegionCosts: () => Promise<void>;
@@ -245,14 +245,21 @@ export const useUserStore = create<UserState>()(
                     }
 
                     const result = data as any;
+                    console.log('🛒 Purchase RPC Result:', result);
+
                     if (result && result.success) {
                         // Refresh profile to get updated state (credits, inventory, etc.)
                         await get().refreshProfile();
+
+                        // Handle both flat (new) and nested (old) reward structures
+                        const rewardType = result.reward_type || result.reward?.type;
+                        const rewardValue = result.reward_value ?? result.reward?.value;
+
                         return {
                             success: true,
                             reward: {
-                                type: result.reward_type,
-                                value: result.reward_value
+                                type: rewardType,
+                                value: rewardValue
                             }
                         };
                     } else {
@@ -574,7 +581,9 @@ export const useUserStore = create<UserState>()(
                             if (!unlockedError && dbMissions) {
                                 const dbCounts: Record<string, number> = {};
                                 dbMissions.forEach(m => {
-                                    dbCounts[m.province_id] = (dbCounts[m.province_id] || 0) + 1;
+                                    if (m.province_id) {
+                                        dbCounts[m.province_id] = (dbCounts[m.province_id] || 0) + 1;
+                                    }
                                 });
 
                                 unlockedProvinces.forEach(provId => {
@@ -691,20 +700,7 @@ export const useUserStore = create<UserState>()(
 
                 return { newBadges };
             },
-            setPremium: async (isPremium) => {
-                set({ isPremium });
-                try {
-                    const { data: { user } } = await supabase.auth.getUser();
-                    if (user) {
-                        await supabase
-                            .from('profiles')
-                            .update({ is_premium: isPremium })
-                            .eq('id', user.id);
-                    }
-                } catch (err) {
-                    console.error('Error syncing premium status:', err);
-                }
-            },
+            // setPremium: async (isPremium) => { ... } // REMOVED
             fetchAdvancedStats: async () => {
                 try {
                     const { data, error } = await supabase.rpc('get_advanced_stats');

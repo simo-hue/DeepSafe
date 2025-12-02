@@ -35,7 +35,7 @@ export async function challengeFriend(challengerId: string, opponentId: string, 
         }
 
         if (existing) {
-            return { success: false, message: 'Challenge already pending!' };
+            return { success: false, message: 'Sfida già in attesa!' };
         }
 
         // 2. Create the challenge record
@@ -70,11 +70,11 @@ export async function challengeFriend(challengerId: string, opponentId: string, 
             console.error('Failed to send push notification:', pushError);
         }
 
-        return { success: true, challenge: data, message: 'Challenge sent!' };
+        return { success: true, challenge: data, message: 'Sfida inviata!' };
 
     } catch (error) {
         console.error('Error creating challenge:', error);
-        return { success: false, message: 'Failed to create challenge.' };
+        return { success: false, message: 'Impossibile creare la sfida.' };
     }
 }
 
@@ -163,6 +163,6 @@ export async function submitDuelScore(challengeId: string, userId: string, score
 
     } catch (error) {
         console.error('Error submitting duel score:', error);
-        return { success: false, message: 'Failed to submit score.' };
+        return { success: false, message: 'Impossibile inviare il punteggio.' };
     }
 }

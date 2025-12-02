@@ -286,7 +286,7 @@ function ShopContent() {
                 </AnimatePresence>
 
                 {isLoading ? (
-                    <div className="text-center py-20 text-cyan-500 font-mono animate-pulse">LOADING BLACK MARKET...</div>
+                    <div className="text-center py-20 text-cyan-500 font-mono animate-pulse">CARICAMENTO MERCATO NERO...</div>
                 ) : (
                     <>
                         {/* Credit Packs Section */}
@@ -335,7 +335,7 @@ function ShopContent() {
                         {dailyDealItem && (
                             <section className="relative overflow-hidden rounded-2xl border border-yellow-500/30 bg-gradient-to-br from-yellow-950/20 to-slate-900 p-6">
                                 <div className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-3 py-1 rounded-bl-lg font-orbitron">
-                                    DAILY DEAL -50%
+                                    OFFERTA DEL GIORNO -50%
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <div className="p-4 rounded-full bg-yellow-500/10 border border-yellow-500/50 animate-pulse text-4xl">
@@ -453,7 +453,7 @@ function ShopContent() {
 
 export default function ShopPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-cyan-500 font-mono">LOADING SHOP...</div>}>
+        <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-cyan-500 font-mono">CARICAMENTO SHOP...</div>}>
             <ShopContent />
         </Suspense>
     );
