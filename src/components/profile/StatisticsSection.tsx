@@ -16,17 +16,19 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({ isPremium 
     const provinceScores = useUserStore(state => state.provinceScores);
     const xp = useUserStore(state => state.xp);
     const globalRank = useUserStore(state => state.globalRank) || 0;
-    const totalMissions = useUserStore(state => state.totalMissions) || 0; // Use dynamic count from store
+    const totalMissions = useUserStore(state => state.totalMissions) || 0;
+    const unlockedMissionsCount = useUserStore(state => state.unlockedMissionsCount) || 0;
 
     // Calculate Completed Missions from user progress
     const completedMissions = Object.values(provinceScores).reduce((acc, p) => {
         return acc + (p.missions ? Object.values(p.missions).filter(m => m.isCompleted).length : 0);
     }, 0);
 
-    console.log('Stats Debug:', { totalMissions, completedMissions, provinceScores });
+    console.log('Stats Debug:', { totalMissions, unlockedMissionsCount, completedMissions, provinceScores });
 
-    // Ensure totalMissions is at least equal to completedMissions to avoid > 100%
-    const effectiveTotal = Math.max(totalMissions, completedMissions);
+    // Use unlockedMissionsCount as the denominator
+    // Ensure we don't divide by zero and handle edge cases where completed > unlocked (shouldn't happen but safe to handle)
+    const effectiveTotal = Math.max(unlockedMissionsCount, completedMissions);
     const missionCompletionRate = effectiveTotal > 0 ? Math.round((completedMissions / effectiveTotal) * 100) : 0;
 
     // Calculate Accuracy

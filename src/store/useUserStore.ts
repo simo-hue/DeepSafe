@@ -33,6 +33,7 @@ interface UserState {
     isPremium: boolean;
     globalRank: number | null;
     totalMissions: number;
+    unlockedMissionsCount: number;
     mapTier: 'level_1' | 'level_2' | 'level_3';
     completedTiers: string[];
     regionCosts: Record<string, number>;
@@ -95,6 +96,7 @@ export const useUserStore = create<UserState>()(
             isPremium: false,
             globalRank: null,
             totalMissions: 0,
+            unlockedMissionsCount: 0,
             mapTier: 'level_1',
             completedTiers: [],
             regionCosts: {},
@@ -558,6 +560,35 @@ export const useUserStore = create<UserState>()(
                         if (!missionsError && missionsCount !== null) {
                             set({ totalMissions: missionsCount });
                         }
+
+                        // Calculate Unlocked Missions Count (Hybrid: DB + Fallback)
+                        const unlockedProvinces = profile.unlocked_provinces ?? ['CB', 'IS', 'FG'];
+                        let calculatedTotal = 0;
+
+                        if (unlockedProvinces.length > 0) {
+                            const { data: dbMissions, error: unlockedError } = await supabase
+                                .from('missions')
+                                .select('province_id')
+                                .in('province_id', unlockedProvinces);
+
+                            if (!unlockedError && dbMissions) {
+                                const dbCounts: Record<string, number> = {};
+                                dbMissions.forEach(m => {
+                                    dbCounts[m.province_id] = (dbCounts[m.province_id] || 0) + 1;
+                                });
+
+                                unlockedProvinces.forEach(provId => {
+                                    const count = dbCounts[provId] || 0;
+                                    // If DB has missions, use that count. Otherwise assume 1 fallback mission.
+                                    calculatedTotal += (count > 0 ? count : 1);
+                                });
+                            } else {
+                                // Fallback if DB fetch fails: 1 per province
+                                calculatedTotal = unlockedProvinces.length;
+                            }
+                        }
+
+                        set({ unlockedMissionsCount: calculatedTotal });
                     }
                 } catch (err) {
                     console.error('Unexpected error refreshing profile:', err);
@@ -807,6 +838,26 @@ export const useUserStore = create<UserState>()(
         }),
         {
             name: 'deepsafe-user-storage',
+            partialize: (state) => ({
+                xp: state.xp,
+                credits: state.credits,
+                lives: state.lives,
+                streak: state.streak,
+                unlockedProvinces: state.unlockedProvinces,
+                provinceScores: state.provinceScores,
+                lastLoginDate: state.lastLoginDate,
+                lastStreakDate: state.lastStreakDate,
+                earnedBadges: state.earnedBadges,
+                streakFreezes: state.streakFreezes,
+                inventory: state.inventory,
+                ownedAvatars: state.ownedAvatars,
+                hasSeenTutorial: state.hasSeenTutorial,
+                isPremium: state.isPremium,
+                settings: state.settings,
+                mapTier: state.mapTier,
+                completedTiers: state.completedTiers,
+                unlockedMissionsCount: state.unlockedMissionsCount,
+            })
         }
     )
 );
