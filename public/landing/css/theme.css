@@ -57,7 +57,7 @@
 }
 
 /* Target 2: Adult (25-39) - Professional Tech */
-body.theme-adult {
+.theme-adult {
     --primary-color: #2563eb;
     /* Royal Blue */
     --secondary-color: #10b981;
@@ -67,6 +67,11 @@ body.theme-adult {
     --card-bg: #f3f4f6;
     font-family: 'Inter', sans-serif;
     /* Clean, professional */
+
+    background-color: var(--background-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    width: 100%;
 }
 
 .theme-adult h1 {
@@ -86,7 +91,7 @@ body.theme-adult {
 }
 
 /* Target 3: Senior (40-55) - Clear & Trustworthy */
-body.theme-senior {
+.theme-senior {
     --primary-color: #059669;
     /* Calming Green */
     --secondary-color: #d97706;
@@ -96,6 +101,11 @@ body.theme-senior {
     --card-bg: #fff;
     font-family: 'Roboto', sans-serif;
     /* Readable, familiar */
+
+    background-color: var(--background-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    width: 100%;
 }
 
 .theme-senior h1 {

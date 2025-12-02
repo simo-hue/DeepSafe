@@ -22,7 +22,7 @@ export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
         }
     }, []);
 
-    const isLandingPage = pathname === '/';
+    const isLandingPage = pathname === '/' || pathname === '/adult' || pathname === '/senior';
 
     if (isLandingPage) {
         return <main className="min-h-screen">{children}</main>;
