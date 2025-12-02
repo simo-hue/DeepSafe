@@ -47,12 +47,7 @@ jobs:
 
       - name: Setup Pages
         id: pages
-        uses: actions/configure-pages@v5
-        with:
-          static_site_generator: next
-          # Disable automatic injection of Next.js configuration to avoid parsing errors with PWA wrapper
-          # We manually handle basePath in next.config.js
-          enablement: true 
+        uses: actions/configure-pages@v5 
 
       - name: Restore cache
         uses: actions/cache@v4
