@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Shield, Lock, ChevronRight, AlertTriangle, LogIn } from 'lucide-react';
+import { AlertTriangle, LogIn } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { Database } from '@/types/supabase';
@@ -14,9 +14,6 @@ export default function AdminLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const [isUnlocked, setIsUnlocked] = useState(false);
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
     // Auth State
@@ -59,31 +56,18 @@ export default function AdminLayout({
 
         setAuthStatus('authorized');
 
-        // 3. Check Lock Screen State
-        const unlocked = sessionStorage.getItem('admin_unlocked');
-        if (unlocked === 'true') {
-            setIsUnlocked(true);
-        }
+        // Authentication is the Supabase session plus the profiles.is_admin check
+        // above, enforced server-side by row-level security.
+        //
+        // There used to be a second "access code" lock screen here, compared against
+        // process.env.NEXT_PUBLIC_ADMIN_PASSWORD. Next.js inlines every NEXT_PUBLIC_*
+        // value into the client bundle at build time, so on a public static export
+        // that password was readable by anyone who opened the JavaScript. It offered
+        // no protection against an attacker — only friction for the real admin — so
+        // it has been removed rather than reintroduced in a form that looks secret
+        // but is not. Any real second factor has to be enforced by Supabase, never
+        // by a string shipped to the browser.
         setIsLoading(false);
-    };
-
-    const handleUnlock = (e: React.FormEvent) => {
-        e.preventDefault();
-        const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
-
-        if (!adminPassword) {
-            alert('ERRORE SICUREZZA: Password Admin non configurata nel sistema (.env).');
-            return;
-        }
-
-        if (password === adminPassword) {
-            sessionStorage.setItem('admin_unlocked', 'true');
-            setIsUnlocked(true);
-            setError(false);
-        } else {
-            setError(true);
-            setPassword('');
-        }
     };
 
     const handleExit = () => {
@@ -152,70 +136,6 @@ export default function AdminLayout({
                     >
                         RETURN TO DASHBOARD
                     </button>
-                </div>
-            </div>
-        );
-    }
-
-    // SCENARIO 3: Admin, but Locked (Enter Code)
-    if (!isUnlocked) {
-        return (
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 font-sans">
-                <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl shadow-cyan-900/20">
-                    <div className="flex justify-center mb-6">
-                        <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center border border-slate-700">
-                            <Shield className="w-8 h-8 text-cyan-500" />
-                        </div>
-                    </div>
-
-                    <h1 className="text-2xl font-bold text-white text-center font-orbitron mb-2">RESTRICTED ACCESS</h1>
-                    <p className="text-slate-400 text-center text-sm mb-2 font-mono">
-                        Welcome, <span className="text-cyan-400">{userEmail}</span>.
-                    </p>
-                    <p className="text-slate-500 text-center text-xs mb-8 font-mono">
-                        Please confirm your identity with the access code.
-                    </p>
-
-                    <form onSubmit={handleUnlock} className="space-y-4">
-                        <div>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => {
-                                        setPassword(e.target.value);
-                                        setError(false);
-                                    }}
-                                    placeholder="Enter Access Code"
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-lg pl-10 pr-4 py-3 text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all font-mono"
-                                    autoFocus
-                                />
-                            </div>
-                            {error && (
-                                <p className="text-red-500 text-xs mt-2 font-mono text-center">
-                                    ACCESS DENIED: Invalid credentials.
-                                </p>
-                            )}
-                        </div>
-
-                        <button
-                            type="submit"
-                            className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-lg transition-all shadow-lg shadow-cyan-900/20 flex items-center justify-center gap-2 group"
-                        >
-                            AUTHENTICATE
-                            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </button>
-                    </form>
-
-                    <div className="mt-6 text-center">
-                        <button
-                            onClick={handleExit}
-                            className="text-slate-500 hover:text-slate-300 text-xs font-mono transition-colors"
-                        >
-                            ← RETURN TO APPLICATION
-                        </button>
-                    </div>
                 </div>
             </div>
         );

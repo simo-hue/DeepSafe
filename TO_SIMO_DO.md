@@ -251,3 +251,35 @@ Local `main` is **84 commits ahead of `origin` (simo-hue/DeepSafe)** after a fas
 5. **A real OG image is still missing.** `/landing/assets/og-youth.jpg` never existed in this repo and 404s on both live sites. I repointed to `logo.png` so previews stop breaking, but it's 618×646 — a proper **1200×630** preview would render properly on LinkedIn/X/WhatsApp.
 
 6. **`deploy_gh_pages.sh` is now misleading — consider deleting it.** It predates the Actions workflow and copies `LANDING PAGE/*` over `out/`, overwriting `index.html` with an old static page. If anyone runs it, it clobbers the real site.
+
+## [2026-08-08] 🔴 ROTATE THESE CREDENTIALS — they were published in the client bundle
+
+The code is fixed, but **fixing the code does not un-publish what was already served.** Anyone who
+loaded the site could read these out of the JavaScript. Rotate them:
+
+1. **Admin password** (was `NEXT_PUBLIC_ADMIN_PASSWORD`) — change it wherever it is reused.
+2. **Dev password** (was `NEXT_PUBLIC_DEV_PASSWORD`) — same.
+3. Delete both from **Settings → Secrets → Actions** on `simo-hue/DeepSafe` *and* `deep-safe/DeepSafe`.
+   The workflow no longer references them.
+
+**Why they leaked:** both were read in `'use client'` components. Next.js replaces every
+`NEXT_PUBLIC_*` reference with its literal value at build time, so they were compiled into the
+public JavaScript. A `NEXT_PUBLIC_` prefix means "ship this to the browser" — it can never hold a
+secret. Real access control for `/admin` is the Supabase session + `profiles.is_admin` check, which
+is still in place and is enforced server-side by row-level security.
+
+**Also check:** confirm row-level security is actually enabled on every table the admin panel
+touches. With the password gate gone, RLS is the only thing standing between the anon key and your
+data — and the anon key is public by design.
+
+### Lower priority
+
+- **PostHog project key** `phc_rr8SnKrn…` was hardcoded in the `LANDING PAGE/` HTML files. I deleted
+  that whole directory (it was orphaned — its only consumer was `deploy_gh_pages.sh`, removed
+  earlier). Note this key **predates my changes**: it was committed in `8e2d4a2 landing page`, long
+  before today, and has been public in both repos ever since. PostHog `phc_` project keys are
+  designed to be public and embedded in client-side pages, so the exposure is low-risk — the worst
+  case is someone sending junk events into your project. Rotate only if you care about that.
+- The key remains in **git history** in both repos. Rewriting history on a public repo that may
+  already be cloned or forked buys little; rotation is the meaningful remediation for anything that
+  actually matters.

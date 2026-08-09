@@ -26,20 +26,17 @@ export default function DevPage() {
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        const devPassword = process.env.NEXT_PUBLIC_DEV_PASSWORD;
-
-        if (!devPassword) {
-            setError('SECURITY ERROR: Dev password not configured in .env');
-            return;
-        }
-
-        if (password === devPassword) {
-            setIsAuthenticated(true);
-            setError('');
-        } else {
-            setError('Access Denied: Invalid credentials');
-            setPassword('');
-        }
+        // This page is nested under /admin, whose layout already requires a valid
+        // Supabase session with profiles.is_admin — that is the real access control.
+        //
+        // This form used to compare against process.env.NEXT_PUBLIC_DEV_PASSWORD.
+        // Next.js inlines every NEXT_PUBLIC_* value into the client bundle at build
+        // time, so on a public static export that password was readable by anyone
+        // who opened the JavaScript: zero protection against an attacker, friction
+        // only for the legitimate admin. Never gate anything on a secret that ships
+        // to the browser — enforce it in Supabase instead.
+        setIsAuthenticated(true);
+        setError('');
     };
 
     const closeConfirmation = () => {
