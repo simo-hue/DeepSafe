@@ -235,3 +235,19 @@ Per testare il sistema di premi settimanali/mensili senza aspettare la data effe
 2. Abilita "Leaked Password Protection":
    - Vai su Supabase Dashboard -> Authentication -> Security.
    - Attiva il toggle "Enable Leaked Password Protection".
+## [2026-08-08] DeepSafe — entity/GEO fixes: what you need to do
+
+Local `main` is **84 commits ahead of `origin` (simo-hue/DeepSafe)** after a fast-forward from `deep-safe/DeepSafe`, plus my changes to `src/app/layout.tsx`. Nothing is committed or pushed.
+
+1. **Review and push to `simo-hue/DeepSafe`.** The Actions workflow (`.github/workflows/deploy.yml`) builds and deploys to Pages automatically on push to `main`, and `actions/configure-pages` derives `NEXT_PUBLIC_BASE_PATH=/DeepSafe` by itself — no manual config needed.
+
+2. ⚠️ **Check the Actions secrets on `simo-hue/DeepSafe`.** The build fails with `Error: supabaseUrl is required` without them. This fork last built in Dec 2025, so confirm these exist in Settings → Secrets → Actions:
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`, `NEXT_PUBLIC_DEV_PASSWORD`, `NEXT_PUBLIC_ADMIN_PASSWORD`
+
+3. **Redeploy `deep-safe/DeepSafe` too.** The cross-canonical only works once the upstream copy also rebuilds and starts emitting the `simo-hue` canonical. Merge the same change upstream, or push it there as well.
+
+4. **`deepsafe.app` — you own it, it times out on HTTPS.** Nothing in the code references it any more. Best use now: point it at `https://simo-hue.github.io/DeepSafe/` with a 301 at the registrar, so the domain you're paying for feeds the canonical URL instead of dying quietly.
+
+5. **A real OG image is still missing.** `/landing/assets/og-youth.jpg` never existed in this repo and 404s on both live sites. I repointed to `logo.png` so previews stop breaking, but it's 618×646 — a proper **1200×630** preview would render properly on LinkedIn/X/WhatsApp.
+
+6. **`deploy_gh_pages.sh` is now misleading — consider deleting it.** It predates the Actions workflow and copies `LANDING PAGE/*` over `out/`, overwriting `index.html` with an old static page. If anyone runs it, it clobbers the real site.
